@@ -5,18 +5,15 @@ import kotlinx.serialization.Serializable
 /**
  * Saved feedback for a completed trip.
  *
- * Overall is required. Optional ratings remain null when unselected.
- * An empty comment means that no written feedback was supplied.
- *
- * An unfinished review draft must use a separate draft model because
- * its overall rating may still be unselected.
+ * Overall is required. Unselected optional ratings remain null.
+ * An empty comment means no written feedback was supplied.
  */
 @Serializable
 data class TripReview(
     val overall: Int,
     val quality: Int? = null,
     val interesting: Int? = null,
-    val fun: Int? = null,
+    val `fun`: Int? = null,
     val comment: String = ""
 ) {
     init {
@@ -29,7 +26,7 @@ data class TripReview(
         require(interesting == null || interesting in 1..5) {
             "Interesting rating must be null or between 1 and 5."
         }
-        require(fun == null || fun in 1..5) {
+        require(`fun` == null || `fun` in 1..5) {
             "Fun rating must be null or between 1 and 5."
         }
     }
