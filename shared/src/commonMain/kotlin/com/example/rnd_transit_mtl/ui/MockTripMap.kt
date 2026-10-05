@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -37,15 +38,12 @@ import kotlin.math.min
 /**
  * Stateless presentation of one stored mock route.
  *
- * Uses Fit scaling and centered alignment inside an inset area.
- * The image is never cropped. mapRect is the exact displayed image
- * rectangle, including scaling, alignment, and marker-clearance offsets.
+ * Uses centered Fit scaling inside an inset area without cropping.
+ * The image, endpoints, route, and person use the same map rectangle.
  *
- * Start, destination, route, and traveller all use the same transform.
- * Normalized coordinates are not pixels, GPS positions, or street routes.
- *
- * This component does not generate endpoints, animate independently,
- * own a timer, or mutate state. Its caller supplies progress.
+ * Normalized coordinates are not pixels or geographic coordinates.
+ * This component does not generate endpoints, own a timer,
+ * animate independently, or mutate trip state.
  */
 @Composable
 fun MockTripMap(
@@ -54,13 +52,14 @@ fun MockTripMap(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
+    val density = LocalDensity.current
     val mapPainter = painterResource(Res.drawable.map_sample)
     val boundedProgress = boundedTripProgress(progress)
     val percentage = tripProgressPercentage(boundedProgress)
 
     /*
-     * The verified bundled map is 1510 × 746. These dimensions also
-     * supply its aspect ratio while the web resource painter is loading.
+     * The bundled map is 1510 × 746. These dimensions also provide
+     * its aspect ratio while the web resource painter is loading.
      */
     val intrinsic = mapPainter.intrinsicSize
     val sourceSize = if (
@@ -89,22 +88,29 @@ fun MockTripMap(
                 stateDescription = "$percentage percent complete"
             }
     ) {
-        val containerSize = Size(
-            width = maxWidth.toPx(),
-            height = maxHeight.toPx()
-        )
+        /*
+         * Dp-to-pixel conversions require an explicit Density receiver.
+         */
+        val containerSize = with(density) {
+            Size(
+                width = maxWidth.toPx(),
+                height = maxHeight.toPx()
+            )
+        }
 
         /*
-         * Scale markers down only for unusually small constrained maps.
-         * The inset exceeds the endpoint and person half-extents, so
-         * coordinates at 0 or 1 still leave every marker visible.
+         * Scale markers down for unusually small maps.
+         * Clearance keeps markers visible at normalized coordinates 0 and 1.
          */
         val markerSize = minOf(
             48.dp,
             maxWidth / 4f,
             maxHeight / 4f
         )
-        val markerPixels = markerSize.toPx()
+
+        val markerPixels = with(density) {
+            markerSize.toPx()
+        }
         val clearancePixels = markerPixels * 0.75f
 
         val mapRect = fittedMapRect(
@@ -129,8 +135,8 @@ fun MockTripMap(
         if (mapRect.width > 0f && mapRect.height > 0f) {
             Canvas(Modifier.matchParentSize()) {
                 /*
-                 * Drawing into mapRect is equivalent to centered
-                 * ContentScale.Fit inside the inset area.
+                 * Draw the image into the same rectangle used
+                 * to transform all normalized route coordinates.
                  */
                 translate(
                     left = mapRect.left,
@@ -152,6 +158,7 @@ fun MockTripMap(
                     strokeWidth = routeBorderWidth,
                     cap = StrokeCap.Round
                 )
+
                 drawLine(
                     color = TransitHighlight,
                     start = startPosition,
@@ -170,12 +177,13 @@ fun MockTripMap(
                     )
                 }
 
-                // Start: circular yellow boundary around the user badge.
+                // Start: circular yellow boundary.
                 drawCircle(
                     color = TransitMain,
                     radius = endpointRadius,
                     center = startPosition
                 )
+
                 drawCircle(
                     color = TransitHighlight,
                     radius = endpointRadius,
@@ -185,7 +193,7 @@ fun MockTripMap(
                     )
                 )
 
-                // Destination: green square, distinct in shape and color.
+                // Destination: distinct green square.
                 val destinationTopLeft = Offset(
                     x = destinationPosition.x - endpointRadius,
                     y = destinationPosition.y - endpointRadius
@@ -194,11 +202,13 @@ fun MockTripMap(
                     width = endpointRadius * 2f,
                     height = endpointRadius * 2f
                 )
+
                 drawRect(
                     color = TransitSelected,
                     topLeft = destinationTopLeft,
                     size = destinationSize
                 )
+
                 drawRect(
                     color = TransitMain,
                     topLeft = destinationTopLeft,
@@ -207,6 +217,7 @@ fun MockTripMap(
                         width = markerPixels * 0.06f
                     )
                 )
+
                 drawCircle(
                     color = TransitWhite,
                     radius = markerPixels * 0.16f,
@@ -216,10 +227,13 @@ fun MockTripMap(
 
             /*
              * Preserve the supplied pointer's original colors.
-             * Its center uses the same startPosition as the Canvas marker.
+             * Its center is anchored to the stored start position.
              */
             val startBadgeSize = markerSize * 0.78f
-            val startBadgePixels = startBadgeSize.toPx()
+            val startBadgePixels = with(density) {
+                startBadgeSize.toPx()
+            }
+
             Icon(
                 painter = painterResource(
                     Res.drawable.map_user_pointer_badge
@@ -237,8 +251,8 @@ fun MockTripMap(
             )
 
             /*
-             * Float translation retains subpixel movement.
-             * The marker's center remains anchored to personPosition.
+             * Float translation preserves subpixel movement.
+             * The person's center stays anchored to the route.
              */
             OrangePersonMarker(
                 description = null,
@@ -256,9 +270,8 @@ fun MockTripMap(
 }
 
 /**
- * Computes centered Fit scaling inside a container with equal clearance.
- *
- * Letterboxing remains visible instead of cropping map content.
+ * Computes centered Fit scaling with equal marker clearance.
+ * Letterboxing remains visible rather than cropping the image.
  */
 private fun fittedMapRect(
     container: Size,
@@ -274,6 +287,7 @@ private fun fittedMapRect(
         availableWidth / source.width,
         availableHeight / source.height
     )
+
     val displayedWidth = source.width * scale
     val displayedHeight = source.height * scale
     val left = (container.width - displayedWidth) / 2f
