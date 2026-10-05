@@ -230,12 +230,12 @@ fun CurrentTripScreen(
         if (!handled) {
             operationMessage =
                 "The review screen has not opened. " +
-                        "Your completed trip is saved. Tap Open trip review to retry."
+                        "Your completed trip is saved. Tap the 100% progress bar to retry."
             return
         }
 
         /*
-         * A manual review request may occur after the automatic pending
+         * A repeated review request may occur after the pending
          * event was already handled. Only acknowledge a matching event.
          */
         if (tripsStore.pendingReviewTripId == trip.id) {
@@ -261,28 +261,8 @@ fun CurrentTripScreen(
         }
     }
 
-    /*
-     * Completion is already recorded before this effect sees its ID.
-     * A false callback result leaves that ID saved for retry/restoration.
-     *
-     * Once acknowledged, returning to this completed screen does not
-     * automatically reopen its review.
-     */
-    LaunchedEffect(
-        tripsStore,
-        trip.id,
-        currentState.pendingReviewTripId,
-        isDestinationActive,
-        isAppResumed
-    ) {
-        if (
-            currentState.pendingReviewTripId == trip.id &&
-            isDestinationActive &&
-            isAppResumed
-        ) {
-            requestReview()
-        }
-    }
+    // Completion stays visible at 100%. Review navigation is a user action.
+    // The saved pending ID survives rotation until navigation or Skip handles it.
 
     if (storedTrip == null) {
         Column(

@@ -6,16 +6,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rnd_transit_mtl.model.Trip
-import com.example.rnd_transit_mtl.ui.theme.TransitHighlight
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitSelected
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
@@ -44,7 +44,7 @@ import kotlin.math.abs
 /**
  * Stateless planned-minutes selector and primary planner action.
  *
- * The parent decides whether the action starts, resumes, or opens a review.
+ * The parent decides whether the action starts, resumes, or opens a completed trip.
  * Selected minutes do not determine the ten-second simulation duration.
  */
 @Composable
@@ -58,68 +58,54 @@ internal fun GOBox(
     actionEnabled: Boolean = true,
     minutesEnabled: Boolean = true
 ) {
-    Column(
+    Row(
         modifier = modifier
-            .fillMaxWidth()
+            .height(96.dp * layoutScale)
             .background(
-                brush = Brush.horizontalGradient(
-                    listOf(TransitMain, TransitSelected)
+                Brush.horizontalGradient(
+                    0f to TransitMain,
+                    0.84f to TransitMain,
+                    1f to TransitSelected
                 ),
-                shape = RoundedCornerShape(24.dp)
+                RoundedCornerShape(28.dp * layoutScale)
             )
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 8.dp * layoutScale),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 12.dp,
-                alignment = Alignment.CenterHorizontally
-            ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "I have",
-                color = TransitWhite,
-                fontSize = 22.sp * layoutScale
-            )
-
-            ScrollableMinutes(
-                minutes = minutes,
-                onMinutesChange = onMinutesChange,
-                enabled = minutesEnabled,
-                layoutScale = layoutScale
-            )
-
-            Text(
-                text = "minutes",
-                color = TransitWhite,
-                fontSize = 22.sp * layoutScale
-            )
-        }
-
-        Button(
-            onClick = onGo,
-            enabled = actionEnabled,
+        Text("I have", color = TransitWhite, fontSize = 20.sp * layoutScale,
+            maxLines = 1, softWrap = false)
+        ControlDivider(layoutScale)
+        ScrollableMinutes(minutes, onMinutesChange, minutesEnabled, layoutScale)
+        ControlDivider(layoutScale)
+        Text("minutes", color = TransitWhite, fontSize = 20.sp * layoutScale,
+            maxLines = 1, softWrap = false)
+        ControlDivider(layoutScale)
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp),
-            shape = RoundedCornerShape(26.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = TransitHighlight,
-                contentColor = TransitMain,
-                disabledContainerColor = TransitWhite.copy(alpha = 0.3f),
-                disabledContentColor = TransitWhite
-            )
+                .width(if (actionLabel == "Resume trip") 84.dp else 60.dp)
+                .fillMaxHeight()
+                .clickable(enabled = actionEnabled, onClick = onGo)
+                .semantics { contentDescription = actionLabel },
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = actionLabel,
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
+                color = TransitWhite.copy(alpha = if (actionEnabled) 1f else 0.5f),
+                fontSize = (if (actionLabel == "Resume trip") 16.sp else 22.sp) * layoutScale,
+                textAlign = TextAlign.Center,
+                maxLines = 2
             )
         }
     }
+}
+
+@Composable
+private fun ControlDivider(layoutScale: Float) {
+    Spacer(
+        Modifier.width(1.dp).height(58.dp * layoutScale)
+            .background(TransitWhite.copy(alpha = 0.8f))
+    )
 }
 
 /**
@@ -141,7 +127,7 @@ private fun ScrollableMinutes(
     val dragThreshold = with(density) { 18.dp.toPx() }
 
     Column(
-        modifier = Modifier.width(72.dp),
+        modifier = Modifier.width(48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconButton(
@@ -152,7 +138,7 @@ private fun ScrollableMinutes(
                 )
             },
             enabled = enabled && minutes < Trip.MAX_PLANNED_MINUTES,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(32.dp * layoutScale)
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_arrow_drop_up),
@@ -166,10 +152,11 @@ private fun ScrollableMinutes(
             text = minutes.toString(),
             color = TransitWhite,
             fontSize = 28.sp * layoutScale,
+            lineHeight = 30.sp * layoutScale,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 6.dp)
+                .padding(vertical = 0.dp)
                 .pointerInput(enabled, dragThreshold) {
                     if (enabled) {
                         var dragDistance = 0f
@@ -219,7 +206,7 @@ private fun ScrollableMinutes(
                 )
             },
             enabled = enabled && minutes > Trip.MIN_PLANNED_MINUTES,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(32.dp * layoutScale)
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_arrow_drop_down),

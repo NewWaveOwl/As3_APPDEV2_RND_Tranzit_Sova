@@ -97,33 +97,36 @@ fun TripInformationPanel(
             color = TransitMain
         )
 
-        Text(
-            text = "Reference image",
-            style = MaterialTheme.typography.titleMedium,
-            color = TransitMain
-        )
-
-        TripReferenceImage(
-            imageUrl = trip.imageUrl,
-            tripTitle = trip.title
-        )
-
-        SelectionContainer {
+        // Older saved trips can retain a separate image reference.
+        if (trip.imageUrl.isNotBlank()) {
             Text(
-                text = trip.imageUrl,
-                style = MaterialTheme.typography.bodyMedium,
+                text = "Reference image",
+                style = MaterialTheme.typography.titleMedium,
                 color = TransitMain
             )
-        }
 
-        OutlinedButton(
-            onClick = onOpenImageReference,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Open image reference",
-                color = TransitMain
+            TripReferenceImage(
+                imageUrl = trip.imageUrl,
+                tripTitle = trip.title
             )
+
+            SelectionContainer {
+                Text(
+                    text = trip.imageUrl,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TransitMain
+                )
+            }
+
+            OutlinedButton(
+                onClick = onOpenImageReference,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Open image reference",
+                    color = TransitMain
+                )
+            }
         }
 
         Text(

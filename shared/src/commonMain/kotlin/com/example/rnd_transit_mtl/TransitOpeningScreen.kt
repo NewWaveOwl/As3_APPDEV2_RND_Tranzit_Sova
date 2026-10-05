@@ -8,7 +8,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import com.example.rnd_transit_mtl.data.MockTripGenerator
 import com.example.rnd_transit_mtl.data.TripGenerationInput
 import com.example.rnd_transit_mtl.data.TripGenerationResult
@@ -19,33 +18,19 @@ import com.example.rnd_transit_mtl.state.LocalTripsStore
 import com.example.rnd_transit_mtl.state.TripActionResult
 import com.example.rnd_transit_mtl.ui.TripPlannerContent
 
-/**
- * Owns the saveable planner draft and coordinates GO/Resume.
- *
- * onOpenCurrentTrip receives the generated or existing stored Trip.
- * A true result means navigation was synchronously established.
- *
- * onOpenPendingReview follows the same navigation contract.
- * The pending event is acknowledged only after a true result.
- *
- * TripsStore remains the only owner of active/completed Trip records.
- */
+/** Saves planner selections and starts or resumes one generated mock trip. */
 @Composable
 internal fun TransitOpeningScreen(
     transportTypes: List<TransportType>,
     transportRoutes: List<TransportRoute>,
     onOpenCurrentTrip: ((Trip) -> Boolean)? = null,
-    onOpenPendingReview: ((String) -> Boolean)? = null,
+    onOpenCompletedTrip: ((String) -> Boolean)? = null,
     isDestinationActive: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val tripsStore = LocalTripsStore.current
-    val focusManager = LocalFocusManager.current
     val generator = remember { MockTripGenerator() }
 
-    var tripTitle by rememberSaveable { mutableStateOf("") }
-    var tripDescription by rememberSaveable { mutableStateOf("") }
-    var imageUrl by rememberSaveable { mutableStateOf("") }
     var minutes by rememberSaveable { mutableStateOf(30) }
 
     var selectedTransportIds by rememberSaveable {
@@ -65,14 +50,11 @@ internal fun TransitOpeningScreen(
         mutableStateOf<String?>(null)
     }
     var intensity by rememberSaveable { mutableStateOf(90f) }
-    var validationAttempted by rememberSaveable {
-        mutableStateOf(false)
-    }
     var validationMessage by rememberSaveable {
         mutableStateOf("")
     }
 
-    // This synchronous action lock is not a saved job or permanent form state.
+    // Blocks overlapping GO actions; the store also prevents another active trip.
     var processingAction by remember { mutableStateOf(false) }
 
     val latestDestinationActive by rememberUpdatedState(
@@ -81,8 +63,8 @@ internal fun TransitOpeningScreen(
     val latestOpenCurrentTrip by rememberUpdatedState(
         onOpenCurrentTrip
     )
-    val latestOpenPendingReview by rememberUpdatedState(
-        onOpenPendingReview
+    val latestOpenCompletedTrip by rememberUpdatedState(
+        onOpenCompletedTrip
     )
 
     val currentState by tripsStore.state
@@ -96,7 +78,6 @@ internal fun TransitOpeningScreen(
         latestDestinationActive && !processingAction
 
     fun clearValidation() {
-        validationAttempted = false
         validationMessage = ""
     }
 
@@ -114,8 +95,6 @@ internal fun TransitOpeningScreen(
                     validationMessage = "Current Trip navigation is unavailable."
                     return
                 }
-
-                focusManager.clearFocus()
                 validationMessage = ""
 
                 if (!openTrip(existingActive)) {
@@ -127,22 +106,11 @@ internal fun TransitOpeningScreen(
 
             val pendingId = tripsStore.pendingReviewTripId
             if (pendingId != null) {
-                val openReview = latestOpenPendingReview
-                if (openReview == null) {
-                    validationMessage = "Review navigation is unavailable."
-                    return
-                }
-
-                focusManager.clearFocus()
-
-                if (openReview(pendingId)) {
-                    if (tripsStore.pendingReviewTripId == pendingId) {
-                        tripsStore.acknowledgeReviewNavigation(pendingId)
-                    }
-                    validationMessage = ""
+                val openCompleted = latestOpenCompletedTrip
+                if (openCompleted == null || !openCompleted(pendingId)) {
+                    validationMessage = "Your completed trip is saved. Try opening it again."
                 } else {
-                    validationMessage =
-                        "The review has not opened. Your completed trip is preserved."
+                    validationMessage = ""
                 }
                 return
             }
@@ -153,13 +121,12 @@ internal fun TransitOpeningScreen(
                 return
             }
 
-            validationAttempted = true
             validationMessage = ""
 
             val input = TripGenerationInput(
-                title = tripTitle,
-                description = tripDescription,
-                imageUrl = imageUrl,
+                title = "Trip ${tripsStore.completedTrips.size + 1}",
+                description = "Random mock route with $minutes planned minutes.",
+                imageUrl = "",
                 plannedMinutes = minutes,
                 selectedTransportIds = selectedTransportIds.toList(),
                 selectedRouteIds = selectedRouteIds.toList(),
@@ -191,7 +158,6 @@ internal fun TransitOpeningScreen(
                 is TripGenerationResult.Success -> {
                     when (val started = tripsStore.start(generated.trip)) {
                         TripActionResult.Applied -> {
-                            focusManager.clearFocus()
 
                             if (!openTrip(generated.trip)) {
                                 validationMessage =
@@ -221,65 +187,19 @@ internal fun TransitOpeningScreen(
         }
     }
 
-    val titleError = if (
-        validationAttempted && tripTitle.isBlank()
-    ) {
-        "Enter a trip title."
-    } else {
-        null
-    }
-
-    val descriptionError = if (
-        validationAttempted && tripDescription.isBlank()
-    ) {
-        "Enter a trip description."
-    } else {
-        null
-    }
-
-    val imageUrlError = if (
-        validationAttempted &&
-        !Trip.isSupportedImageUrl(imageUrl.trim())
-    ) {
-        "Enter an HTTPS image URL with a valid host."
-    } else {
-        null
-    }
-
     val actionLabel = when {
         activeState != null -> "Resume trip"
-        pendingReviewId != null -> "Continue review"
+        pendingReviewId != null -> "100%"
         else -> "GO"
     }
 
-    val actionHasCallback = if (pendingReviewId != null) {
-        onOpenPendingReview != null
+    val actionHasCallback = if (activeState == null && pendingReviewId != null) {
+        onOpenCompletedTrip != null
     } else {
         onOpenCurrentTrip != null
     }
 
     TripPlannerContent(
-        tripTitle = tripTitle,
-        onTripTitleChange = {
-            if (canChangeInputs()) {
-                tripTitle = it
-                clearValidation()
-            }
-        },
-        tripDescription = tripDescription,
-        onTripDescriptionChange = {
-            if (canChangeInputs()) {
-                tripDescription = it
-                clearValidation()
-            }
-        },
-        imageUrl = imageUrl,
-        onImageUrlChange = {
-            if (canChangeInputs()) {
-                imageUrl = it
-                clearValidation()
-            }
-        },
         minutes = minutes,
         onMinutesChange = {
             if (canChangeInputs()) {
@@ -377,15 +297,11 @@ internal fun TransitOpeningScreen(
                 clearValidation()
             }
         },
-        titleError = titleError,
-        descriptionError = descriptionError,
-        imageUrlError = imageUrlError,
         validationMessage = validationMessage,
         actionLabel = actionLabel,
         actionEnabled = isDestinationActive &&
                 !processingAction &&
                 actionHasCallback,
-        inputsEnabled = isDestinationActive && !processingAction,
         activeTripSummary = activeState?.let {
             val percentage = (
                     it.elapsedMillis.toFloat() / 10_000f * 100f
@@ -394,7 +310,7 @@ internal fun TransitOpeningScreen(
             "Unfinished: ${it.trip.title} · $percentage%"
         },
         pendingReviewSummary = pendingReviewTrip?.let {
-            "Completed: ${it.title} · review ready"
+            "Completed: ${it.title} · tap 100% to open your trip"
         },
         onPrimaryAction = { performPrimaryAction() },
         modifier = modifier

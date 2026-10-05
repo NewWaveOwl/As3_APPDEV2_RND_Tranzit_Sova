@@ -74,51 +74,25 @@ private fun PlannerPreviewContent(
 ) {
     RNDTransitTheme {
         TripPlannerContent(
-            tripTitle = if (showErrors) "" else "Sunday discovery walk",
-            onTripTitleChange = {},
-            tripDescription = if (showErrors) {
-                ""
-            } else {
-                "Discover interesting places with a walk and a bus ride."
-            },
-            onTripDescriptionChange = {},
-            imageUrl = if (showErrors) {
-                "invalid link"
-            } else {
-                "https://example.com/trip-reference.jpg"
-            },
-            onImageUrlChange = {},
             minutes = 30,
             onMinutesChange = {},
             transportTypes = plannerPreviewTypes,
             transportRoutes = plannerPreviewRoutes,
-            selectedTransportIds = listOf("walk", "bus"),
-            selectedRouteIds = listOf("bus:401"),
+            selectedTransportIds = if (showErrors) emptyList() else listOf("walk", "bus"),
+            selectedRouteIds = if (showErrors) emptyList() else listOf("bus:401"),
             expandedTransportId = null,
             onExpandedTransportChange = {},
             onToggleTransport = {},
             onToggleRoute = { _, _ -> },
             intensity = 90f,
             onIntensityChange = {},
-            titleError = if (showErrors) "Enter a trip title." else null,
-            descriptionError = if (showErrors) {
-                "Enter a trip description."
-            } else {
-                null
-            },
-            imageUrlError = if (showErrors) {
-                "Enter an HTTPS image URL with a valid host."
-            } else {
-                null
-            },
             validationMessage = if (showErrors) {
-                "Enter a trip title."
+                "Choose at least one transport type."
             } else {
                 ""
             },
             actionLabel = if (resume) "Resume trip" else "GO",
             actionEnabled = true,
-            inputsEnabled = true,
             activeTripSummary = if (resume) {
                 "Unfinished: Sunday discovery walk · 50%"
             } else {

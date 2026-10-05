@@ -25,7 +25,7 @@ fun MainScreen(
     transportRoutes: List<TransportRoute>?,
     loadingError: Boolean,
     onOpenCurrentTrip: ((Trip) -> Boolean)? = null,
-    onOpenPendingReview: ((String) -> Boolean)? = null,
+    onOpenCompletedTrip: ((String) -> Boolean)? = null,
     isDestinationActive: Boolean = true
 ) {
     Box(
@@ -38,7 +38,7 @@ fun MainScreen(
                     transportTypes = transportTypes,
                     transportRoutes = transportRoutes,
                     onOpenCurrentTrip = onOpenCurrentTrip,
-                    onOpenPendingReview = onOpenPendingReview,
+                    onOpenCompletedTrip = onOpenCompletedTrip,
                     isDestinationActive = isDestinationActive
                 )
             }

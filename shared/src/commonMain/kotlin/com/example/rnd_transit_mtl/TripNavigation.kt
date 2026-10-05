@@ -70,6 +70,21 @@ class TripNavigation(
                 current.trip.id == trip.id
     }
 
+    /** Restores the completed 100% presentation without running a simulation. */
+    fun openCompletedTrip(tripId: String): Boolean {
+        val completed = tripsStore.findCompleted(tripId) ?: return false
+        if (!discardCurrentReview()) return false
+
+        val current = navigator.current
+        if (current is CurrentTripScreenKey && current.trip.id == tripId) {
+            return true
+        }
+
+        pruneCompletedSimulationEntries()
+        navigator.navigate(CurrentTripScreenKey(completed))
+        return (navigator.current as? CurrentTripScreenKey)?.trip?.id == tripId
+    }
+
     fun resumeActiveTrip(): Boolean {
         val trip = tripsStore.activeTrip ?: return false
         return openCurrentTrip(trip)

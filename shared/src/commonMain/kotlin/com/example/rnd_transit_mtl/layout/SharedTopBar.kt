@@ -90,7 +90,7 @@ fun SharedTopBar() {
                 "Resume trip"
             }
         }
-        pendingReviewId != null -> "Continue review"
+        pendingReviewId != null -> "Trip complete · 100%"
         else -> null
     }
 
@@ -114,7 +114,9 @@ fun SharedTopBar() {
                 if (tripsStore.activeTrip != null) {
                     navigation.resumeActiveTrip()
                 } else {
-                    navigation.recoverPendingReview()
+                    tripsStore.pendingReviewTripId?.let {
+                        navigation.openCompletedTrip(it)
+                    }
                 }
             }
         }

@@ -107,7 +107,9 @@ fun CurrentTripContent(
                 destinationLabel = trip.destination.label,
                 distanceKm = trip.distanceKm,
                 progress = boundedProgress,
-                statusText = status
+                statusText = status,
+                onCompletedClick = onRequestReview,
+                actionsEnabled = actionsEnabled
             )
 
             Column(
@@ -125,20 +127,6 @@ fun CurrentTripContent(
                 }
 
                 if (completed) {
-                    Button(
-                        onClick = onRequestReview,
-                        enabled = actionsEnabled,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            if (trip.review == null) {
-                                "Open trip review"
-                            } else {
-                                "View or edit review"
-                            }
-                        )
-                    }
-
                     OutlinedButton(
                         onClick = onLeave,
                         enabled = actionsEnabled,

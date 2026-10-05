@@ -70,6 +70,7 @@ data class Trip(
     val id: String,
     val title: String,
     val description: String,
+    // Empty for bundled-map trips; older trips can retain their reference URL.
     val imageUrl: String,
     val start: TripPoint,
     val destination: TripPoint,
@@ -166,8 +167,8 @@ data class Trip(
             require(description.isNotBlank()) {
                 "Enter a trip description."
             }
-            require(isSupportedImageUrl(imageUrl)) {
-                "Enter an HTTPS image URL with a valid host."
+            require(imageUrl.isEmpty() || isSupportedImageUrl(imageUrl)) {
+                "An optional image reference must be a valid HTTPS URL."
             }
             require(
                 plannedMinutes in MIN_PLANNED_MINUTES..MAX_PLANNED_MINUTES &&

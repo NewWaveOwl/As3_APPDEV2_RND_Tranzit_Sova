@@ -5,15 +5,9 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -24,7 +18,6 @@ import com.example.rnd_transit_mtl.model.TransportRoute
 import com.example.rnd_transit_mtl.model.TransportType
 import com.example.rnd_transit_mtl.model.Trip
 import com.example.rnd_transit_mtl.model.TripReviewMode
-import com.example.rnd_transit_mtl.state.LocalTripsStore
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -159,45 +152,7 @@ fun Router(
 ) {
     val navigator = LocalNavigator.current
     val navigation = LocalTripNavigation.current
-    val tripsStore = LocalTripsStore.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-
-    val lifecycleFlow = remember(lifecycle) {
-        lifecycle.currentStateFlow
-    }
-    val lifecycleState by lifecycleFlow.collectAsState()
-
-    val pendingReviewId by remember(tripsStore) {
-        derivedStateOf { tripsStore.pendingReviewTripId }
-    }
-    val currentKey = navigator.current as? ScreenKey
-
-    /*
-     * CurrentTripScreen handles completion while it is the current destination.
-     * This fallback handles completion flushed during departure, or a restored
-     * pending event whose current destination is Home/History/another section.
-     *
-     * Existing review destinations acknowledge their own matching event.
-     */
-    LaunchedEffect(
-        pendingReviewId,
-        currentKey,
-        lifecycleState
-    ) {
-        val pendingId = pendingReviewId
-        val matchingCurrentTrip =
-            currentKey is CurrentTripScreenKey &&
-                    currentKey.trip.id == pendingId
-
-        if (
-            pendingId != null &&
-            lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
-            !matchingCurrentTrip &&
-            currentKey !is TripReviewScreenKey
-        ) {
-            navigation.recoverPendingReview()
-        }
-    }
+    // Saved completion waits for the user's 100% action, including after restoration.
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -231,18 +186,9 @@ fun Router(
                             false
                         }
                     },
-                    onOpenPendingReview = { tripId ->
-                        val current = navigator.current
-                        val alreadyOpened =
-                            current is TripReviewScreenKey &&
-                                    current.tripId == tripId &&
-                                    current.mode == TripReviewMode.INITIAL
-
-                        if (
-                            current == MainScreenKey ||
-                            alreadyOpened
-                        ) {
-                            navigation.openInitialReview(tripId)
+                    onOpenCompletedTrip = { tripId ->
+                        if (navigator.current == MainScreenKey) {
+                            navigation.openCompletedTrip(tripId)
                         } else {
                             false
                         }

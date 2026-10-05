@@ -1,6 +1,7 @@
 package com.example.rnd_transit_mtl.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +44,9 @@ fun TripProgressPanel(
     distanceKm: Double,
     progress: Float,
     modifier: Modifier = Modifier,
-    statusText: String? = null
+    statusText: String? = null,
+    onCompletedClick: (() -> Unit)? = null,
+    actionsEnabled: Boolean = true
 ) {
     require(tripTitle.isNotBlank()) {
         "Trip title must not be blank."
@@ -57,6 +60,8 @@ fun TripProgressPanel(
 
     val boundedProgress = boundedTripProgress(progress)
     val percentage = tripProgressPercentage(boundedProgress)
+    val canOpenReview = boundedProgress == 1f &&
+        actionsEnabled && onCompletedClick != null
     val remainingDistanceKm =
         distanceKm * (1f - boundedProgress).toDouble()
 
@@ -136,9 +141,19 @@ fun TripProgressPanel(
                     bottom = 20.dp
                 )
                 .fillMaxWidth()
-                .height(34.dp)
+                .height(48.dp)
                 .clip(RoundedCornerShape(17.dp))
                 .background(TransitMain)
+                .then(
+                    if (canOpenReview) {
+                        Modifier.clickable(
+                            onClickLabel = "Rate your trip",
+                            onClick = { onCompletedClick?.invoke() }
+                        )
+                    } else {
+                        Modifier
+                    }
+                )
                 .semantics {
                     contentDescription =
                         "Demo progress for $tripTitle"
@@ -163,7 +178,11 @@ fun TripProgressPanel(
              * across both colors of the progress track.
              */
             Text(
-                text = "$percentage%",
+                text = if (boundedProgress == 1f && onCompletedClick != null) {
+                    "100% · Rate your trip"
+                } else {
+                    "$percentage%"
+                },
                 modifier = Modifier
                     .background(
                         color = TransitMain,
