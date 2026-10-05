@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
@@ -103,6 +104,8 @@ fun TripPlannerContent(
         contentAlignment = Alignment.TopCenter
     ) {
         val availableHeight = maxHeight
+        // Wide windows expose the map around the panel's rounded upper corners.
+        val panelTopRadius = if (maxWidth >= 600.dp) 24.dp else 0.dp
         val layoutScale = (maxWidth.value.coerceAtMost(430f) / 402f)
             .coerceIn(0.7f, 1.1f)
         val controlHeight = 96.dp * layoutScale
@@ -180,6 +183,12 @@ fun TripPlannerContent(
                         .heightIn(
                             min = (availableHeight - topSpace - controlHeight - 12.dp)
                                 .coerceAtLeast(0.dp)
+                        )
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = panelTopRadius,
+                                topEnd = panelTopRadius
+                            )
                         )
                         .background(TransitMain)
                 ) {
