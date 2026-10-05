@@ -5,10 +5,14 @@ import kotlinx.serialization.Serializable
 /**
  * Unsaved feedback for a completed trip.
  *
- * Overall may remain null while the user is editing. Saving requires
- * an overall rating. Optional unselected ratings remain null.
+ * The store associates this record with the stable trip ID.
+ * Changing a draft never immediately changes the saved TripReview.
  *
- * The keyword fun must be escaped in Kotlin property references.
+ * Overall may be null during editing but is required when saving.
+ * Optional unselected ratings remain null.
+ *
+ * step restores the current question after rotation.
+ * Animation progress, focus, and keyboard state are not stored.
  */
 @Serializable
 data class ReviewDraft(
@@ -16,7 +20,8 @@ data class ReviewDraft(
     val quality: Int? = null,
     val interesting: Int? = null,
     val `fun`: Int? = null,
-    val comment: String = ""
+    val comment: String = "",
+    val step: ReviewStep = ReviewStep.OVERALL
 ) {
     init {
         require(overall == null || overall in 1..5) {
@@ -31,5 +36,27 @@ data class ReviewDraft(
         require(`fun` == null || `fun` in 1..5) {
             "Fun rating must be null or between 1 and 5."
         }
+    }
+
+    fun ratingFor(question: ReviewStep): Int? = when (question) {
+        ReviewStep.OVERALL -> overall
+        ReviewStep.QUALITY -> quality
+        ReviewStep.INTERESTING -> interesting
+        ReviewStep.FUN -> `fun`
+    }
+
+    /**
+     * Returns another validated draft.
+     *
+     * Null clears an optional selection. It is never converted to zero.
+     */
+    fun withRating(
+        question: ReviewStep,
+        rating: Int?
+    ): ReviewDraft = when (question) {
+        ReviewStep.OVERALL -> copy(overall = rating)
+        ReviewStep.QUALITY -> copy(quality = rating)
+        ReviewStep.INTERESTING -> copy(interesting = rating)
+        ReviewStep.FUN -> copy(`fun` = rating)
     }
 }
