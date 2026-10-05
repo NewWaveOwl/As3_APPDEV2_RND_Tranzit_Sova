@@ -1,11 +1,300 @@
-17:00 - 17:30 -> Moved Projects code to new repo for AS3
-was eating 
-18:30 - 19:00 -> genetratingvahin prop for reasling project
-19:-- - Implemting ptoject 
-20:00-20:20 - created mock ups of the pages in Figma and special icons
-20:20-20:50 - added teip scrren
-20:50 - 21:00
+ASSIGNMENT 3 — TIME FLOW
+Student: Atiom
+Project: RND Transit MTL / As3_APPDEV2_RND_Tranzit_Sova
+Updated: 5 October 2026
+======================================================================================
 
-23:30 - 2:00 finalizng project poslishn plus updating doc and AI uasge
+HOW TO READ THIS RECORD
 
-Total time: 
+A. Student notes are preserved below as self-reported session ranges.
+B. Chat intervals are measured from one human prompt/reply timestamp to the next.
+   They can include AI response time, debugging, waiting and breaks. They are not
+   independently verified active-work durations. Do not add A and B together.
+C. Original estimate remains 30 minutes per numbered prompt (0–11: 6 hours).
+   Prompt gaps do not replace that original estimate.
+
+A. SELF-REPORTED SESSION NOTES
+--------------------------------------------------------------------------------------
+Dates were not specified in the original notes. Times below retain the supplied
+clock values; only the final session crosses midnight.
+
+Start   End       Duration   Activity
+-----   -------   --------   --------------------------------------------------------
+17:00   17:30     00:30      Moved project code into the Assignment 3 repository
+—       —         Unknown    Eating break; exact start/end not recorded
+18:30   19:00     00:30      Generated the main project prompt sequence
+19:--   Unknown   Unknown    Project implementation; incomplete original time range
+20:00   20:20     00:20      Created page mockups in Figma and custom icons
+20:20   20:50     00:30      Added the trip screen
+20:50   21:00     00:10      Activity not described in the original note
+23:30   02:00 +1  02:30      Final polish, documentation and AI usage updates
+
+Total of supplied complete clock ranges: 04:30 (270 minutes).
+Of that, 00:10 has no activity label. The incomplete implementation interval and
+break duration are not included. This is not a complete verified project total.
+
+B. RECORDED PROMPT-TO-PROMPT INTERVALS — THIS CHAT
+--------------------------------------------------------------------------------------
+Timezone: America/Toronto (EDT, UTC−04:00 on these dates).
+Timestamps below are displayed to seconds. Durations are calculated using the
+original millisecond timestamps, then rounded once to seconds.
+
+01. Prompt 0 — project context
+    Prompt: 2026-10-04 18:57:09 EDT
+    Next:   2026-10-04 18:57:50 EDT
+    Gap:    00:00:41 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-001
+
+02. Prompt 1 — inspection/design
+    Prompt: 2026-10-04 18:57:50 EDT
+    Next:   2026-10-04 19:12:38 EDT
+    Gap:    00:14:48 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-002
+
+03. Prompt 2 — models/generator
+    Prompt: 2026-10-04 19:12:38 EDT
+    Next:   2026-10-04 19:31:54 EDT
+    Gap:    00:19:16 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-003
+
+04. Kotlin fun keyword error
+    Prompt: 2026-10-04 19:31:54 EDT
+    Next:   2026-10-04 19:34:13 EDT
+    Gap:    00:02:20 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-004
+
+05. Prompt 3 — store/restoration
+    Prompt: 2026-10-04 19:34:13 EDT
+    Next:   2026-10-04 19:45:28 EDT
+    Gap:    00:11:14 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-005
+
+06. Navigation import error
+    Prompt: 2026-10-04 19:45:28 EDT
+    Next:   2026-10-04 19:53:26 EDT
+    Gap:    00:07:58 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-006
+
+07. Prompt 4 — map/progress
+    Prompt: 2026-10-04 19:53:26 EDT
+    Next:   2026-10-04 20:14:04 EDT
+    Gap:    00:20:38 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-007
+
+08. Mockup comparison
+    Prompt: 2026-10-04 20:14:04 EDT
+    Next:   2026-10-04 20:16:17 EDT
+    Gap:    00:02:13 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-008
+
+09. Prompt 5 — simulation
+    Prompt: 2026-10-04 20:16:17 EDT
+    Next:   2026-10-04 20:37:03 EDT
+    Gap:    00:20:46 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-009
+
+10. Test source-set error
+    Prompt: 2026-10-04 20:37:03 EDT
+    Next:   2026-10-04 20:43:49 EDT
+    Gap:    00:06:45 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-010
+
+11. Prompt 6 — review sequence
+    Prompt: 2026-10-04 20:43:49 EDT
+    Next:   2026-10-04 20:58:52 EDT
+    Gap:    00:15:04 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-011
+
+12. TripReviewMode question
+    Prompt: 2026-10-04 20:58:52 EDT
+    Next:   2026-10-04 21:08:06 EDT
+    Gap:    00:09:14 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-012
+
+13. Dp.toPx error
+    Prompt: 2026-10-04 21:08:06 EDT
+    Next:   2026-10-04 21:18:09 EDT
+    Gap:    00:10:03 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-013
+
+14. Prompt 7 — History/details
+    Prompt: 2026-10-04 21:18:09 EDT
+    Next:   2026-10-04 21:51:34 EDT
+    Gap:    00:33:25 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-014
+
+15. Prompt 8 — planner integration
+    Prompt: 2026-10-04 21:51:34 EDT
+    Next:   2026-10-04 21:55:52 EDT
+    Gap:    00:04:18 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-015
+
+16. Routing choice reply
+    Prompt: 2026-10-04 21:55:52 EDT
+    Next:   2026-10-04 22:17:22 EDT
+    Gap:    00:21:31 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-016
+
+17. Prompt 9 — sealed navigation
+    Prompt: 2026-10-04 22:17:22 EDT
+    Next:   2026-10-04 22:46:19 EDT
+    Gap:    00:28:57 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-017
+
+18. Prompt 10 — review/verification
+    Prompt: 2026-10-04 22:46:19 EDT
+    Next:   2026-10-04 23:09:15 EDT
+    Gap:    00:22:55 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-018
+
+19. Prompt 11 — assignment docs
+    Prompt: 2026-10-04 23:09:15 EDT
+    Next:   2026-10-04 23:12:11 EDT
+    Gap:    00:02:57 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-019
+
+20. Estimate answer
+    Prompt: 2026-10-04 23:12:11 EDT
+    Next:   2026-10-04 23:13:10 EDT
+    Gap:    00:00:58 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-020
+
+21. Estimate clarification
+    Prompt: 2026-10-04 23:13:10 EDT
+    Next:   2026-10-04 23:37:08 EDT
+    Gap:    00:23:58 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-021
+
+22. GO layout complaint
+    Prompt: 2026-10-04 23:37:08 EDT
+    Next:   2026-10-04 23:43:40 EDT
+    Gap:    00:06:31 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-022
+
+23. Map-first GO redesign / direct edits
+    Prompt: 2026-10-04 23:43:40 EDT
+    Next:   2026-10-05 00:00:57 EDT
+    Gap:    00:17:17 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-023
+
+24. Current Trip map/popup redesign
+    Prompt: 2026-10-05 00:00:57 EDT
+    Next:   2026-10-05 00:14:16 EDT
+    Gap:    00:13:19 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-024
+
+25. Commit message request
+    Prompt: 2026-10-05 00:14:16 EDT
+    Next:   2026-10-05 00:14:51 EDT
+    Gap:    00:00:35 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-025
+
+26. One-line commit request
+    Prompt: 2026-10-05 00:14:51 EDT
+    Next:   2026-10-05 00:15:43 EDT
+    Gap:    00:00:52 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-026
+
+27. maxHeight scope error
+    Prompt: 2026-10-05 00:15:43 EDT
+    Next:   2026-10-05 00:27:31 EDT
+    Gap:    00:11:48 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-027
+
+28. Map/icons/intensity/About refinement
+    Prompt: 2026-10-05 00:27:31 EDT
+    Next:   2026-10-05 00:54:19 EDT
+    Gap:    00:26:48 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-028
+
+29. Settings right-aligned
+    Prompt: 2026-10-05 00:54:19 EDT
+    Next:   2026-10-05 00:57:00 EDT
+    Gap:    00:02:41 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-029
+
+30. Slower animation
+    Prompt: 2026-10-05 00:57:00 EDT
+    Next:   2026-10-05 01:00:01 EDT
+    Gap:    00:03:01 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-030
+
+31. All controls slide down
+    Prompt: 2026-10-05 01:00:01 EDT
+    Next:   2026-10-05 01:04:13 EDT
+    Gap:    00:04:12 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-031
+
+32. Instant-transition bug report
+    Prompt: 2026-10-05 01:04:13 EDT
+    Next:   2026-10-05 01:11:10 EDT
+    Gap:    00:06:57 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-032
+
+33. Popup cancel / gradient title
+    Prompt: 2026-10-05 01:11:10 EDT
+    Next:   2026-10-05 01:18:00 EDT
+    Gap:    00:06:50 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-033
+
+34. AI log archive request
+    Prompt: 2026-10-05 01:18:00 EDT
+    Next:   2026-10-05 01:36:48 EDT
+    Gap:    00:18:48 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-034
+
+35. Minutes/documents/time-flow request
+    Prompt: 2026-10-05 01:36:48 EDT
+    Next:   2026-10-05 01:42:36 EDT
+    Gap:    00:05:48 (elapsed interval; not active effort)
+    Link:   AI_Log_As3.md#b-turn-035
+
+36. Final maximum: 360 minutes
+    Prompt: 2026-10-05 01:42:36 EDT
+    Next:   Not yet recorded
+    Gap:    Pending next prompt
+    Link:   AI_Log_As3.md#b-turn-036
+
+First prompt:  2026-10-04 18:57:09 EDT
+Latest prompt: 2026-10-05 01:42:36 EDT
+Elapsed span between those prompts: 06:45:27.
+The current request's completion time is not included; no later prompt exists yet.
+
+C. ORIGINAL PROMPT ESTIMATES AND MEASURED ELAPSED WINDOWS
+--------------------------------------------------------------------------------------
+Each P0–P11 window ends at the next numbered prompt. P11 ends at the first later
+UI-change prompt. These windows include intervening clarification/debugging replies.
+
+Task   Original estimate   Elapsed window   Verified active effort
+----   -----------------   --------------   ----------------------
+P0     00:30               00:00:41         Not established
+P1     00:30               00:14:48         Not established
+P2     00:30               00:21:35         Not established
+P3     00:30               00:19:12         Not established
+P4     00:30               00:22:51         Not established
+P5     00:30               00:27:31         Not established
+P6     00:30               00:34:21         Not established
+P7     00:30               00:33:25         Not established
+P8     00:30               00:25:49         Not established
+P9     00:30               00:28:57         Not established
+P10    00:30               00:22:55         Not established
+P11    00:30               00:27:54         Not established
+
+Original total: 06:00 (360 minutes).
+Active-effort variance cannot be computed from elapsed windows alone.
+Later UI/debugging/documentation prompts have no supplied original estimates.
+
+D. SOURCES AND COMPLETION FIELDS
+--------------------------------------------------------------------------------------
+Current chat:
+https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765
+codex://threads/01a10922-a539-7d00-a97a-4809cce23449
+
+Prompt-preparation chat (not included in section B's elapsed total):
+https://chatgpt.com/s/cx_6ac332cd06d48191a686a0a3777468a1
+
+Complete text transcripts and deep links: AI_Log_As3.md.
+Dates for the manually written sessions: Atiom to confirm.
+Missing implementation start/end and unlabeled activity: Atiom to complete.
+Verified active-work total and variance explanation: Atiom to complete.
+Final tested/submitted revision and runtime evidence: Atiom to complete.

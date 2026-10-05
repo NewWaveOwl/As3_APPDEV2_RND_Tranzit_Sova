@@ -57,6 +57,39 @@ fun TripPlannerResumePreview() {
 }
 
 @Preview(
+    name = "360 minutes on narrow phone",
+    showBackground = true,
+    widthDp = 320,
+    heightDp = 780
+)
+@Composable
+fun TripPlannerMaxMinutesPreview() {
+    PlannerPreviewContent(minutes = 360)
+}
+
+@Preview(
+    name = "Zero minutes hides lower arrow",
+    showBackground = true,
+    widthDp = 320,
+    heightDp = 780
+)
+@Composable
+fun TripPlannerZeroMinutesPreview() {
+    PlannerPreviewContent(minutes = 0)
+}
+
+@Preview(
+    name = "360 minutes with Resume",
+    showBackground = true,
+    widthDp = 320,
+    heightDp = 780
+)
+@Composable
+fun TripPlannerMaxMinutesResumePreview() {
+    PlannerPreviewContent(minutes = 360, resume = true)
+}
+
+@Preview(
     name = "Planner validation",
     showBackground = true,
     widthDp = 350,
@@ -70,11 +103,12 @@ fun TripPlannerValidationPreview() {
 @Composable
 private fun PlannerPreviewContent(
     resume: Boolean = false,
-    showErrors: Boolean = false
+    showErrors: Boolean = false,
+    minutes: Int = 30
 ) {
     RNDTransitTheme {
         TripPlannerContent(
-            minutes = 30,
+            minutes = minutes,
             onMinutesChange = {},
             transportTypes = plannerPreviewTypes,
             transportRoutes = plannerPreviewRoutes,

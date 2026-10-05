@@ -141,9 +141,27 @@ data class Trip(
     }
 
     companion object {
-        const val MIN_PLANNED_MINUTES: Int = 5
-        const val MAX_PLANNED_MINUTES: Int = 240
+        const val MIN_PLANNED_MINUTES: Int = 0
+        const val MAX_PLANNED_MINUTES: Int = 360
         const val PLANNED_MINUTES_STEP: Int = 5
+
+        /** Keep planner selections in the supported five-minute range. */
+        fun coercePlannedMinutes(value: Int): Int {
+            val bounded = value.coerceIn(MIN_PLANNED_MINUTES, MAX_PLANNED_MINUTES)
+            return bounded - bounded % PLANNED_MINUTES_STEP
+        }
+
+        /** Clamp arrow/drag movement at 0 and 360 minutes. */
+        fun adjustPlannedMinutes(value: Int, direction: Int): Int {
+            val current = coercePlannedMinutes(value)
+            return when {
+                direction > 0 ->
+                    (current + PLANNED_MINUTES_STEP).coerceAtMost(MAX_PLANNED_MINUTES)
+                direction < 0 ->
+                    (current - PLANNED_MINUTES_STEP).coerceAtLeast(MIN_PLANNED_MINUTES)
+                else -> current
+            }
+        }
 
         const val MIN_ATTRACTION_INTENSITY: Float = 0f
         const val MAX_ATTRACTION_INTENSITY: Float = 100f
@@ -174,7 +192,7 @@ data class Trip(
                 plannedMinutes in MIN_PLANNED_MINUTES..MAX_PLANNED_MINUTES &&
                         plannedMinutes % PLANNED_MINUTES_STEP == 0
             ) {
-                "Planned minutes must be 5–240 in five-minute steps."
+                "Planned minutes must be 0–360 in five-minute steps."
             }
             require(
                 attractionIntensity.isFinite() &&

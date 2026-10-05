@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rnd_transit_mtl.model.Trip
@@ -109,7 +111,8 @@ private fun ControlDivider(layoutScale: Float) {
 }
 
 /**
- * Arrow taps and vertical dragging change minutes in five-minute steps.
+ * Arrow taps and vertical dragging change minutes in five-minute steps,
+ * bounded between 0 and 360 minutes. Empty arrow slots keep the number centred.
  *
  * Updated-state references let a continuous gesture keep using the latest
  * value/callback without restarting its pointer effect after each step.
@@ -121,39 +124,66 @@ private fun ScrollableMinutes(
     enabled: Boolean,
     layoutScale: Float
 ) {
-    val latestMinutes by rememberUpdatedState(minutes)
+    val boundedMinutes = Trip.coercePlannedMinutes(minutes)
+    val latestMinutes by rememberUpdatedState(boundedMinutes)
     val latestOnMinutesChange by rememberUpdatedState(onMinutesChange)
     val density = LocalDensity.current
     val dragThreshold = with(density) { 18.dp.toPx() }
+    val numberWidth = 76.dp * layoutScale
+    val numberText = boundedMinutes.toString()
+    val numberStyle = MaterialTheme.typography.bodyLarge.copy(
+        fontSize = 28.sp * layoutScale,
+        lineHeight = 30.sp * layoutScale,
+        textAlign = TextAlign.Center,
+        fontFeatureSettings = "tnum"
+    )
+    val textMeasurer = rememberTextMeasurer()
+    val measuredWidth = textMeasurer.measure(
+        text = numberText,
+        style = numberStyle,
+        softWrap = false,
+        maxLines = 1
+    ).size.width
+    val availableWidth = with(density) {
+        (numberWidth - 8.dp * layoutScale).toPx()
+    }
+    val fontScale = (availableWidth / measuredWidth.coerceAtLeast(1))
+        .coerceAtMost(1f)
 
     Column(
-        modifier = Modifier.width(48.dp),
+        modifier = Modifier.width(numberWidth),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconButton(
-            onClick = {
-                latestOnMinutesChange(
-                    (latestMinutes + Trip.PLANNED_MINUTES_STEP)
-                        .coerceAtMost(Trip.MAX_PLANNED_MINUTES)
-                )
-            },
-            enabled = enabled && minutes < Trip.MAX_PLANNED_MINUTES,
-            modifier = Modifier.size(32.dp * layoutScale)
+        Box(
+            modifier = Modifier.size(32.dp * layoutScale),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_arrow_drop_up),
-                contentDescription = "Increase planned time by five minutes",
-                tint = TransitWhite,
-                modifier = Modifier.size(28.dp)
-            )
+            if (boundedMinutes < Trip.MAX_PLANNED_MINUTES) {
+                IconButton(
+                    onClick = {
+                        latestOnMinutesChange(
+                            Trip.adjustPlannedMinutes(latestMinutes, direction = 1)
+                        )
+                    },
+                    enabled = enabled,
+                    modifier = Modifier.size(32.dp * layoutScale)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_arrow_drop_up),
+                        contentDescription = "Increase planned time by five minutes",
+                        tint = TransitWhite,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
         }
 
         Text(
-            text = minutes.toString(),
+            text = numberText,
             color = TransitWhite,
-            fontSize = 28.sp * layoutScale,
-            lineHeight = 30.sp * layoutScale,
-            textAlign = TextAlign.Center,
+            style = numberStyle.copy(fontSize = numberStyle.fontSize * fontScale),
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 0.dp)
@@ -175,13 +205,9 @@ private fun ScrollableMinutes(
                                     val direction =
                                         if (dragDistance < 0f) 1 else -1
 
-                                    workingMinutes = (
-                                            workingMinutes +
-                                                    direction *
-                                                    Trip.PLANNED_MINUTES_STEP
-                                            ).coerceIn(
-                                        Trip.MIN_PLANNED_MINUTES,
-                                        Trip.MAX_PLANNED_MINUTES
+                                    workingMinutes = Trip.adjustPlannedMinutes(
+                                        workingMinutes,
+                                        direction
                                     )
 
                                     latestOnMinutesChange(workingMinutes)
@@ -193,27 +219,33 @@ private fun ScrollableMinutes(
                 }
                 .semantics {
                     contentDescription =
-                        "Planned time: $minutes minutes. " +
+                        "Planned time: $boundedMinutes minutes. " +
                                 "Drag up to increase or down to decrease."
                 }
         )
 
-        IconButton(
-            onClick = {
-                latestOnMinutesChange(
-                    (latestMinutes - Trip.PLANNED_MINUTES_STEP)
-                        .coerceAtLeast(Trip.MIN_PLANNED_MINUTES)
-                )
-            },
-            enabled = enabled && minutes > Trip.MIN_PLANNED_MINUTES,
-            modifier = Modifier.size(32.dp * layoutScale)
+        Box(
+            modifier = Modifier.size(32.dp * layoutScale),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_arrow_drop_down),
-                contentDescription = "Decrease planned time by five minutes",
-                tint = TransitWhite,
-                modifier = Modifier.size(28.dp)
-            )
+            if (boundedMinutes > Trip.MIN_PLANNED_MINUTES) {
+                IconButton(
+                    onClick = {
+                        latestOnMinutesChange(
+                            Trip.adjustPlannedMinutes(latestMinutes, direction = -1)
+                        )
+                    },
+                    enabled = enabled,
+                    modifier = Modifier.size(32.dp * layoutScale)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_arrow_drop_down),
+                        contentDescription = "Decrease planned time by five minutes",
+                        tint = TransitWhite,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
         }
     }
 }

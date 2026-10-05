@@ -273,6 +273,42 @@ class TripInvariantsTest {
         }
     }
 
+    @Test
+    fun minuteSelectorCapsAt360AndStepsBackTo355() {
+        assertEquals(360, Trip.coercePlannedMinutes(Int.MAX_VALUE))
+        assertEquals(0, Trip.coercePlannedMinutes(Int.MIN_VALUE))
+        assertEquals(350, Trip.coercePlannedMinutes(354))
+        assertEquals(360, Trip.adjustPlannedMinutes(355, 1))
+        assertEquals(360, Trip.adjustPlannedMinutes(360, 1))
+        assertEquals(355, Trip.adjustPlannedMinutes(360, -1))
+        assertEquals(350, Trip.adjustPlannedMinutes(355, -1))
+        assertEquals(0, Trip.adjustPlannedMinutes(5, -1))
+        assertEquals(0, Trip.adjustPlannedMinutes(0, -1))
+    }
+
+    @Test
+    fun maximumPlannedMinutesRestoreWithoutChangingSimulationDuration() {
+        val trip = fixtureTrip("maximum-minutes").copy(plannedMinutes = 360)
+        val store = TripsStore(nowEpochMillis = { 12_000L })
+        assertEquals(TripActionResult.Applied, store.start(trip))
+        assertEquals(TripActionResult.Applied, store.updateElapsed(trip.id, 5_000L))
+
+        val restored = assertNotNull(
+            TripsStore.fromSavedStateJson(
+                store.toSavedStateJson(),
+                nowEpochMillis = { 90_000L }
+            )
+        )
+        assertEquals(360, restored.activeTrip?.plannedMinutes)
+        assertEquals(0.5f, restored.progress)
+        assertEquals(TripActionResult.Applied, restored.updateElapsed(trip.id, 10_000L))
+        assertEquals(360, restored.findCompleted(trip.id)?.plannedMinutes)
+        assertEquals(1f, restored.progressFor(trip.id))
+        assertFailsWith<IllegalArgumentException> {
+            trip.copy(plannedMinutes = 365)
+        }
+    }
+
     private fun completedStore(vararg trips: Trip): TripsStore {
         val store = TripsStore(nowEpochMillis = { 12_000L })
 

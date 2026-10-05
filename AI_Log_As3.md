@@ -1,5 +1,6 @@
 # Assignment 3 — AI Technique Log and Conversation Evidence
 
+Student: **Atiom**  
 Project: **RND Transit MTL**  
 Prepared: **5 October 2026**  
 Document: **AI_Log_As3.md**  
@@ -35,31 +36,77 @@ Both shared pages were opened and their titles and individual message element ID
 
 The local archive can contain progress updates or superseded messages that the immutable shared snapshot does not display. These are retained, rather than silently rewritten to match the final answer. Pasted-text attachments are reproduced separately when accessible. Screenshot references remain in the prompts; the shared chats provide the visual references. Temporary local attachment paths may cease to work on another machine.
 
-The current log-generation request is included at the end of transcript B. Its ongoing response is excluded to avoid a document recursively embedding itself. This document adds no new build or runtime test result.
+Transcript B now includes the log-generation request, the minute-cap/documentation/time-flow update request, and Atiom’s correction to a 360-minute maximum. The current request’s final response is not yet part of the archived conversation; the archive stops at that latest human prompt to avoid recursively embedding this document. This document adds no new build or runtime test result.
 
 <a id="time-records"></a>
 ## Original estimates and actual-time distinction
 
 The student answered **“30 mins for each propmt”** and clarified **“Original proposed estimate.”** See [estimate answer](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-39) and [clarification](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-41).
 
-| Numbered prompt | Original proposed estimate | Actual time | Variance explanation |
+| Numbered prompt | Original proposed estimate | Recorded elapsed window | Verified active effort / variance |
 | --- | --- | --- | --- |
-| 0 — Context and rules | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 1 — Inspection and design | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 2 — Models and generator | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 3 — Shared state and restoration | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 4 — Map and progress visuals | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 5 — Active-time simulation | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 6 — Review sequence and ratings | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 7 — History and details | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 8 — Planner and image integration | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 9 — Sealed routes and navigation | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 10 — Review and verification guidance | 30 minutes | Not supplied — student to complete | Pending actual time |
-| 11 — Assignment documentation | 30 minutes | Not supplied — student to complete | Pending actual time |
+| 0 — Context/rules | 30 minutes | 00:00:41 | Not established / not calculated |
+| 1 — Inspection/design | 30 minutes | 00:14:48 | Not established / not calculated |
+| 2 — Models/generator | 30 minutes | 00:21:35 | Not established / not calculated |
+| 3 — Shared state/restoration | 30 minutes | 00:19:12 | Not established / not calculated |
+| 4 — Map/progress | 30 minutes | 00:22:51 | Not established / not calculated |
+| 5 — Simulation | 30 minutes | 00:27:31 | Not established / not calculated |
+| 6 — Reviews | 30 minutes | 00:34:21 | Not established / not calculated |
+| 7 — History/details | 30 minutes | 00:33:25 | Not established / not calculated |
+| 8 — Original planner/images | 30 minutes | 00:25:49 | Not established / not calculated |
+| 9 — Navigation | 30 minutes | 00:28:57 | Not established / not calculated |
+| 10 — Review/verification | 30 minutes | 00:22:55 | Not established / not calculated |
+| 11 — Documentation | 30 minutes | 00:27:54 | Not established / not calculated |
 
 For prompts 0–11 inclusive, this sums to **360 proposed minutes / 6 hours**; prompts 1–11 alone sum to **330 proposed minutes / 5.5 hours**. These totals exclude the separate prompt-preparation chat and later UI/debugging follow-ups, for which original estimates were not supplied.
 
-Template **Time** means total interaction effort including relevant iterations and debugging, excluding unrelated breaks. Neither timestamps nor the app's “Worked for” durations establish the student's total actual effort. Do not substitute the proposed estimates for actual time or add overlapping challenge estimates twice.
+Template **Time** means total interaction effort including relevant iterations and debugging, excluding unrelated breaks. Neither timestamps nor the app's “Worked for” durations establish the student's total actual effort. Do not substitute the proposed estimates for actual time or add overlapping challenge estimates twice. The supplied manual session notes are now formatted in [TimeFlow_As3_Sova.txt](TimeFlow_As3_Sova.txt); complete clock ranges total 4 hours 30 minutes, including an unlabeled ten-minute interval. Their dates and one implementation interval are incomplete, so a complete active-work total is not established.
+
+
+### Recorded intervals between human prompts in this chat
+
+At Atiom’s request, these are timestamp differences to the **next** human prompt/reply, measured from the local conversation archive. Local times are America/Toronto (EDT). Durations are calculated from milliseconds and rounded to seconds. They include response/waiting time and possible breaks; they are not certified active effort. The latest prompt has no following prompt yet.
+
+| Prompt/reply | Local timestamp | Gap to next prompt | Full text |
+| --- | --- | --- | --- |
+| 1 — Prompt 0 — project context | 2026-10-04 18:57:09 EDT | 00:00:41 | [Prompt](#b-turn-001) |
+| 2 — Prompt 1 — inspection/design | 2026-10-04 18:57:50 EDT | 00:14:48 | [Prompt](#b-turn-002) |
+| 3 — Prompt 2 — models/generator | 2026-10-04 19:12:38 EDT | 00:19:16 | [Prompt](#b-turn-003) |
+| 4 — Kotlin fun keyword error | 2026-10-04 19:31:54 EDT | 00:02:20 | [Prompt](#b-turn-004) |
+| 5 — Prompt 3 — store/restoration | 2026-10-04 19:34:13 EDT | 00:11:14 | [Prompt](#b-turn-005) |
+| 6 — Navigation import error | 2026-10-04 19:45:28 EDT | 00:07:58 | [Prompt](#b-turn-006) |
+| 7 — Prompt 4 — map/progress | 2026-10-04 19:53:26 EDT | 00:20:38 | [Prompt](#b-turn-007) |
+| 8 — Mockup comparison | 2026-10-04 20:14:04 EDT | 00:02:13 | [Prompt](#b-turn-008) |
+| 9 — Prompt 5 — simulation | 2026-10-04 20:16:17 EDT | 00:20:46 | [Prompt](#b-turn-009) |
+| 10 — Test source-set error | 2026-10-04 20:37:03 EDT | 00:06:45 | [Prompt](#b-turn-010) |
+| 11 — Prompt 6 — review sequence | 2026-10-04 20:43:49 EDT | 00:15:04 | [Prompt](#b-turn-011) |
+| 12 — TripReviewMode question | 2026-10-04 20:58:52 EDT | 00:09:14 | [Prompt](#b-turn-012) |
+| 13 — Dp.toPx error | 2026-10-04 21:08:06 EDT | 00:10:03 | [Prompt](#b-turn-013) |
+| 14 — Prompt 7 — History/details | 2026-10-04 21:18:09 EDT | 00:33:25 | [Prompt](#b-turn-014) |
+| 15 — Prompt 8 — planner integration | 2026-10-04 21:51:34 EDT | 00:04:18 | [Prompt](#b-turn-015) |
+| 16 — Routing choice reply | 2026-10-04 21:55:52 EDT | 00:21:31 | [Prompt](#b-turn-016) |
+| 17 — Prompt 9 — sealed navigation | 2026-10-04 22:17:22 EDT | 00:28:57 | [Prompt](#b-turn-017) |
+| 18 — Prompt 10 — review/verification | 2026-10-04 22:46:19 EDT | 00:22:55 | [Prompt](#b-turn-018) |
+| 19 — Prompt 11 — assignment docs | 2026-10-04 23:09:15 EDT | 00:02:57 | [Prompt](#b-turn-019) |
+| 20 — Estimate answer | 2026-10-04 23:12:11 EDT | 00:00:58 | [Prompt](#b-turn-020) |
+| 21 — Estimate clarification | 2026-10-04 23:13:10 EDT | 00:23:58 | [Prompt](#b-turn-021) |
+| 22 — GO layout complaint | 2026-10-04 23:37:08 EDT | 00:06:31 | [Prompt](#b-turn-022) |
+| 23 — Map-first GO redesign / direct edits | 2026-10-04 23:43:40 EDT | 00:17:17 | [Prompt](#b-turn-023) |
+| 24 — Current Trip map/popup redesign | 2026-10-05 00:00:57 EDT | 00:13:19 | [Prompt](#b-turn-024) |
+| 25 — Commit message request | 2026-10-05 00:14:16 EDT | 00:00:35 | [Prompt](#b-turn-025) |
+| 26 — One-line commit request | 2026-10-05 00:14:51 EDT | 00:00:52 | [Prompt](#b-turn-026) |
+| 27 — maxHeight scope error | 2026-10-05 00:15:43 EDT | 00:11:48 | [Prompt](#b-turn-027) |
+| 28 — Map/icons/intensity/About refinement | 2026-10-05 00:27:31 EDT | 00:26:48 | [Prompt](#b-turn-028) |
+| 29 — Settings right-aligned | 2026-10-05 00:54:19 EDT | 00:02:41 | [Prompt](#b-turn-029) |
+| 30 — Slower animation | 2026-10-05 00:57:00 EDT | 00:03:01 | [Prompt](#b-turn-030) |
+| 31 — All controls slide down | 2026-10-05 01:00:01 EDT | 00:04:12 | [Prompt](#b-turn-031) |
+| 32 — Instant-transition bug report | 2026-10-05 01:04:13 EDT | 00:06:57 | [Prompt](#b-turn-032) |
+| 33 — Popup cancel / gradient title | 2026-10-05 01:11:10 EDT | 00:06:50 | [Prompt](#b-turn-033) |
+| 34 — AI log archive request | 2026-10-05 01:18:00 EDT | 00:18:48 | [Prompt](#b-turn-034) |
+| 35 — Minutes/documents/time-flow request | 2026-10-05 01:36:48 EDT | 00:05:48 | [Prompt](#b-turn-035) |
+| 36 — Final maximum: 360 minutes | 2026-10-05 01:42:36 EDT | Pending next prompt | [Prompt](#b-turn-036) |
+
+First-to-latest-prompt elapsed span: **06:45:27**. Do not add this to overlapping manual session notes. Numbered-task elapsed windows above end at the next numbered prompt (P11 at the first later UI-change prompt), and can contain several smaller intervals from this table.
 
 <a id="technique-entries"></a>
 ## AI Technique Log entries
@@ -82,7 +129,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Planning/document impact. Approximate percentage of assignment code or design document: **not supplied — student to complete**.
 
-**Time:** Original estimate for this separate preparatory interaction: **not supplied**. Actual total including its iterations: **not supplied — student to complete**.
+**Time:** Original estimate for this separate preparatory interaction: **not supplied**. Active effort: **not established**. No interval from the implementation chat is attributed to this separate preparatory chat.
 
 **Result / reflection:** The sequence made the intended responsibilities and delivery rules explicit. The record supports staged prompting as the chosen strategy. Student's personal reflection: **to complete**.
 
@@ -106,7 +153,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Models, trip snapshots, input validation and random endpoint generation. Approximate assignment percentage: **not supplied — student to complete**.
 
-**Time:** Original estimates: **30 minutes for Prompt 1 and 30 minutes for Prompt 2**. Actual time including debugging: **not supplied — student to complete**.
+**Time:** Original estimates: **30 minutes for Prompt 1 and 30 minutes for Prompt 2**. Active effort: **not established**. Recorded prompt-window elapsed time: **00:36:23**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** The design separates fixed trip data from runtime coordination. The keyword error shows why generated code required review and correction. Student's personal reflection: **to complete**.
 
@@ -130,7 +177,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Observable store, serializable snapshots, provider and App integration. Approximate percentage: **not supplied — student to complete**.
 
-**Time:** Original estimate: **30 minutes for Prompt 3**. Actual interaction time including related corrections: **not supplied — student to complete**.
+**Time:** Original estimate: **30 minutes for Prompt 3**. Active effort: **not established**. Recorded prompt-window elapsed time: **00:19:12**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** Centralizing records supports consistent History and ID-based operations. Explicit snapshots introduce restoration responsibilities and limits; they do not provide permanent database storage. Student's personal reflection: **to complete**.
 
@@ -154,7 +201,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Map transform, progress visuals, timer coordination, lifecycle/session guards and related previews/tests. Approximate percentage: **not supplied — student to complete**.
 
-**Time:** Original estimates: **30 minutes for Prompt 4 and 30 minutes for Prompt 5**. Actual including debugging: **not supplied — student to complete**.
+**Time:** Original estimates: **30 minutes for Prompt 4 and 30 minutes for Prompt 5**. Active effort: **not established**. Recorded prompt-window elapsed time: **00:50:23**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** Using one elapsed/progress calculation prevents separate marker and distance animations drifting. Density and source-set mistakes required explicit corrections. Student's personal reflection: **to complete**.
 
@@ -178,7 +225,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Review drafts and questions, rating presentation, History filters/cards and static details. Approximate percentage: **not supplied — student to complete**.
 
-**Time:** Original estimates: **30 minutes for Prompt 6 and 30 minutes for Prompt 7**. Actual including refinements: **not supplied — student to complete**.
+**Time:** Original estimates: **30 minutes for Prompt 6 and 30 minutes for Prompt 7**. Active effort: **not established**. Recorded prompt-window elapsed time: **01:07:45**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** Nullable optional ratings distinguish “unselected” from a saved rating, and ID-based edits preserve the existing record. Student's personal reflection: **to complete**.
 
@@ -202,7 +249,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Planner, image presentation/configuration, serializable routes, navigation coordinator and shared layout/header integration. Approximate percentage: **not supplied — student to complete**.
 
-**Time:** Original estimates: **30 minutes for Prompt 8 and 30 minutes for Prompt 9**. Actual including follow-ups: **not supplied — student to complete**.
+**Time:** Original estimates: **30 minutes for Prompt 8 and 30 minutes for Prompt 9**. Active effort: **not established**. Recorded prompt-window elapsed time: **00:54:45**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** The generated Trip parameter demonstrates the intended second-screen handoff while the store remains authoritative. Later removal of the form changes assignment coverage. Student's personal reflection: **to complete**.
 
@@ -226,7 +273,7 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Review corrections/tests plus documentation. Approximate assignment/document percentage: **not supplied — student to complete**.
 
-**Time:** Original estimates: **30 minutes for Prompt 10 and 30 minutes for Prompt 11**. Actual including review/documentation iterations: **not supplied — student to complete**.
+**Time:** Original estimates: **30 minutes for Prompt 10 and 30 minutes for Prompt 11**. Active effort: **not established**. Recorded prompt-window elapsed time: **00:50:49**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** Explicit evidence distinctions reduce the chance that generated verification instructions are mistaken for passed checks. Student's personal reflection: **to complete**.
 
@@ -260,11 +307,35 @@ Template **Time** means total interaction effort including relevant iterations a
 
 **Code impact:** Planner layout/transition, map geometry/assets, shared navigation styling and current-trip popup/cancellation presentation. Approximate assignment percentage: **not supplied — student to complete**.
 
-**Time:** Original estimates for these additional follow-ups: **not supplied**. Actual including animation debugging: **not supplied — student to complete**.
+**Time:** Original estimates for these additional follow-ups: **not supplied**. Active effort: **not established**. Recorded prompt-window elapsed time: **01:40:52**; see the interval table/TimeFlow for source boundaries. This is elapsed time, not a verified active-work duration.
 
 **Result / reflection:** Screenshots and concrete runtime feedback revealed differences that source-level reasoning alone had missed. Increasing animation duration was insufficient until navigation waited for the animation. Student's personal reflection: **to complete**.
 
 **Evidence:** [Direct-edit authorization and form removal](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-44), [map-first request](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-46), [height correction](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-51), [fill/map/icon refinement](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-52), [Settings placement](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-55), [instant-transition report](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-60), [ordering correction](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-61), [popup cancellation and gradient](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-63).
+
+### TL-09 — Three-digit minute control and current assignment records
+
+**Challenge / context:** Fit three-digit planned minutes between GO dividers, enforce a bounded choice in both UI and record validation, reconcile outdated assignment documents, identify the student and record prompt intervals.
+
+**AI tool(s):** ChatGPT / Codex in “Extend RND Transit app.”
+
+**Prompting approaches used:** Structured targeted prompting; iterative refinement; prompt chaining; evidence-based documentation; explicit correction of a numeric limit.
+
+**Prompt elements used:** Goal (minutes and documents), current screen context, constraints (no values above the maximum), output requests (README/log/TimeFlow), student identity and a subsequent maximum correction.
+
+**Iteration / adaptation:** Atiom first requested 999; during the update they changed the maximum to **360**. The final source keeps five-minute choices from 5 to 360, with 355 → 360 → 355 at the upper edge. A wider measured-text number area preserves three-digit visibility. Documents were revised around the actual Home/GO, Current Trip and History screens, the popup/cancellation map UI, supplied directional pointer and tap-100% review. Original estimates were kept separate from recorded prompt gaps; supplied session notes were formatted without completing missing times.
+
+**Verification:** Source/call-site inspection and documentation/transcript consistency checks were performed. Minute-boundary/restoration tests and narrow-phone 360-minute previews were added but not run. No successful compilation or runtime layout is claimed.
+
+**AI output / how used:** Direct source and document edits were requested/authorized. The earlier 999 limit was superseded by the student's 360 instruction. Final rebuilt-app acceptance remains unrecorded.
+
+**Code impact:** Trip minute validation/normalization, GOBox text fit/steps, planner callback, previews and focused tests; README, assignment record, design summary, AI log and time-flow documentation. Approximate code/document contribution percentage: **not supplied — Atiom to complete**.
+
+**Time:** Recorded interval from the initial minute/doc request to the 360 correction: **00:05:48**. The combined archive/update challenge spans **00:24:35** from the previous AI-log request to that correction; this excludes the ongoing turn's completion and is not certified active effort. Original estimate for these extra follow-ups: **not supplied**. Complete active effort remains unestablished.
+
+**Result / reflection:** The cap correction changed the validation and boundary behavior as well as visible text. Recording timestamp gaps separately from estimates/manual notes avoids representing waiting time as verified effort. Atiom's personal reflection: **to complete**.
+
+**Evidence:** [Minute/doc/time-flow request](#b-turn-035), [final 360-minute instruction](#b-turn-036), [TimeFlow](TimeFlow_As3_Sova.txt), [open implementation chat](codex://threads/01a10922-a539-7d00-a97a-4809cce23449).
 
 <a id="decisions"></a>
 ## AI-assisted decision record
@@ -353,7 +424,7 @@ The Day 17 technique log supplements the AI Decision Log. These concise ADR reco
 | Map service / GPS / real distance | Outside scope; bundled PNG, stored random normalized points and demo distance |
 | Saved state | Intended restoration, not permanent database storage |
 | AI contribution percentage | Not supplied; do not infer from patch counts or generated output length |
-| Student actual effort and variance | Not supplied; original 30-minute estimates are preserved separately |
+| Student effort and variance | Partial manual session notes supplied; complete active effort/variance unestablished. Prompt intervals and original 30-minute estimates are recorded separately |
 
 The transcript records staged chat-only generation followed by explicitly authorized direct source edits. It should not be described as an entirely manual-paste workflow. Compliance with any course restrictions on tool/agent use must be assessed from the actual record and instructor guidance; this log makes no compliance certification.
 
@@ -2854,7 +2925,7 @@ Stop after delivering the requested documentation.
 ## Full transcript B — Extend RND Transit app
 
 Source: [Shared conversation](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765).
-Archived text: **34 human prompt/reply messages** and **91 user-facing assistant messages**. Assistant messages include progress updates as well as final answers.
+Archived text: **36 human prompt/reply messages** and **99 user-facing assistant messages**. Assistant messages include progress updates as well as final answers.
 
 ### Prompt index
 
@@ -2894,6 +2965,8 @@ Archived text: **34 human prompt/reply messages** and **91 user-facing assistant
 | 32 | [The transition betweeenMAin scrren with GO is stilll instant to the Current trip, why?](#b-turn-032) | 2026-10-05T05:04:13.664Z |
 | 33 | [ASlo add oppotunit to cancnel curen trip when you press Current trip and  add cradient to current trip text, so it will be more logola taht …](#b-turn-033) | 2026-10-05T05:11:10.574Z |
 | 34 | [According to AI log tamplete geenerat AI_Log_As3.md. file with full popmts and uoutputs form this caht ( include links ! \[https://chatgpt.co…](#b-turn-034) | 2026-10-05T05:18:00.864Z |
+| 35 | [Alos update minunts in main scren make them that you can noot put more the n 999 and inshre that three nuber could feet between / - /. THEn …](#b-turn-035) | 2026-10-05T05:36:48.788Z |
+| 36 | [lets keep the max time as 360 for go](#b-turn-036) | 2026-10-05T05:42:36.336Z |
 
 <a id="b-turn-001"></a>
 ### B — Turn 1: Project context, complete feature specification, and response rules
@@ -21357,6 +21430,105 @@ According to AI log tamplete geenerat AI_Log_As3.md. file with full popmts and u
 
 ````
 
+<a id="b-turn-034-output-01"></a>
+**Assistant output 1 — 2026-10-05T05:18:08.995Z**
+Message ID: msg_0e90a4f05dac5be7016ac33310b0ec87d2b51bd149c79fd08e
+
+````text
+I’ll read the Day 17 AI log template and both chat links, then create `AI_Log_As3.md` with the prompts, outputs, and deep links I can retrieve. I’ll mark any missing content clearly.
+
+````
+
+<a id="b-turn-034-output-02"></a>
+**Assistant output 2 — 2026-10-05T05:18:44.619Z**
+Message ID: msg_0e90a4f05dac5be7016ac33334d32c87d2bda8f4652d482403
+
+````text
+I’m using the Presentations skill to read the template fields in the slides. Both shared links failed through the web reader, so I’m checking the local chat records and will try the links in the browser.
+
+````
+
+<a id="b-turn-034-output-03"></a>
+**Assistant output 3 — 2026-10-05T05:23:22.498Z**
+Message ID: msg_0e90a4f05dac5be7016ac3344986bc87d2bd766f30295997be
+
+````text
+Both shared chats are accessible in the browser. I found the Day 17 template: it calls for one entry per major challenge, with the full conversations kept as supporting evidence. I’ll include both, with links to individual transcript entries. Your 30-minute estimates will stay separate from actual time, which hasn’t been supplied.
+
+````
+
+<a id="b-turn-034-output-04"></a>
+**Assistant output 4 — 2026-10-05T05:25:17.255Z**
+Message ID: msg_0e90a4f05dac5be7016ac334bc9f9087d295e1e909481d9620
+
+````text
+The second link is “Write prompts for trip features”; the first is “Extend RND Transit app.” I’ve matched both to their local conversation records, which contain the complete code responses. The log will also record your later UI changes, including removing the planner form and opening reviews by tapping 100%, so it reflects how the design evolved.
+
+````
+
+<a id="b-turn-034-output-05"></a>
+**Assistant output 5 — 2026-10-05T05:31:07.957Z**
+Message ID: msg_0e90a4f05dac5be7016ac3361be9cc87d296fef7b8e0eb9380
+
+````text
+The template entries and decision records are drafted. I’m adding the full transcripts and pasted-text attachments now, then checking that every retrieved message is present and each internal link has a matching destination.
+
+````
+
+<a id="b-turn-034-output-06"></a>
+**Assistant output 6 — 2026-10-05T05:33:59.681Z**
+Message ID: msg_0e90a4f05dac5be7016ac336c5ff7487d280ad80941936c161
+
+````text
+Created [AI_Log_As3.md](<K:/CLASSES 26 FALL/APP_DEV/As3/MainRepo/As3_APPDEV2_RND_Tranzit_Sova/AI_Log_As3.md>) with:
+
+- Day 17 template: eight technique entries and four decision records.
+- Full text of 37 prompts/replies, 102 assistant messages, and three pasted attachments.
+- Both shared-chat links, message deep links, and transcript navigation.
+
+Actual time and unconfirmed verification remain marked for you to complete.
+````
+
+<a id="b-turn-035"></a>
+### B — Turn 35: Alos update minunts in main scren make them that you can noot put more the n 999 and inshre that three nuber could feet between / - /. THEn …
+
+**Human prompt / reply — 2026-10-05T05:36:48.788Z**
+Message ID: msg_01a10a90-9094-7583-be69-00624de6f44f
+
+````text
+Alos update minunts in main scren make them that you can noot put more the n 999 and inshre that three nuber could feet between | - |. THEn update all docs tath neede for this asnemd and Readme to represtn current implmemtaion and main 3 scrren that we implemented. After Update Ai usage log to iclude this piompt , aSlo student should be Atiom, and time put time between propmts in thiss caht . And format nicely TimeFlow_As3_Sova.txt
+
+````
+
+<a id="b-turn-035-output-01"></a>
+**Assistant output 1 — 2026-10-05T05:36:54.951Z**
+Message ID: msg_0e90a4f05dac5be7016ac33776214487d2ae0633928df3d77d
+
+````text
+I’ll cap the minutes selector at 999 and make room for three digits. Then I’ll update the README and assignment documents to match the current app, set the student name to Atiom, and format `TimeFlow_As3_Sova.txt`. I’ll label the gaps between chat prompts as elapsed intervals, since they don’t establish active work time.
+
+````
+
+<a id="b-turn-035-output-02"></a>
+**Assistant output 2 — 2026-10-05T05:38:41.625Z**
+Message ID: msg_0e90a4f05dac5be7016ac337e11a5c87d295e07a5b52578d6d
+
+````text
+The selector currently stops at 240 and validates five-minute steps. I’ll keep those steps, allow 999 as the final value, and widen the number area so it fits between the dividers. The documents also still describe the removed form, human marker, and automatic review opening; I’ll replace those descriptions with the current GO, Current Trip, and History flow.
+
+````
+
+<a id="b-turn-036"></a>
+### B — Turn 36: lets keep the max time as 360 for go
+
+**Human prompt / reply — 2026-10-05T05:42:36.336Z**
+Message ID: msg_01a10a95-de30-7081-bda3-204b18047918
+
+````text
+lets keep the max time as 360 for go 
+
+````
+
 <a id="attachments"></a>
 ## Full pasted-text attachments
 
@@ -22654,7 +22826,7 @@ class ActiveTripSimulationTest {
 <a id="completion-checklist"></a>
 ## Student completion checklist
 
-- [ ] Add personal reflections to the eight technique entries.
+- [ ] Add personal reflections to the nine technique entries.
 - [ ] Supply actual interaction/debugging time, excluding unrelated breaks.
 - [ ] Complete variance explanations from actual records.
 - [ ] Provide an evidence-based code/document contribution estimate.

@@ -1,606 +1,280 @@
 # RND Transit — Assignment 3 Documentation
 
-## Record status
+**Student: Atiom**  
+Updated: 5 October 2026  
+Final submitted/tested revision: **to record**  
+Selected verified second platform: **Desktop or Web — to record**
 
-**Student:** To complete.  
-**Student identifier:** To complete.  
-**Final submitted commit/revision:** To complete.  
-**Selected second platform:** To complete — Desktop or Web.  
-**Runtime verification date and device:** To complete.
+This document describes the current source implementation and available records. Source presence, historical test reports, manual verification and submission evidence are distinct.
 
-This document describes the supplied implementation and available evidence. It does not certify that all assignment requirements have been verified.
+## 1. Current implementation: three main screens
 
-The student confirmed that **30 minutes per prompt was the original proposed estimate**. Recorded actual times have not been supplied.
-
-Explicit approval of the ADR entries has not been supplied. Their status therefore remains Proposed even where the described approach is present in the source.
-
-## 1. References and assignment scope
-
-The documentation follows:
-
-- Assignment 3 Handout, slides 1–4.
-- Day 17: Shared Layout, Gantt Chart, and AI Technique Log, particularly slides 10–12 and the dependency guidance.
-- Day 18: shared resources, shared navigation, and hoisted layout.
-- Day 19: data records, restricted alternatives, cohesion, coupling, integrity, evolvability, and fitness for purpose.
-
-### Assignment requirements
-
-The handout requires:
-
-- Kotlin/Compose Multiplatform, Material 3, and Navigation 3.
-- Emulated Android plus Desktop or Web.
-- Three related meaningful content screens and an information screen.
-- Multiple text inputs and an image link on the first screen.
-- The entered item passed as a parameter to the second screen.
-- A provider-backed interactive collection on the third screen.
-- Item removal and details.
-- Routes defined through a sealed class.
-- Shared layout/navigation and rotation robustness.
-- Meaningful internal documentation and a root README.
-- WBS, original estimates, dependencies, Gantt chart, actual effort, and variance notes.
-- Intentional AI use, at least three AI-assisted key decisions, saved prompts/outputs, and an AI usage summary.
-
-Responsive design is a bonus requirement.
-
-### Additional feature requirements supplied by the student
-
-The assignment does not itself prescribe:
-
-- A ten-second active-time trip simulation.
-- Random normalized endpoints generated once.
-- An orange person marker.
-- Pause, resume, cancellation, and exactly-once completion.
-- Sequential review questions inspired by supplied screenshots.
-- Overall-required and optional-null star ratings.
-- Review editing by stable ID.
-- A bundled mock map separate from the entered reference image.
-- No GPS, real routing, street guidance, or permanent database.
-
-These are the chosen RND Transit feature requirements.
-
-## 2. Work breakdown structure and original estimates
-
-### Estimate source and counting convention
-
-Original proposed estimate: **30 minutes for each prompt**, confirmed by the student during Prompt 11.
-
-The table includes Prompt 0, which established scope and delivery rules, and Prompts 1–11. That is twelve prompt-level tasks:
-
-**12 × 30 minutes = 360 minutes = 6 hours proposed effort.**
-
-If the student's original accounting excluded Prompt 0, record that convention here. Prompts 1–11 alone total 330 minutes, or 5 hours 30 minutes. Do not change individual estimates to match hindsight.
-
-The task labels below organize the prompt sequence for this document. This does not claim that this exact table or chart existed before implementation.
-
-The handout also gives a general six-hour effort guideline. That guideline is not evidence of actual time worked.
-
-| ID | Task and deliverable | Prompt | Original estimate | Prerequisite for the sequential workflow | Actual effort | Variance | Explanation |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| P0 | Establish project scope, preserved behavior, and delivery rules | 0 | 30 min | None | Not supplied | Not calculated | Student to complete |
-| P1 | Inspect project and establish architecture, contracts, and assignment mapping | 1 | 30 min | P0 | Not supplied | Not calculated | Student to complete |
-| P2 | Trip records, validation, snapshots, and mock-trip generator | 2 | 30 min | P1 | Not supplied | Not calculated | Student to complete |
-| P3 | Shared TripsStore, provider, Saver, snapshot restoration, and App integration | 3 | 30 min | P2 | Not supplied | Not calculated | Student to complete |
-| P4 | Mock map, orange person, progress presentation, and static previews | 4 | 30 min | P3; uses P2 records | Not supplied | Not calculated | Student to complete |
-| P5 | Current Trip coordination, active-time simulation, pause/resume, and cancellation | 5 | 30 min | P4; uses P3 state | Not supplied | Not calculated | Student to complete |
-| P6 | Sequential review form, star controls, review drafts, Save/Skip/edit behavior | 6 | 30 min | P5; uses P3 state | Not supplied | Not calculated | Student to complete |
-| P7 | Completed History, filters, cards, removal, and static details | 7 | 30 min | P6; uses P4 visuals | Not supplied | Not calculated | Student to complete |
-| P8 | Planner inputs, GO/Resume behavior, image loading, and affected screens | 8 | 30 min | P7; uses P2/P3 | Not supplied | Not calculated | Student to complete |
-| P9 | Sealed route hierarchy, registrations, shared navigation, and complete flow | 9 | 30 min | P8; integrates P5–P7 | Not supplied | Not calculated | Student to complete |
-| P10 | Assembled-code review, corrections, invariant tests, and verification | 10 | 30 min | P9 | Not supplied | Not calculated | Student to complete |
-| P11 | README, planning record, ADRs, technique log, checklists, and design summary | 11 | 30 min | P10; uses available evidence | Not supplied | Not calculated | Student to complete |
-| Total | Twelve prompt-level tasks | 0–11 | **360 min / 6 h** | Sequential review gates | **Not supplied** | **Not calculated** | Student to complete |
-
-### Technical dependencies
-
-The prompt sequence was deliberately reviewed one step at a time.
-
-Within that sequence:
-
-- Models and generator establish the records used by the store and screens.
-- Store restoration supports simulation and review coordination.
-- Map/progress components support Current Trip and completed details.
-- Review state/components support saved feedback shown in History.
-- Planner generation and callbacks connect to final routing.
-- Final navigation integrates all screen contracts and serializers.
-- Verification depends on the assembled flow.
-- Final documentation depends on the implementation and available evidence.
-
-Some components could technically be developed in parallel. No parallel development or overlapping work is claimed.
-
-## 3. Final Gantt chart and handout milestones
-
-### Relative planned-effort Gantt
-
-Each column represents **30 minutes of planned work**. It does not represent a calendar day or actual work session.
-
-`██` = allocated original estimate.  
-`--` = no allocation for that task in that slot.
-
-```text
-Planned slot         01 02 03 04 05 06 07 08 09 10 11 12
-Elapsed minutes       0 30 60 90 120150180210240270300330
-                     -----------------------------------
-P0 Scope             ██ -- -- -- -- -- -- -- -- -- -- --
-P1 Design            -- ██ -- -- -- -- -- -- -- -- -- --
-P2 Models            -- -- ██ -- -- -- -- -- -- -- -- --
-P3 Store             -- -- -- ██ -- -- -- -- -- -- -- --
-P4 Map visuals       -- -- -- -- ██ -- -- -- -- -- -- --
-P5 Simulation        -- -- -- -- -- ██ -- -- -- -- -- --
-P6 Reviews           -- -- -- -- -- -- ██ -- -- -- -- --
-P7 History/details   -- -- -- -- -- -- -- ██ -- -- -- --
-P8 Planner/images    -- -- -- -- -- -- -- -- ██ -- -- --
-P9 Navigation        -- -- -- -- -- -- -- -- -- ██ -- --
-P10 Verification     -- -- -- -- -- -- -- -- -- -- ██ --
-P11 Documentation    -- -- -- -- -- -- -- -- -- -- -- ██
-                     -----------------------------------
-Planned finish: 360 minutes of work
-Actual task dates and bars: not supplied
-```
-
-Planned intervals are P0: 0–30, P1: 30–60, P2: 60–90, P3: 90–120, P4: 120–150, P5: 150–180, P6: 180–210, P7: 210–240, P8: 240–270, P9: 270–300, P10: 300–330, and P11: 330–360 minutes.
-
-This chart preserves the supplied estimate and sequential prompt order. Breaks, waiting between prompts, and actual calendar placement are not established.
-
-### Calendar milestones from the handout
-
-| Deadline | Required deliverable | Completion evidence |
+| Main content screen | Implemented interaction | Source responsibility |
 | --- | --- | --- |
-| October 4, midnight | WBS, original effort estimates, and Gantt chart | Not supplied |
-| October 5, midnight | Git/repository evidence, machine setup photograph, preliminary AI design screenshot | Not supplied |
-| October 8, midnight | Assignment code, documentation, and actual-effort summary | Not supplied |
+| Home / GO | Map background; centered minutes/GO; transport/routes; attraction intensity; start/resume | MainScreen, TransitOpeningScreen, TripPlannerContent, GOBox |
+| Current Trip | Parameterized Trip; pan/zoom map; directional pointer; synchronized ten-second progress; information/cancel popup; tap 100% for review | CurrentTripScreen, ActiveTripSimulation, CurrentTripContent, MockTripMap |
+| History | Completed provider collection; filters; expandable feedback; stable-ID details/edit/removal | HistoryScreen, History content/cards and TripsStore |
 
-No revised deadline or completed submission is claimed.
+Supporting destinations: sequential TripReviewScreen, static TripDetailsScreen, Profile, Settings and About. About remains the information screen and is reached through Profile. Settings is right-aligned in the shared bar.
 
-## 4. Actual effort and variance record
+### Current GO behavior
 
-For each WBS task, copy the student's recorded actual time into the table.
+Planned minutes are **0–360 in five-minute steps**, default 30. Up from 355 reaches 360; further increases stop. Down from 360 reaches 355. The number area fits three digits between dividers and uses text measurement to reduce font size when necessary.
 
-Calculate:
+GO validates the existing transport/route selections and snapshots minutes/intensity. It generates one record with an automatic title/description and empty image URL. The generator creates fixed endpoints once, using safe visible-map bounds, minimum separation, bounded attempts and a fallback.
 
-**Variance in minutes = actual effort − original estimate.**
+Only one unfinished active trip exists. Resume uses the same ID and elapsed time. Repeated GO taps are guarded. All foreground planner controls slide down together for one second before navigation; the map and shared bar remain in place. Intensity fill is clipped inside the dark oval.
 
-A positive value means more time than estimated. A negative value means less time. Zero means the recorded effort matches the estimate.
+### Current Trip and completed feedback
 
-For a significant difference, explain the observed cause in one or two sentences. No cause has been inferred here.
+The bundled PNG uses the same proportional crop as GO. Drag/pinch zoom and zoom/reset controls apply the same transform to the image and overlays. Start is orange; destination is green; the supplied circular pointer points along movement, and travelled route length fills orange.
 
-Record these totals after entering actuals:
+One authoritative elapsed value produces position, percentage, progress track and remaining demo distance. Duration is 10,000 milliseconds of active time regardless of planned minutes. Leaving/backgrounding pauses; resume retains endpoints/time.
 
-- Actual total: Not supplied.
-- Original estimated total: 360 minutes under the P0–P11 convention.
-- Total variance: Not calculated.
-- Most significant variance and explanation: Student to complete.
-- Counting convention, including whether P0 was tracked: Student to confirm.
+The gradient Current trip title opens stored information and unfinished-trip cancellation. Cancel returns to GO without History. At completion, the store records the trip once and keeps the display at 100%. **The user taps 100% to open review; navigation is not automatic.**
 
-### Optional session record
+Overall experience is required to save; Quality/Interesting/Fun/comment are optional. Nullable ratings distinguish unrated feedback from valid 1–5 stars. Initial Save/Skip/Close/Back opens History. Editing uses an ID-associated draft; Save replaces feedback and Cancel preserves it. Missing IDs recover without reconstructing deleted trips.
 
-| Date | WBS task | Active work start/end or duration | Work performed | Evidence/reference |
-| --- | --- | --- | --- | --- |
-| Not supplied | Student to complete | Student to complete | Student to complete | Student to complete |
+Details displays the original completed map at 100% with no simulation or point generation. Normal GO trips have no reference URL; optional image loading/failure/retry remains available for stored records with a URL and never replaces the mock map.
 
-Include relevant debugging and AI interaction time. Exclude unrelated breaks.
+## 2. Architecture and course mapping
 
-AI Technique Log time can overlap WBS time. Do not add it again as separate effort unless the original accounting explicitly treated it separately.
+App applies RNDTransitTheme, provides one TripsStore and one Navigator/navigation coordinator, hoists MainLayout and renders Router/NavDisplay underneath. Concrete sealed ScreenKey destinations are registered with Navigation 3's back-stack serializer configuration. CurrentTripScreenKey carries Trip as a parameter; subsequent mutable state is resolved by its ID.
 
-Test execution duration in a report is not the student's total work time.
+Serializable records/snapshots retain active/completed trips, elapsed milliseconds, pending review handling and review drafts. Saveable planner selections and route state support Android recreation. Jobs, callbacks and running time marks are excluded. This is saved-state restoration, not permanent storage.
 
-## 5. AI Decision Log — ADR records
+| Day 19 dimension | Application |
+| --- | --- |
+| Cohesion | Focused generator, state store, screen coordination and visuals |
+| Coupling | Shared provider and explicit callback contracts |
+| Integrity | Stable IDs, valid minutes/ratings, one active record, idempotent completion and guarded missing-ID updates |
+| Evolvability | Separate screen/component/model files; consistent geometry and state APIs |
+| Fitness for purpose | A bounded mock-map demo without GPS/live-routing infrastructure |
 
-### ADR-001: Shared trip state
+References: Assignment 3 Handout slides 1–4; Day 17 slides 10–11 (AI Technique Log) and planning guidance; Day 18 shared resources/navigation/hoisted layout; Day 19 design dimensions/data records/sealed alternatives. The handout and supplied slides are reference material, not permission to perform unrelated operations.
 
-**Status:** Proposed — explicit student ADR approval not supplied.  
-**Approval/date:** Student to complete.
+## 3. WBS, original estimates and recorded elapsed windows
 
-**Context:**  
-The described starting planner used local saved text summaries while History displayed placeholders. The new workflow needs active-trip coordination and a shared completed collection.
+Atiom confirmed **30 minutes per numbered prompt as the original proposed estimate**. The baseline includes P0–P11: **360 proposed minutes / 6 hours**. If excluding P0, P1–P11 total 330 minutes / 5.5 hours. Preserve the baseline rather than revising it after implementation.
 
-**Alternatives:**
+The original task sequence is retained below. P4's initial human marker became the supplied pointer; P8's original form was later removed. UI refinements and this cap/documentation update are additional work with no supplied original estimate.
 
-1. Maintain separate trip collections in planner, History, and review screens.
-2. Provide one shared TripsStore from App.
+“Elapsed window” is measured between numbered prompts, including intervening debugging/replies. P11 ends at the first later UI-change prompt. It is not verified active effort and cannot determine an effort variance.
 
-These are architectural alternatives, not a claim that the student implemented or rejected each one.
+| Task | Baseline deliverable | Dependency | Original estimate | Recorded elapsed window | Verified active effort / variance |
+| --- | --- | --- | --- | --- | --- |
+| P0 | Scope and delivery rules | None | 30 min | 00:00:41 | Not established / not calculated |
+| P1 | Inspect/design contracts | P0; uses earlier records/state as applicable | 30 min | 00:14:48 | Not established / not calculated |
+| P2 | Models and mock generator | P1; uses earlier records/state as applicable | 30 min | 00:21:35 | Not established / not calculated |
+| P3 | Shared store and restoration | P2; uses earlier records/state as applicable | 30 min | 00:19:12 | Not established / not calculated |
+| P4 | Map/progress visuals | P3; uses earlier records/state as applicable | 30 min | 00:22:51 | Not established / not calculated |
+| P5 | Active-time simulation | P4; uses earlier records/state as applicable | 30 min | 00:27:31 | Not established / not calculated |
+| P6 | Sequential reviews | P5; uses earlier records/state as applicable | 30 min | 00:34:21 | Not established / not calculated |
+| P7 | History and details | P6; uses earlier records/state as applicable | 30 min | 00:33:25 | Not established / not calculated |
+| P8 | Original planner/image integration | P7; uses earlier records/state as applicable | 30 min | 00:25:49 | Not established / not calculated |
+| P9 | Sealed navigation integration | P8; uses earlier records/state as applicable | 30 min | 00:28:57 | Not established / not calculated |
+| P10 | Assembled review/checks | P9; uses earlier records/state as applicable | 30 min | 00:22:55 | Not established / not calculated |
+| P11 | Assignment documentation | P10; uses earlier records/state as applicable | 30 min | 00:27:54 | Not established / not calculated |
 
-**Decision:**  
-The supplied implementation uses one TripsStore through LocalTripsStore. It owns active state, elapsed time, completed trips, pending review handling, and review drafts. Screens derive their displays from that store.
+Technical dependencies: models → store → simulation/reviews; map visuals → Current Trip/details; reviews → History feedback; generation + store + screen callbacks → routing; assembled implementation → verification/documentation. The baseline reflects sequential human review; no parallel work is claimed.
 
-**Consequences:**  
-Review updates and removal affect the same records shown throughout the app. Atomic snapshot replacement keeps updates observable. The cost is explicit store operations and restoration validation. Navigation remains outside the store.
+### Relative baseline Gantt
 
-**Verification:**  
-Existing test reports record successful collection, review-update, deletion, and snapshot tests. Device UI updates and the submitted revision still require confirmation.
+Each slot is 30 proposed minutes, not a date or actual session. An X marks the original allocation.
 
-### ADR-002: Stored normalized endpoints generated once
+~~~text
+Slot                   01 02 03 04 05 06 07 08 09 10 11 12
+P0  Scope               X
+P1  Design                 X
+P2  Models                    X
+P3  Store                        X
+P4  Map                             X
+P5  Simulation                         X
+P6  Reviews                               X
+P7  History                                  X
+P8  Planner                                     X
+P9  Navigation                                     X
+P10 Verification                                      X
+P11 Documentation                                        X
+Finish: 360 proposed minutes. Actual task bars are not established.
+~~~
 
-**Status:** Proposed — explicit student ADR approval not supplied.  
-**Approval/date:** Student to complete.
+### Time records and variance
 
-**Context:**  
-A mock route must survive resizing, rotation, resuming, and details navigation without changing endpoints. Pixel positions depend on display size.
+[TimeFlow_As3_Sova.txt](../TimeFlow_As3_Sova.txt) contains the formatted student session notes and every recorded prompt-to-prompt interval in this chat. Local timestamps use America/Toronto. Complete supplied session ranges total **4 hours 30 minutes**, including ten minutes without an activity label; the incomplete implementation range and eating break are excluded. Dates for those manual notes were not supplied.
 
-**Alternatives:**
+The chat's first-to-latest-prompt span is recorded there separately. Do not add it to the session total: the records overlap and chat gaps can include waiting/breaks. Active effort per WBS task and final active-effort total remain unestablished.
 
-1. Store display-specific pixel coordinates.
-2. Regenerate endpoints when displaying the map.
-3. Store normalized endpoints generated once per trip.
+Effort variance = verified active effort − original estimate. Do not substitute a prompt gap for verified effort. Record significant variance reasons from actual experience; no reason is invented.
 
-No rejected implementation history is claimed.
+## 4. AI Decision Log — ADR records
 
-**Decision:**  
-The supplied generator creates and stores normalized start and destination points once. It uses safe margins, minimum separation, bounded attempts, and a fallback. MockTripMap converts those points through the actual displayed image rectangle.
+### ADR-001: One shared trip state
 
-**Consequences:**  
-The route can retain its geometry at different sizes. The image and overlays must use the same transform. Normalized coordinates and synthetic distance must be explained clearly because they are not geographic data.
+**Status:** Required in the student's state prompt; separate formal ADR approval/date not recorded.
 
-**Verification:**  
-Existing reports include seeded-generation, endpoint-margin, separation, fallback, and retained-endpoint tests. Visual alignment and midpoint position still require runtime or preview inspection.
+**Context:** The old planner kept local text summaries while History had unrelated placeholders.
 
-### ADR-003: Restorable active time and idempotent completion
+**Alternatives:** Separate screen collections; one provider-backed store.
 
-**Status:** Proposed — explicit student ADR approval not supplied.  
-**Approval/date:** Student to complete.
+**Decision:** App provides TripsStore through LocalTripsStore, with active/completed records, elapsed time, pending review state and drafts. Navigation remains outside it.
 
-**Context:**  
-The simulation must last ten seconds of active time, pause outside Current Trip or while backgrounded, resume after recreation, and enter History once.
+**Consequences:** Observable, coherent ID-based changes across screens; explicit validation/restoration is required. No permanent database is implied.
 
-**Alternatives:**
+**Verification:** Source and supplied focused tests exist. Historical results do not verify this final revision; runtime restoration is pending.
 
-1. Count scheduled delay iterations.
-2. Use wall-clock time that includes paused intervals.
-3. Measure active intervals monotonically and save accumulated elapsed time.
+### ADR-002: Fixed normalized endpoints and a shared map transform
 
-No rejected implementation history is claimed.
+**Status:** Required by the model/map prompts and subsequent asset/crop refinements; formal ADR approval/date not recorded.
 
-**Decision:**  
-The supplied implementation uses transient monotonic time marks and frame scheduling. TripsStore saves accumulated elapsed milliseconds. Progress drives all visuals. Reaching the duration commits completion in one observable state update, clears active state, and creates pending review handling.
+**Context:** Endpoints must survive composition, rotation, resizing and static details while matching the PNG.
 
-Review navigation is acknowledged after the destination is established.
+**Alternatives:** Pixel coordinates; repeated point generation; stored normalized coordinates.
 
-**Consequences:**  
-Paused intervals can be excluded and restored trips retain elapsed time. Session guards prevent stale cancellation from stopping a newer session. Lifecycle and destination ownership require careful coordination. Jobs and time marks are not persisted.
+**Decision:** Generate/store points once and apply the displayed image's crop/pan/zoom transform to all overlays. Use supplied start/end/pointer artwork; rotate the pointer toward movement.
 
-**Verification:**  
-Existing reports include irregular-frame timing, excluded paused time, restored elapsed time, stale-session cancellation, duplicate completion, and pending-navigation tests. Actual device lifecycle and rotation timing remain pending.
+**Consequences:** Portable fixed records with responsive geometry. Normalized points and demo distance are not geographic data.
 
-### ADR-004: Review editing and removal by stable ID
+**Verification:** Geometry/generator checks and previews exist; final visual alignment/gestures require manual verification.
 
-**Status:** Proposed — explicit student ADR approval not supplied.  
-**Approval/date:** Student to complete.
+### ADR-003: Active-time simulation with explicit review action
 
-**Context:**  
-A review can be created immediately after completion or edited later from History/details. A referenced trip may be removed.
+**Status:** Active-time behavior required originally; tap-100% behavior explicitly requested in the later redesign. Formal ADR approval/date not recorded.
 
-**Alternatives:**
+**Context:** A ten-second journey must exclude inactive intervals, complete once and avoid repeatedly reopening review.
 
-1. Update records by their current list position.
-2. Save feedback into a route's retained Trip snapshot.
-3. Resolve and update the current stored record by stable ID.
+**Alternatives:** Count scheduled delays; include background wall-clock time; measure monotonic active intervals and save accumulated elapsed time.
 
-No rejected implementation history is claimed.
+**Decision:** Save elapsed milliseconds and derive all progress from them. Commit completion once; retain pending review handling. Wait for a 100% click, establish review navigation and then acknowledge handling.
 
-**Decision:**  
-The supplied implementation resolves completed trips by ID. Unsaved feedback stays in an ID-associated draft. Save replaces the existing review without appending a trip. Cancel discards the draft. Missing-ID saves return an unsuccessful result and cannot recreate records.
+**Consequences:** Pause/resume and rotation retain state; lifecycle/session guards need careful testing. Selected 0–360 minutes remain independent of the 10,000-ms demo.
 
-**Consequences:**  
-Sorting and filtering do not change record identity. Cancel preserves saved feedback. Removal must clear matching drafts and pending actions, and missing destinations need recovery content.
+**Verification:** Tests were supplied for elapsed time, restoration and duplicate completion. Final lifecycle/rotation/click behavior remains pending.
 
-**Verification:**  
-Existing reports cover review replacement, preserved IDs and collection size, deleted-ID protection, draft restoration, and editing return destinations. Keyboard, interaction, and visual checks remain pending.
+### ADR-004: ID-based review editing and missing-record recovery
 
-## 6. AI Technique Log — Day 17 fields
+**Status:** Required in the review/History prompts; formal ADR approval/date not recorded.
 
-These entries summarize meaningful challenges. They do not replace saved prompts and outputs.
+**Context:** Sorting/removal and stale routes must not update the wrong item or resurrect deleted records.
 
-### Technique entry 1: Architecture, records, and shared state
+**Alternatives:** List-position updates; mutable route snapshots; resolve by stable ID.
 
-**Challenge/context:**  
-Replace disconnected summaries/placeholders with structured trips and one provider-backed collection. Related prompts: 0–3.
+**Decision:** Separate unsaved drafts from saved TripReview and update/remove completed records by ID. Cancellation discards edits; missing-ID operations fail clearly.
 
-**AI tool:**  
-Codex in this conversation. Exact model/version was not recorded in the supplied evidence.
+**Consequences:** Collection size/identity are preserved on review saves; removal clears stale drafts/pending actions.
 
-**Prompting approaches:**  
-Structured prompting, decomposition, multi-step prompting, and prompt chaining.
+**Verification:** Existing test code covers these invariants. Final interaction and keyboard checks are pending.
 
-**Prompt elements:**  
-Goal, existing-project context, assignment requirements, constraints, Kotlin examples, and a required delivery format.
+### ADR-005: Complete the planner exit before navigating
 
-**Iteration/adaptation:**  
-The requests established separate records, generator, store, provider, and Saver responsibilities. Follow-up questions identified rating-property syntax and navigation import problems.
+**Status:** Correction requested after Atiom reported an instant transition; final runtime acceptance not recorded.
 
-**Verification:**  
-Read-only source review and existing model/state/serialization reports. Student runtime checks are not recorded.
+**Context:** Extending animation duration alone did not help when GO changed destinations immediately.
 
-**How the output was used:**  
-Corresponding implementation files are present. Student to specify whether output was used essentially as generated, modified, used as reference, or rejected.
+**Alternatives:** Immediate navigation with outgoing animation; wait for actual planner exit completion.
 
-**Approximate code impact:**  
-Models, generator, state, and App integration. Percentage not supplied.
+**Decision:** GO/transport/intensity slide down as one foreground group, then the completion callback requests Current Trip. Shared bar/map remain stationary.
 
-**Time spent:**  
-Not supplied. Record total active interaction/debugging minutes.
+**Consequences:** A deliberate handoff with repeat-tap/restoration guards. Timer begins only on the active destination.
 
-**Result/reflection:**  
-The supplied code contains structured records and a coherent shared state layer. Student to record what they understood, changed, and found effective.
+**Verification:** Source correction is present; rebuilt-device confirmation is pending.
 
-### Technique entry 2: Mock map and active-time movement
+## 5. AI Technique Log and usage summary
 
-**Challenge/context:**  
-Adapt the supplied map mockup while keeping fixed endpoints, consistent scaling, synchronized progress, and pause/resume. Related prompts: 4–5.
+[AI_Log_As3.md](../AI_Log_As3.md) is the canonical Day 17 technique log and verbatim textual conversation archive. It includes this update request and Atiom's later correction to a 360-minute maximum, original proposed estimates, timestamp-based intervals, ADR references and both shared links:
 
-**AI tool:**  
-Codex in this conversation.
+- [Extend RND Transit app](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765)
+- [Write prompts for trip features](https://chatgpt.com/s/cx_6ac332cd06d48191a686a0a3777468a1)
+- [Open the implementation chat in Codex](codex://threads/01a10922-a539-7d00-a97a-4809cce23449)
 
-**Prompting approaches:**  
-Structured prompting, decomposition, prompt chaining, and visual-reference guidance.
+The log follows the slide 11 fields: challenge/context, AI tool, prompting approaches/elements, iteration, verification, use of output, code impact, time and reflection. Its full transcripts supplement the concise challenge entries.
 
-**Prompt elements:**  
-Map mockup, fixed-point interpolation example, resource rules, ten-second timing requirements, lifecycle constraints, previews, and expected checks.
+Recorded approaches include staged structured prompts, prompt chaining, supplied examples, screenshot-based refinements and debugging feedback. Early output was delivered in chat; later source edits were explicitly authorized. Do not describe the whole record as manual paste only.
 
-**Iteration/adaptation:**  
-The conversation included a Dp-to-pixel error report and unresolved test imports. The supplied files use explicit density conversion and commonTest test placement.
+The handout requires at least 50% AI generation and at least three AI-assisted key decisions. Assistance is documented across design, models/state, visuals, simulation, reviews/History, navigation, debugging and documentation. **A defensible code-contribution percentage and its basis remain for Atiom to supply.** Prompt counts, code length and clock intervals do not establish a contribution percentage or active effort.
 
-**Verification:**  
-Existing simulation reports cover actual elapsed intervals, pausing, restoration, and stale sessions. Map alignment, recognizability, and observed timing remain manual checks.
+Atiom should record personal reflections, retained AI output versus personal changes, formal decision approvals where applicable, and ability to explain the submitted code.
 
-**How the output was used:**  
-Map, marker, progress, and simulation files are present. Student to record retained output and manual modifications.
+## 6. Verification record
 
-**Approximate code impact:**  
-Mock map, marker, progress presentation, Current Trip coordination, and timing tests. Percentage not supplied.
+Earlier documentation recorded 43 JVM and 42 Android host tests without failures around 2026-10-05 03:06 UTC, and reported Android/JS/Wasm compilation successes. The tested revision was not identified. These historical claims do not establish verification of subsequent map/layout/navigation revisions or the current minute cap.
 
-**Time spent:**  
-Not supplied. Include debugging time associated with this challenge.
+No builds/tests were executed for this update. Focused minute-boundary/restoration tests and 360-minute narrow-phone previews were added, but remain unexecuted. Run the Android/Desktop commands in README and record revision/date/device/results.
 
-**Result/reflection:**  
-The implementation separates the stored route from its rendering and timing coordination. Student reflection and observed runtime outcome remain to complete.
-
-### Technique entry 3: Sequential reviews and interactive History
-
-**Challenge/context:**  
-Adapt the supplied review screenshots to transit feedback, optional ratings, editing, filters, expandable cards, and deletion. Related prompts: 6–7.
-
-**AI tool:**  
-Codex in this conversation.
-
-**Prompting approaches:**  
-Structured prompting, decomposition, prompt chaining, and visual-reference guidance.
-
-**Prompt elements:**  
-Screenshots, category names, star-row example, required/optional rules, draft restoration, navigation behavior, and complete-file requirements.
-
-**Iteration/adaptation:**  
-The request specified a sequence of prompted questions with rolling transitions. A follow-up distinguished saved TripReview data from TripReviewMode navigation behavior. History interaction requirements added expansion and edit/remove actions.
-
-**Verification:**  
-Existing review and History reports cover required overall feedback, optional null values, saved-review preservation, draft restoration, filtering, and removal. Interaction, keyboard, and layout checks are pending.
-
-**How the output was used:**  
-Review and History implementation files are present. Student to record whether they used or modified the generated presentation.
-
-**Approximate code impact:**  
-Review screen/components/state, History cards/content, details, and associated tests. Percentage not supplied.
-
-**Time spent:**  
-Not supplied.
-
-**Result/reflection:**  
-The implementation separates unsaved drafts from saved feedback and supports later editing. Student to record usability observations and any changes they made.
-
-### Technique entry 4: Planner, images, navigation, and verification
-
-**Challenge/context:**  
-Replace obsolete GO/results behavior and integrate the complete Navigation 3 flow without replaying completed trips. Related prompts: 8–10.
-
-**AI tool:**  
-Codex in this conversation.
-
-**Prompting approaches:**  
-Structured prompting, decomposition, prompt chaining, and review-driven refinement.
-
-**Prompt elements:**  
-Existing contracts, complete route flow, serialization examples, preservation requirements, official image-loading documentation, and explicit verification scenarios.
-
-**Iteration/adaptation:**  
-The student explicitly requested Current Trip routing during the planner step. The review later identified completion-boundary Back and retained review destinations underneath header shortcuts. Corrected navigation and focused regression tests are present.
-
-**Verification:**  
-Existing XML reports record 43 JVM and 42 Android host tests with no failures. Build/compilation successes are recorded in the previous README. Final-revision confirmation and runtime checks remain pending.
-
-**How the output was used:**  
-The corrected navigation and regression files are present. Student to record who applied changes, any modifications, and their own verification.
-
-**Approximate code impact:**  
-Planner, reference-image presentation, routing/controller integration, shared header, previews, and regression tests. Percentage not supplied.
-
-**Time spent:**  
-Not supplied. Build-report execution seconds are not a substitute for interaction/debugging time.
-
-**Result/reflection:**  
-The review exposed two navigation edge cases and supplied testable corrections. Student to explain what they learned and whether the approach reduced integration risk.
-
-### Technique entry 5: Evidence-based assignment documentation
-
-**Challenge/context:**  
-Document the final implementation without inventing effort, accepted decisions, verification, or submission evidence. Related prompt: 11.
-
-**AI tool:**  
-Codex in this conversation.
-
-**Prompting approaches:**  
-Structured prompting, decomposition, and clarification of ambiguous information.
-
-**Prompt elements:**  
-Required documents, ADR structure, Day 17 fields, preservation of original estimates, handout deadlines, and chat-only delivery.
-
-**Iteration/adaptation:**  
-The student supplied 30 minutes per prompt and clarified that this was the original proposed estimate. Actual effort was left separate.
-
-**Verification:**  
-Course references, source/configuration, existing README, and existing XML reports were read without saving files or running checks.
-
-**How the output was used:**  
-Documentation supplied in chat for student review and manual saving. Final use is not yet confirmed.
-
-**Approximate code impact:**  
-Documentation only; no production-code changes. Assignment-document contribution percentage not supplied.
-
-**Time spent:**  
-Not supplied. The original 30-minute estimate is not an actual-time measurement.
-
-**Result/reflection:**  
-Known evidence and unknown fields are separated. Student to complete actuals, approvals, contribution summary, and submission evidence.
-
-## 7. AI usage summary
-
-The handout requires at least 50% AI usage and at least three AI-assisted key decisions.
-
-The conversation documents AI assistance with architecture, code generation, UI adaptation, debugging, navigation review, testing suggestions, and documentation.
-
-That scope does not establish a contribution percentage.
-
-Complete before submission:
-
-- Estimated AI contribution to assignment code: Not supplied.
-- Basis for that estimate: Student to complete.
-- Distinction between pre-existing code, retained AI output, and student changes: Student to complete.
-- At least three confirmed AI-assisted decisions: Student to select and confirm ADR status.
-- Student review/adaptation of generated code: Student to complete.
-- Ability to explain the final code: Student to confirm through preparation.
-- Saved prompt/output archive location: Not supplied.
-
-Do not calculate code contribution from the number of prompts or from time estimates. Explain the basis used.
-
-## 8. Verification record
-
-### Available evidence
-
-Existing XML test reports record:
-
-| Target | Tests | Failures | Errors | Skipped |
-| --- | --- | --- | --- | --- |
-| JVM | 43 | 0 | 0 | 0 |
-| Android host | 42 | 0 | 0 | 0 |
-
-Report timestamps are approximately 2026-10-05 03:06 UTC. A tested commit/revision was not supplied.
-
-The previous README also records successful Android debug assembly, JavaScript compilation, and Wasm compilation. Original build logs were not supplied, so these remain reported results.
-
-No commands were executed while preparing this documentation.
-
-### Runtime checks to record
-
-| Check | Expected result | Actual result/evidence |
+| Manual check | Expected result | Final evidence |
 | --- | --- | --- |
-| Planner validation | Invalid inputs do not start a trip | Pending |
-| Repeated GO | One active trip and destination | Pending |
-| Map | Distinct endpoints, connecting line, orange person | Pending |
-| Five active seconds | Approximately 50%, with matching movement and remaining distance | Pending |
-| Rotation | Same ID, endpoints, elapsed time, inputs, and drafts | Pending |
-| Leave and Resume | Paused time excluded; same trip continues | Pending |
-| Background/return | No extra active time counted | Pending |
-| Completion | 100%, zero remaining distance, one History entry | Pending |
-| Initial review | Automatic navigation once; Save/Skip/Back opens History | Pending |
-| Later review/edit | Same ID and collection size; Cancel preserves saved feedback | Pending |
-| Details | Static original route; no simulation restart | Pending |
-| Removal/stale IDs | Only selected record removed; recovery without recreation | Pending |
-| Filters/cards | Immediate updates; expansion and edit/remove actions work | Pending |
-| Reference image | Loading, failure, and retry; map unaffected | Pending |
-| Layouts | Phone, landscape, open keyboard, and selected second platform usable | Pending |
-| Shared navigation | Existing sections reachable; Home root protected | Pending |
-| About | Existing photographs and visible names; acceptable presentation | Pending |
+| Minutes | 0 minimum, 360 maximum; boundary arrows disappear; 355 → 360 → 355; three digits fit on 320-dp phone and Resume layout | Pending |
+| Selection validation | No valid transport selection produces a clear message and no new trip | Pending |
+| Rapid GO | One active ID; one foreground exit; one destination | Pending |
+| Transition | All planner controls slide down for one second before Current Trip; stationary map/shared bar | Pending |
+| Map | Original fixed endpoints; orange start/green end; directional circular pointer; orange travelled line | Pending |
+| Gestures | Pan/pinch/zoom/reset retain aligned map/markers/route | Pending |
+| Five active seconds | Approximately 50%, matching pointer/percentage/remaining distance | Pending |
+| Rotation | Same ID/endpoints/time and saveable selections/drafts | Pending |
+| Leave/resume/background | Inactive intervals excluded; same stored trip resumes | Pending |
+| Popup/cancel | Gradient title opens information; unfinished cancel returns GO with no History entry | Pending |
+| Completion | Exactly 100%, zero remaining distance, one History item; waits for click | Pending |
+| Initial review | Tap 100% opens once; Save/Skip/Close/Back opens History | Pending |
+| Edit/cancel | Same ID and collection size; Cancel preserves saved feedback | Pending |
+| History | Filters, expansion, details/edit/remove and immediate observable updates | Pending |
+| Details/stale IDs | Static original route; no restart; deleted IDs show recovery without recreation | Pending |
+| Layouts | Phone, rotated, keyboard-open review and selected Desktop/Web platform usable | Pending |
+| Navigation | GO/Profile/History/Settings reachable; About from Profile; Home root protected | Pending |
+| Optional reference image | For a stored URL, failure/retry is isolated from the map; normal GO uses no URL | Pending |
 
-Record device/platform, application revision, date, result, and evidence for each completed check.
+## 7. Assignment coverage
 
-## 9. Assignment requirement checklist
-
-| Requirement | Implementation/document evidence | Verification or completion status |
+| Requirement | Current implementation | Verification / gap |
 | --- | --- | --- |
-| Kotlin/Compose Multiplatform | Shared commonMain code and configured targets | Source present |
-| Material 3 | Shared Material 3 UI and theme | Source present; visual check pending |
-| Navigation 3 | One saved back stack, Navigator, and Router | Existing navigation/serialization reports; runtime pending |
-| Android plus Desktop or Web | Android, JVM, JS, and Wasm configured | Android build reported; required launches pending |
-| Three related content screens | Planner, Current Trip, History | Source present; end-to-end check pending |
-| Information screen | Existing About, supplied photographs and names | Source present; visual quality pending |
-| Multiple text inputs/image link | Title, description, HTTPS image URL | Source present; device validation pending |
-| Single entered item passed as parameter | CurrentTripScreenKey carries Trip | Existing parameter serialization tests; runtime pending |
-| Provider-backed interactive list | LocalTripsStore and completed List<Trip> | Existing state/History reports; UI pending |
-| Removal and details | ID-based removal and TripDetailsScreen | Existing deletion tests; UI pending |
-| Sealed-class routes | Sealed ScreenKey and registrations | Source present; existing serialization reports |
-| Shared layout/navigation | App provides state/navigation and hoists MainLayout | Source present; runtime pending |
-| Organized components/state separation | Separate models, state, screens, and reusable UI | Source inspected |
-| Rotation robustness | Savers, serialized snapshots, saveable inputs/drafts/routes | Snapshot tests reported; device rotation pending |
-| Compilation and meaningful runtime output | Build results recorded; test reports present | Runtime output evidence pending |
-| Internal documentation/root README | Comments present; README supplied | Student saving/final review pending |
-| WBS with at least five tasks | Twelve prompt-level tasks in this document | Supplied; baseline inclusion convention to confirm |
-| Original effort estimates | Student-confirmed 30 minutes per prompt | Recorded |
-| Dependencies/Gantt | Sequential dependencies and relative effort chart | Supplied; actual calendar bars not supplied |
-| Actual effort/variance explanations | Fields supplied | Student completion required |
-| At least three AI-assisted key decisions | Four ADR entries supplied | Explicit approvals/decision confirmation required |
-| Day 17 AI Technique Log | Five meaningful challenge entries | Student usage, impact, time, and reflection fields required |
-| At least 50% AI contribution summary | Summary fields supplied | Percentage and basis not supplied |
-| Saved prompts and outputs | Conversation is the primary record | Saved archive not supplied |
-| Git/repository and machine evidence | Local Git working tree confirmed | Required screenshot/photograph not supplied |
-| Preliminary design screenshot | Separate one-page summary supplied | Screenshot not supplied |
-| Responsive design bonus | Width limits, scrolling, and previews present | Phone/desktop or web verification pending |
+| Kotlin/Compose Multiplatform, Material 3, Navigation 3 | Shared code/theme, one stack/Navigator | Final compile/run pending |
+| Three related meaningful content screens | Home/GO, Current Trip, History | Source present; runtime flow pending |
+| Information screen | About through Profile | Visual quality pending |
+| Multiple text inputs and image link on first screen | Removed from GO at Atiom's request | **Currently unmet** |
+| Single entered item passed to second screen | Generated Trip passed in CurrentTripScreenKey | Parameter passing present; record is generated from selections rather than the removed text form |
+| Provider-backed interactive collection | LocalTripsStore / completed List<Trip> | Source present; final UI check pending |
+| Removal/details | ID-based removal and TripDetailsScreen | Source present; final check pending |
+| Sealed-class routes | Sealed ScreenKey and concrete serializers | Source present; final serialization check pending |
+| Shared layout/navigation | App → providers → MainLayout → Router | Source present |
+| State/stateless separation | Coordinators and reusable components | Source present |
+| Rotation robustness | Explicit snapshots/Savers/saveable route and draft state | Final Android recreation check pending |
+| Android plus Desktop or Web | Configured targets | Final launches/second-platform selection pending |
+| Responsive design bonus | Width constraints, scrolling, static previews and fitted minutes | Final phone/desktop check pending |
+| Internal documentation/root README | Comments and current README | Updated; Atiom review pending |
+| WBS ≥5 tasks, estimates, dependencies/Gantt | Twelve baseline tasks, 30-minute estimates and chart | Recorded; no invented original calendar chart |
+| Actuals and variance | Supplied session notes plus labelled prompt gaps | Verified effort allocation/variance incomplete |
+| ≥3 AI-assisted decisions and technique log | ADRs and AI_Log_As3.md | Formal approvals/reflections/contribution basis pending |
+| Save prompts and outputs | Both textual chat archives, attachments and deep links | Present; binary screenshot references stay in shared chats |
+| Setup/design/submission evidence | Fields/checklists below | Not established by source presence |
 
-## 10. Submission checklist
+## 8. Submission checklist
 
-### October 4, midnight — planning deliverables
+### Handout dates
 
-- [ ] Confirm the original WBS accounting convention, including Prompt 0.
-- [ ] Submit WBS tasks with original estimates.
-- [ ] Include dependencies and Gantt chart.
-- [ ] Preserve the initial estimates for later comparison.
+- **October 4, midnight:** WBS, original estimates and Gantt.
+- **October 5, midnight:** Git/repository screenshot, main-machine photograph with Android Studio/Git Branches, preliminary AI design screenshot.
+- **October 8, midnight:** Code, documentation and actual-effort summary.
 
-### October 5, midnight — setup and design evidence
+No submission or extension is claimed.
 
-- [ ] Capture the GitHub repository page showing the Assignment 3 project.
-- [ ] Ensure the project name does not identify it as Assignment 2.
-- [ ] Take a photograph of the main computer with Android Studio, the project, and Git Branches visible.
-- [ ] If using only a school computer, provide its photograph and the explanatory note required by the handout.
-- [ ] Capture the preliminary AI design investigation/summary.
-- [ ] Record the actual evidence locations; do not mark them complete without creating them.
+### Before submission
 
-### October 8, midnight — code, documentation, and actuals
+- [ ] Identify the final submitted/tested commit.
+- [ ] Resolve or explicitly disclose the missing first-screen text/image-link requirement.
+- [ ] Demonstrate meaningful output on emulated Android and the chosen Desktop/Web target.
+- [ ] Complete the current manual checks and save logs/screenshots with revision/date/device.
+- [ ] Supply the GitHub Assignment 3 repository screenshot and required machine photograph.
+- [ ] Supply the preliminary AI design screenshot; the updated design summary is not proof of an earlier capture.
+- [ ] Complete effort allocation/variance and personal reflections from actual records.
+- [ ] Confirm at least three AI-assisted decisions and explain the code.
+- [ ] Provide the AI contribution percentage/basis required by the handout.
+- [ ] Include README, assignment record, TimeFlow and AI prompt/output evidence.
+- [ ] Preserve verification evidence, manually clean the project, inspect the complete ZIP and submit on Lea.
+- [ ] Retain the actual submission confirmation.
 
-- [ ] Identify the submitted revision.
-- [ ] Demonstrate meaningful output on emulated Android and the selected Desktop/Web platform.
-- [ ] Complete rotation, lifecycle, input, image, review, History, and layout checks.
-- [ ] Save verification logs and required evidence before cleaning generated output.
-- [ ] Complete the README and known-limitations section.
-- [ ] Fill actual effort and variance notes from recorded work.
-- [ ] Confirm at least three AI-assisted key decisions and their ADR status.
-- [ ] Complete the separate Day 17 Technique Log fields.
-- [ ] Save prompts and AI outputs; the technique log does not replace them.
-- [ ] Supply the AI usage summary with the contribution estimate and its basis.
-- [ ] Ensure internal documentation is meaningful.
-- [ ] Be prepared to explain the implementation, decisions, and personal contributions.
-- [ ] Clean the project before preparing the ZIP, as required by the handout.
-- [ ] ZIP the complete project and required documentation/evidence.
-- [ ] Inspect the ZIP contents.
-- [ ] Submit through Lea and retain the actual submission confirmation.
+Manual cleanup command, only after preserving evidence: run **.\gradlew.bat clean** from the project root. No cleanup/packaging/submission was performed here.
 
-Manual cleanup command, to run from the project root after preserving evidence:
+The handout specifies 10% per day late penalty up to three days, with no acceptance beyond that without prior arrangement. No extension is inferred.
 
-```powershell
-.\gradlew.bat clean
-```
+## 9. Evidence fields still to complete
 
-No cleanup or packaging was performed during documentation generation.
-
-The handout states a late penalty of 10% per day for up to three days, with nothing accepted after three days without prior arrangement. It recommends an explained incomplete submission on time when necessary, followed by the completed version. No deadline extension or submission is assumed.
-
-## 11. Evidence fields to complete
-
-- GitHub repository screenshot: Not supplied.
-- Main-machine photograph with Git Branches: Not supplied.
-- Preliminary-design screenshot: Not supplied.
-- Prompt/output archive: Not supplied.
-- Final Android runtime evidence: Not supplied.
-- Selected second-platform runtime evidence: Not supplied.
-- Final tested/submitted revision: Not supplied.
-- Build logs confirming reported compilation results: Not supplied.
-- Recorded actual-time source: Not supplied.
-- ADR acceptance confirmations: Not supplied.
-- AI contribution basis and percentage: Not supplied.
-- Lea submission confirmation: Not supplied.
+Final tested/submitted revision; Android and second-platform runtime evidence; GitHub screenshot; main-machine photograph; preliminary-design screenshot; active effort per task and variance; missing manual-note dates/range/activity; AI contribution percentage/basis; formal ADR approvals if applicable; submission confirmation.

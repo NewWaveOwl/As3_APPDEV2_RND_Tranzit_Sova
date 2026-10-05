@@ -36,6 +36,8 @@ internal fun TransitOpeningScreen(
     var generationBounds by remember { mutableStateOf<TripGenerationBounds?>(null) }
 
     var minutes by rememberSaveable { mutableStateOf(30) }
+    // The displayed choice and generated snapshot share the same bounded value.
+    val boundedMinutes = Trip.coercePlannedMinutes(minutes)
 
     var selectedTransportIds by rememberSaveable {
         mutableStateOf(
@@ -190,9 +192,9 @@ internal fun TransitOpeningScreen(
 
             val input = TripGenerationInput(
                 title = "Trip ${tripsStore.completedTrips.size + 1}",
-                description = "Random mock route with $minutes planned minutes.",
+                description = "Random mock route with $boundedMinutes planned minutes.",
                 imageUrl = "",
-                plannedMinutes = minutes,
+                plannedMinutes = boundedMinutes,
                 selectedTransportIds = selectedTransportIds.toList(),
                 selectedRouteIds = selectedRouteIds.toList(),
                 attractionIntensity = intensity
@@ -255,18 +257,10 @@ internal fun TransitOpeningScreen(
     }
 
     TripPlannerContent(
-        minutes = minutes,
+        minutes = boundedMinutes,
         onMinutesChange = {
             if (canChangeInputs()) {
-                minutes = it
-                    .coerceIn(
-                        Trip.MIN_PLANNED_MINUTES,
-                        Trip.MAX_PLANNED_MINUTES
-                    )
-                    .let { bounded ->
-                        bounded -
-                                bounded % Trip.PLANNED_MINUTES_STEP
-                    }
+                minutes = Trip.coercePlannedMinutes(it)
                 clearValidation()
             }
         },

@@ -1,212 +1,153 @@
-# RND Transit MTL
+# RND Transit MTL — Assignment 3
 
-RND Transit is a Kotlin/Compose Multiplatform transit discovery demo using Material 3, Navigation 3, shared Compose resources, and the RND Transit theme.
+**Student: Atiom**  
+Kotlin / Compose Multiplatform · Material 3 · Navigation 3
 
-The main workflow is:
+RND Transit is a map-based trip demo. Its three main content screens are **Home / GO**, **Current Trip**, and **History**. A sequential review form and completed-trip details support that flow. **About** remains the information screen, reached from Profile.
 
-**Planner → Current Trip → Review → History → Details or review editing**
+## The three main screens
 
-Home, Profile, Settings, About, and History remain accessible through the shared navigation bar.
+| Screen | What the user does |
+| --- | --- |
+| Home / GO | Choose planned minutes, transport types/routes and attraction intensity; press GO or resume the existing trip |
+| Current Trip | Watch the stored mock route progress, pan/zoom the map, open trip information or cancel, and tap 100% to review after completion |
+| History | Filter completed trips, expand reviews, open details, review/edit and remove records |
 
-## Plan and start a trip
+The shared bar keeps GO/Home, Profile and History on the left and Settings on the right. About is available in Profile. Destinations share one hoisted layout rather than each adding its own navigation bar.
 
-On Home, enter:
+## GO and planned minutes
 
-- Trip title.
-- Trip description.
-- A direct HTTPS image URL.
-- Planned minutes.
-- Transport types and applicable routes.
-- Attraction intensity.
+Home uses the bundled map background with the original horizontal **I have | minutes value | minutes | GO** control, transport panel and attraction panel. The text/title/image-URL form was removed at Atiom's request.
 
-GO validates the inputs and selections. A valid action generates one `Trip`, stores its endpoints and planner selections, starts it through the shared store, and passes it to Current Trip as a navigation parameter.
+- Default planned time: 30 minutes.
+- Allowed choices: **0–360 minutes in five-minute steps**.
+- Up from 355 reaches 360; down from 360 returns to 355.
+- Arrow taps and vertical dragging cannot exceed 360 or go below 0.
+- The up arrow disappears at 360; the down arrow disappears at 0. Empty slots keep the number centred.
+- The number area reserves room for three digits and fits the text to its available width.
+- Transport and route validation remains; no selected transport produces a clear message.
+- Attraction intensity stays within 0–100, with the light-green fill clipped inside its dark oval.
+- Transport and attraction panels span the phone content width; teal fills the remaining bottom area.
 
-Only one unfinished trip can exist. Repeated GO actions cannot replace it. When an unfinished trip exists, use **Resume trip**.
+GO creates one Trip with a generated title such as “Trip 1”, an automatic description, current selections and two fixed random endpoints. Normal GO trips have an empty reference-image URL.
 
-The selected planner minutes remain part of the trip information. They do not control the demonstration’s duration.
+Only one unfinished trip may exist. While it exists, use **Resume trip**; another GO action cannot replace it. Repeated taps are guarded.
 
-## Current Trip and simulation
+When opening a trip, the foreground GO, transport and attraction controls slide down together for one second. Navigation waits for that exit to finish; the map background remains in place.
 
-Current Trip displays the entered information, planner selections, reference image, bundled mock map, and progress.
+## Current Trip
 
-The map contains:
+The map uses the same proportional crop as GO. It supports drag/pinch zoom and zoom/reset controls. Overlay geometry follows the displayed image transform.
 
-- Distinct start and destination markers.
-- A straight connecting route line.
-- A recognizable orange person moving along that line.
+- Orange start marker and green destination marker.
+- Supplied circular pointer asset, rotated so its sharp tip faces movement.
+- A straight route whose travelled portion fills orange.
+- Progress percentage and remaining demo distance from the same elapsed-time value.
 
-Endpoints are random normalized image positions generated once when starting the trip. Resizing, rotation, resuming, and opening details reuse those stored positions.
+The simulation lasts **10,000 milliseconds of active time**, independently of planned minutes—even a 360-minute selection still has a ten-second demo.
 
-The simulation lasts **10,000 milliseconds of active time**. Movement, percentage, progress track, and remaining demo distance use the same progress value.
+Leaving Current Trip or backgrounding pauses the simulation. Returning/resuming retains the same trip ID, endpoints and elapsed time. Android saved-state restoration is intended to retain these through rotation.
 
-Leaving Current Trip or backgrounding the application pauses the simulation. Resume continues the same trip ID and retained elapsed time.
+Tap the gradient **Current trip** title to open the information popup. It contains stored trip information and a prominent **Cancel trip** action while unfinished. Cancellation returns to GO and adds no History record. The visible Current Trip Back control was removed; GO remains in the shared bar.
 
-**Cancel trip** clears an unfinished trip and returns to the planner. Cancellation does not add a completed History record.
-
-At completion, progress reaches 100%, remaining demo distance becomes zero, and the trip is recorded in History once. The initial review destination replaces Current Trip.
+At completion the trip enters History exactly once, progress remains at **100%**, and remaining demo distance is zero. **Tap the 100% progress bar to open the initial review.** Completion does not automatically open that form.
 
 ## Reviews
 
-The review uses a sequence of questions with animated transitions:
+Questions slide through Overall experience plus an optional comment, Quality, How interesting, and Fun.
 
-1. Overall experience and optional written comment.
-2. Quality.
-3. How interesting the trip was.
-4. Fun.
+Overall is required when saving. Ratings are 1–5; optional categories remain null unless selected. Skip preserves the completed trip without creating a zero-star review.
 
-Ratings use 1–5 stars. Overall is required when saving. Optional ratings remain null until selected; skipping never creates a zero-star review.
+Initial review Save, Skip, Close and Back lead to History. Later editing loads a separate draft from the latest saved review. Save replaces feedback on the same trip ID; Cancel/Close/Back preserve the old review and return to the originating History/details view.
 
-For the initial review:
-
-- Save updates the completed trip and opens History.
-- Skip preserves the completed trip without adding feedback.
-- Close and Back behave like Skip.
-
-For review editing:
-
-- The latest saved review loads into a separate draft.
-- Save replaces feedback on the same trip ID.
-- Cancel, Close, and Back discard unsaved changes.
-- The screen returns to its originating History or details view.
-
-Draft ratings, comment, and current question are included in saved state.
+Draft ratings, comment and question step are included in saved state. Missing/deleted IDs show a recovery action and cannot be recreated by saving.
 
 ## History and details
 
-History reads completed trips from the shared provider. It shows newest completed trips first and supports:
+History reads the shared completed List<Trip>, newest completion first, using stable IDs.
 
-- All, Reviewed, and Not reviewed filters.
-- Overall stars and saved review information.
-- Expandable review content.
-- Details.
-- Review or Edit review.
-- Removal through the action tray.
+- All, Reviewed and Not reviewed filters.
+- Overall stars and expandable saved feedback.
+- “Not reviewed” when no feedback was saved.
+- Review/Edit review, Details and Remove actions; the card action tray exposes edit/remove.
+- Immediate observable collection updates after saving or removal.
 
-Review changes and removal update the same collection immediately.
+Details resolves the current stored trip by ID and displays its original endpoints, static completed route, selections and saved ratings/comment. It does not generate points or run the simulation.
 
-Details resolves the latest stored trip by ID. Its map shows the original endpoints and a static completed route. Opening details does not generate points or restart the simulation.
+## Images and resources
 
-Missing or deleted IDs show recovery content. Saving a review cannot recreate a deleted trip.
+map_sample is a bundled PNG, independent of network access. Start, destination and pointer assets are shared XML resources converted from the supplied artwork.
 
-## Reference images
+The existing optional reference-image component supports loading, failure and retry for stored trips that contain a URL. The current GO screen does not ask for one, and generated trips use an empty URL. A failed optional image cannot break the map simulation. No remote-image loading is needed for the normal GO flow.
 
-The entered URL represents a separate trip reference image. It does not replace `map_sample`, the bundled simulation map.
+## Architecture and saved state
 
-Coil provides loading, failure, and retry presentation. An image may fail because of connectivity, server restrictions, a non-image response, or an unsupported format. The mock route remains available independently.
+App applies RNDTransitTheme, provides one TripsStore and Navigator/navigation coordinator, and hoists MainLayout above Router/NavDisplay. The sealed ScreenKey hierarchy has explicit concrete NavKey serializer registrations. CurrentTripScreenKey carries the generated Trip; screens resolve mutable state through its ID.
 
-Use a directly accessible HTTPS bitmap image URL. On Web, the remote server’s browser access policy can also affect loading.
+The serializable store snapshot/Saver includes active/completed records, elapsed milliseconds, pending review handling and review drafts. Planner selections and route state use saved state as well. Coroutine jobs, callbacks and running clock marks are excluded.
 
-## Shared state and restoration
+This is **saved-state restoration, not permanent database storage**. A fresh launch without restored state begins an empty session; Desktop restart/browser reload are not durable History storage.
 
-`App` provides one `TripsStore` alongside the shared Navigator.
+## Limits and assignment coverage
 
-The store owns:
+The map is a mock image, the route is straight, coordinates are normalized image positions, and distance is synthetic demo distance. There is no GPS, real street routing, turn guidance or live map service.
 
-- One active trip and accumulated elapsed simulation time.
-- The completed `List<Trip>`.
-- Pending review-navigation handling.
-- Review drafts and saved feedback.
+The three main screens, provider collection, parameter passing, details/removal, shared layout and sealed routes remain implemented in source. **The assignment's first-screen multiple-text-input and image-link requirements are currently unmet after removal of that form.** Reviews provide text input elsewhere, but that does not satisfy the literal first-screen requirement.
 
-Its serializable snapshot and Saver restore records and elapsed time. Running jobs, callbacks, lifecycle owners, and clock marks are not saved.
+Final runtime timing, rotation, gestures, phone/keyboard/desktop layouts and current compilation/tests still require evidence.
 
-Planner fields and selections also use saveable state. Navigation keys are serializable and registered with the back-stack configuration.
+## Platforms and manual commands
 
-Android activity recreation, including rotation, is intended to retain the planner, active trip, elapsed time, completed trips, review drafts, and navigation.
+Android, Desktop JVM, Web JavaScript/Wasm and iOS targets are configured. The assignment requires Android plus Desktop or Web; the selected verified second platform has not been recorded.
 
-This is **saved-state restoration, not permanent database storage**. A fresh launch without restored instance state starts an empty session. Closing and reopening Desktop or reloading Web does not provide durable trip storage.
+Run from the project root:
 
-## Scope and limitations
-
-- The map is a bundled mock image.
-- Routes are straight-line demonstrations.
-- Coordinates are normalized image positions, not GPS coordinates.
-- Distance is synthetic demo distance, not real navigation distance.
-- There is no live routing, street guidance, location tracking, or map service.
-- Planned minutes are independent of the ten-second simulation.
-- Permanent database storage is outside this implementation.
-- Runtime rotation, lifecycle timing, image loading, and visual layouts still require verification.
-
-## Platforms and commands
-
-Android, Desktop JVM, Web JavaScript/Wasm, and iOS targets are configured.
-
-The assignment requires an emulated Android application plus either Desktop or Web. The selected second platform and runtime evidence must be recorded in the assignment documentation.
-
-Run commands from:
-
-```powershell
+~~~powershell
 Set-Location -LiteralPath 'K:\CLASSES 26 FALL\APP_DEV\As3\MainRepo\As3_APPDEV2_RND_Tranzit_Sova'
-```
+~~~
 
-### Android
+Android:
 
-```powershell
+~~~powershell
 .\gradlew.bat :androidApp:assembleDebug
 .\gradlew.bat :shared:testAndroidHostTest
-```
+~~~
 
-Run the `androidApp` configuration in Android Studio on an emulator or connected device.
+Launch androidApp in Android Studio for emulator/device checks.
 
-### Desktop
+Desktop:
 
-```powershell
+~~~powershell
 .\gradlew.bat :shared:compileKotlinJvm
 .\gradlew.bat :shared:jvmTest
 .\gradlew.bat :desktopApp:run
-```
+~~~
 
-### Web: Wasm
+Optional Web, choosing one configured target:
 
-```powershell
+~~~powershell
 .\gradlew.bat :shared:wasmJsTest
 .\gradlew.bat :webApp:wasmJsBrowserDevelopmentRun
-```
+~~~
 
-### Web: JavaScript
-
-```powershell
+~~~powershell
 .\gradlew.bat :shared:jsTest
 .\gradlew.bat :webApp:jsBrowserDevelopmentRun
-```
+~~~
 
-### iOS
+For iOS, open iosApp with Xcode on macOS. No iOS run is claimed.
 
-Open `iosApp` in Xcode on macOS. An iOS build or launch is not claimed by the available evidence.
+## Verification status
 
-## Verification evidence
+Earlier documentation recorded 43 JVM and 42 Android host tests without failures around 2026-10-05 03:06 UTC, plus reported build/compilation successes. Those historical records do **not** establish verification of the later UI revisions or the 360-minute change. The tested revision was not identified.
 
-These results existed before this documentation was generated. No commands were executed during documentation preparation.
+No builds or tests were run for this update. Focused source tests and 360-minute phone previews were added; execute the appropriate commands and record the final revision/results yourself.
 
-| Check | Available evidence |
-| --- | --- |
-| JVM tests | Existing XML reports record 43 tests, zero failures, zero errors, and zero skipped |
-| Android host tests | Existing XML reports record 42 tests, zero failures, zero errors, and zero skipped |
-| Android debug build | Previous README reports successful `:androidApp:assembleDebug`; original build log was not supplied |
-| JavaScript compilation | Previous README reports successful `:shared:compileKotlinJs`; original build log was not supplied |
-| Wasm compilation | Previous README reports successful `:shared:compileKotlinWasmJs`; original build log was not supplied |
-| Application launches | No runtime evidence supplied |
-| Browser tests and iOS checks | No passing evidence supplied |
-| Device rotation, timing, image loading, and layouts | Manual verification pending |
+## Assignment records
 
-Existing test-report timestamps are approximately **2026-10-05 03:06 UTC**. The tested commit or revision has not been identified.
+- [Assignment documentation](docs/AssignmentDocumentation.md): WBS, original estimates, dependencies/Gantt, ADRs, coverage and submission checks.
+- [Current design summary](docs/PreliminaryDesignSummary.md): current three-screen architecture; no earlier screenshot is implied.
+- [AI technique log and complete chat evidence](AI_Log_As3.md): both conversations, prompts/outputs and deep links.
+- [Time flow](TimeFlow_As3_Sova.txt): supplied work notes plus measured intervals between chat prompts.
 
-Android host tests run on the development machine. They do not establish successful emulator rotation or application lifecycle behavior.
-
-The tests cover state invariants, navigation, serialization, snapshot restoration, review updates, deletion, History presentation, and bounded endpoint generation.
-
-Before submission, identify the tested revision and complete the manual verification checklist in the assignment documentation.
-
-## Assignment documentation
-
-The accompanying assignment record contains:
-
-- WBS, original estimates, dependencies, and Gantt chart.
-- Actual-time and variance fields.
-- AI-assisted decision records.
-- Day 17 AI Technique Log entries.
-- Requirement and submission checklists.
-- Verification evidence and pending checks.
-
-The preliminary-design summary is supplied separately for a screenshot.
-
-Original proposed effort is **30 minutes per prompt**, as confirmed by the student. Actual effort, ADR approval status, AI contribution percentage, and completed submission evidence must be supplied from the student’s records.
+Original estimate: 30 minutes per numbered prompt. Chat intervals include response/waiting time and possible breaks; they are recorded as elapsed intervals, not automatically treated as active work.
