@@ -1,98 +1,142 @@
 # RND Transit MTL
 
-RND Transit is a Kotlin/Compose Multiplatform transit discovery demo.
-It uses Material 3, Navigation 3, a shared layout, shared resources,
-and the project's LINE Seed JP typography.
+RND Transit is a Kotlin/Compose Multiplatform transit discovery demo using Material 3, Navigation 3, shared Compose resources, and the RND Transit theme.
 
-The project includes Android, Desktop, Web, and iOS targets.
-The assignment requires Android plus either Desktop or Web.
+The main workflow is:
 
-## Using the app
+**Planner → Current Trip → Review → History → Details or review editing**
 
-1. Open Home and enter a trip title, description, and HTTPS image URL.
-2. Choose planned minutes, transport types, routes, and attraction intensity.
-3. Press GO to start one mock trip.
-4. Watch the orange person travel between the stored start and destination.
-5. After completion, save a review or skip it.
-6. Open History to filter completed trips, view details, review or edit
-   feedback, and remove records.
+Home, Profile, Settings, About, and History remain accessible through the shared navigation bar.
 
-Only one unfinished trip can exist. Home and the shared header offer
-Resume trip when an unfinished trip is available.
+## Plan and start a trip
 
-Leaving Current Trip or backgrounding the application pauses the demo.
-Returning to that trip resumes its stored elapsed time.
+On Home, enter:
 
-## Mock route and reference image
+- Trip title.
+- Trip description.
+- A direct HTTPS image URL.
+- Planned minutes.
+- Transport types and applicable routes.
+- Attraction intensity.
 
-The map is a bundled image. Endpoints are generated once per trip and
-stored as normalized image positions.
+GO validates the inputs and selections. A valid action generates one `Trip`, stores its endpoints and planner selections, starts it through the shared store, and passes it to Current Trip as a navigation parameter.
 
-The route is a straight-line visual demonstration. Its distance is
-synthetic; it is not a geographic measurement or street-routing result.
+Only one unfinished trip can exist. Repeated GO actions cannot replace it. When an unfinished trip exists, use **Resume trip**.
 
-The simulation uses 10,000 milliseconds of active time. Planned minutes
-describe the user's preference and do not change the simulation duration.
+The selected planner minutes remain part of the trip information. They do not control the demonstration’s duration.
 
-The entered image URL is a separate trip reference image. Loading or
-decoding failure shows an unavailable state and retry action. Image
-failure does not replace the bundled map or stop the simulation.
+## Current Trip and simulation
 
-Use a directly accessible HTTPS bitmap image URL. A URL may have valid
-syntax and still fail because the server is unavailable, access is
-restricted, the response is not an image, or the format is unsupported.
+Current Trip displays the entered information, planner selections, reference image, bundled mock map, and progress.
 
-## Reviews and History
+The map contains:
 
-Overall experience is required when saving a review.
-Quality, Interesting, Fun, and the written comment are optional.
+- Distinct start and destination markers.
+- A straight connecting route line.
+- A recognizable orange person moving along that line.
 
-Unselected optional ratings remain null. Skipping does not create a
-zero-star review.
+Endpoints are random normalized image positions generated once when starting the trip. Resizing, rotation, resuming, and opening details reuse those stored positions.
 
-Initial review Save, Skip, Close, and Back lead to History.
-Editing Save returns to the originating History or details view.
-Editing Cancel, Close, and Back discard unsaved changes.
+The simulation lasts **10,000 milliseconds of active time**. Movement, percentage, progress track, and remaining demo distance use the same progress value.
 
-History contains completed trips only. Cancelling an unfinished trip
-does not create a History entry.
+Leaving Current Trip or backgrounding the application pauses the simulation. Resume continues the same trip ID and retained elapsed time.
 
-## Saved state and limitations
+**Cancel trip** clears an unfinished trip and returns to the planner. Cancellation does not add a completed History record.
 
-TripsStore is the shared source of active and completed trip records,
-elapsed time, pending review handling, and review drafts.
+At completion, progress reaches 100%, remaining demo distance becomes zero, and the trip is recorded in History once. The initial review destination replaces Current Trip.
 
-Android saved-instance-state restoration is intended to preserve trips,
-elapsed time, review drafts, planner inputs, and navigation during
-activity recreation such as rotation.
+## Reviews
 
-Permanent database storage is outside this demo's scope. A fresh launch
-without restored instance state starts an empty session. Closing and
-relaunching Desktop or reloading Web is not permanent storage.
+The review uses a sequence of questions with animated transitions:
 
-There is no GPS, live map service, real routing, or street guidance.
+1. Overall experience and optional written comment.
+2. Quality.
+3. How interesting the trip was.
+4. Fun.
 
-Automated build and test results for this revision are recorded below.
-Runtime timing, rotation, image loading, and layouts still require
-verification on the final assembled application.
+Ratings use 1–5 stars. Overall is required when saving. Optional ratings remain null until selected; skipping never creates a zero-star review.
 
-## Project structure
+For the initial review:
 
-- `shared/src/commonMain/kotlin`: shared application, screens, models,
-  state, simulation coordination, and reusable UI.
-- `shared/src/commonMain/composeResources`: shared images, vectors,
-  fonts, and transport data.
-- `shared/src/commonTest/kotlin`: shared state, navigation, simulation,
-  and presentation tests.
-- `androidApp`: Android application entry point.
-- `desktopApp`: Desktop window entry point.
-- `webApp`: browser entry point.
-- `iosApp`: iOS application entry point.
-- `docs/MainDesignDoc.md`: broader product design reference.
+- Save updates the completed trip and opens History.
+- Skip preserves the completed trip without adding feedback.
+- Close and Back behave like Skip.
 
-## Commands on Windows
+For review editing:
 
-Run these from the project root.
+- The latest saved review loads into a separate draft.
+- Save replaces feedback on the same trip ID.
+- Cancel, Close, and Back discard unsaved changes.
+- The screen returns to its originating History or details view.
+
+Draft ratings, comment, and current question are included in saved state.
+
+## History and details
+
+History reads completed trips from the shared provider. It shows newest completed trips first and supports:
+
+- All, Reviewed, and Not reviewed filters.
+- Overall stars and saved review information.
+- Expandable review content.
+- Details.
+- Review or Edit review.
+- Removal through the action tray.
+
+Review changes and removal update the same collection immediately.
+
+Details resolves the latest stored trip by ID. Its map shows the original endpoints and a static completed route. Opening details does not generate points or restart the simulation.
+
+Missing or deleted IDs show recovery content. Saving a review cannot recreate a deleted trip.
+
+## Reference images
+
+The entered URL represents a separate trip reference image. It does not replace `map_sample`, the bundled simulation map.
+
+Coil provides loading, failure, and retry presentation. An image may fail because of connectivity, server restrictions, a non-image response, or an unsupported format. The mock route remains available independently.
+
+Use a directly accessible HTTPS bitmap image URL. On Web, the remote server’s browser access policy can also affect loading.
+
+## Shared state and restoration
+
+`App` provides one `TripsStore` alongside the shared Navigator.
+
+The store owns:
+
+- One active trip and accumulated elapsed simulation time.
+- The completed `List<Trip>`.
+- Pending review-navigation handling.
+- Review drafts and saved feedback.
+
+Its serializable snapshot and Saver restore records and elapsed time. Running jobs, callbacks, lifecycle owners, and clock marks are not saved.
+
+Planner fields and selections also use saveable state. Navigation keys are serializable and registered with the back-stack configuration.
+
+Android activity recreation, including rotation, is intended to retain the planner, active trip, elapsed time, completed trips, review drafts, and navigation.
+
+This is **saved-state restoration, not permanent database storage**. A fresh launch without restored instance state starts an empty session. Closing and reopening Desktop or reloading Web does not provide durable trip storage.
+
+## Scope and limitations
+
+- The map is a bundled mock image.
+- Routes are straight-line demonstrations.
+- Coordinates are normalized image positions, not GPS coordinates.
+- Distance is synthetic demo distance, not real navigation distance.
+- There is no live routing, street guidance, location tracking, or map service.
+- Planned minutes are independent of the ten-second simulation.
+- Permanent database storage is outside this implementation.
+- Runtime rotation, lifecycle timing, image loading, and visual layouts still require verification.
+
+## Platforms and commands
+
+Android, Desktop JVM, Web JavaScript/Wasm, and iOS targets are configured.
+
+The assignment requires an emulated Android application plus either Desktop or Web. The selected second platform and runtime evidence must be recorded in the assignment documentation.
+
+Run commands from:
+
+```powershell
+Set-Location -LiteralPath 'K:\CLASSES 26 FALL\APP_DEV\As3\MainRepo\As3_APPDEV2_RND_Tranzit_Sova'
+```
 
 ### Android
 
@@ -101,8 +145,7 @@ Run these from the project root.
 .\gradlew.bat :shared:testAndroidHostTest
 ```
 
-Run `androidApp` from Android Studio on an emulator or connected device
-for lifecycle, rotation, keyboard, and visual checks.
+Run the `androidApp` configuration in Android Studio on an emulator or connected device.
 
 ### Desktop
 
@@ -112,94 +155,58 @@ for lifecycle, rotation, keyboard, and visual checks.
 .\gradlew.bat :desktopApp:run
 ```
 
-### Web
-
-Wasm:
+### Web: Wasm
 
 ```powershell
 .\gradlew.bat :shared:wasmJsTest
 .\gradlew.bat :webApp:wasmJsBrowserDevelopmentRun
 ```
 
-JavaScript:
+### Web: JavaScript
 
 ```powershell
 .\gradlew.bat :shared:jsTest
 .\gradlew.bat :webApp:jsBrowserDevelopmentRun
 ```
 
-Browser image requests remain subject to the remote server's browser
-access policy.
-
 ### iOS
 
-Open `iosApp` in Xcode on macOS and run its application configuration.
+Open `iosApp` in Xcode on macOS. An iOS build or launch is not claimed by the available evidence.
 
-## Verification
+## Verification evidence
 
-The following automated checks passed for these corrections:
+These results existed before this documentation was generated. No commands were executed during documentation preparation.
 
-| Check | Result |
+| Check | Available evidence |
 | --- | --- |
-| `:shared:jvmTest` | 43 tests passed; none failed or skipped |
-| `:shared:testAndroidHostTest` | 42 tests passed; none failed or skipped |
-| `:androidApp:assembleDebug` | Android debug APK built successfully |
-| `:shared:compileKotlinJs` | JavaScript compilation passed |
-| `:shared:compileKotlinWasmJs` | Wasm compilation passed |
+| JVM tests | Existing XML reports record 43 tests, zero failures, zero errors, and zero skipped |
+| Android host tests | Existing XML reports record 42 tests, zero failures, zero errors, and zero skipped |
+| Android debug build | Previous README reports successful `:androidApp:assembleDebug`; original build log was not supplied |
+| JavaScript compilation | Previous README reports successful `:shared:compileKotlinJs`; original build log was not supplied |
+| Wasm compilation | Previous README reports successful `:shared:compileKotlinWasmJs`; original build log was not supplied |
+| Application launches | No runtime evidence supplied |
+| Browser tests and iOS checks | No passing evidence supplied |
+| Device rotation, timing, image loading, and layouts | Manual verification pending |
 
-All three `TripNavigationRegressionTest` cases failed against the previous
-navigation code and passed after applying the fixes. Android host tests
-run on the development machine; they do not verify device rotation.
-Browser tests, iOS checks, and application launches were not run for this
-revision.
+Existing test-report timestamps are approximately **2026-10-05 03:06 UTC**. The tested commit or revision has not been identified.
 
-The common tests cover navigation, serialization, restoration, review
-updates, deletion, collection integrity, and bounded endpoint generation.
-`TripNavigationRegressionTest` checks that completion-boundary Back
-preserves the preceding page and that section shortcuts close reviews.
+Android host tests run on the development machine. They do not establish successful emulator rotation or application lifecycle behavior.
 
-Verify these behaviors on the required platforms:
+The tests cover state invariants, navigation, serialization, snapshot restoration, review updates, deletion, History presentation, and bounded endpoint generation.
 
-- Invalid text, image URLs, and transport selections show validation and
-  do not start a trip.
-- Repeated GO taps start one trip; Resume keeps its ID, endpoints, and
-  elapsed progress.
-- Leaving Current Trip or backgrounding excludes paused time. Ten active
-  seconds completes one History record at 100% and zero remaining distance.
-- Rotation preserves planner inputs, trip progress, review ratings,
-  comment, current question, and review return destination.
-- Initial Save/Skip/Back reaches History. Editing Save/Cancel/Back returns
-  to History or Details; cancelling keeps previously saved feedback.
-- Leaving initial Review through Profile and pressing Back reaches History.
-  Leaving a Details edit through Settings and pressing Back returns to
-  Details with the previous saved review. The closed review cannot reopen.
-- History filters update after saving, editing, or removing a trip. Cards
-  expand reviews and expose edit/remove actions by swipe or Actions.
-- Completed Details uses the original endpoints and a static route. A
-  removed record shows recovery content and cannot be recreated by saving.
-- Image loading, failure, and retry work without changing the mock route.
-- Narrow phones, landscape, an open keyboard, and Desktop keep controls
-  reachable. Cancelling predictive Back keeps the review draft.
-- About shows the existing photographs and the names Caio, Artiom, and
-  Jimmy. Home remains protected from Back.
-
-Actual device rotation, lifecycle timing, predictive Back, image loading,
-application launch, and visual layout require runtime verification.
-iOS builds and tests require macOS.
+Before submission, identify the tested revision and complete the manual verification checklist in the assignment documentation.
 
 ## Assignment documentation
 
-The submission also requires:
+The accompanying assignment record contains:
 
-- A WBS with at least five tasks.
-- Original effort estimates and dependencies.
-- A Gantt chart.
-- Actual time tracking and explanations of significant differences.
-- An AI Technique Log with at least three decisions in ADR format.
-- Saved prompts and AI responses.
-- An evidence-based AI contribution summary.
-- Git, machine setup, and preliminary design evidence.
+- WBS, original estimates, dependencies, and Gantt chart.
+- Actual-time and variance fields.
+- AI-assisted decision records.
+- Day 17 AI Technique Log entries.
+- Requirement and submission checklists.
+- Verification evidence and pending checks.
 
-These records must reflect the work actually performed. Estimates,
-accepted decisions, actual time, contribution percentages, and successful
-verification must not be inferred from the presence of generated code.
+The preliminary-design summary is supplied separately for a screenshot.
+
+Original proposed effort is **30 minutes per prompt**, as confirmed by the student. Actual effort, ADR approval status, AI contribution percentage, and completed submission evidence must be supplied from the student’s records.
