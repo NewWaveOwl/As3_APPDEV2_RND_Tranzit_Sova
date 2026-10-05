@@ -2,142 +2,408 @@ package com.example.rnd_transit_mtl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import com.example.rnd_transit_mtl.data.MockTripGenerator
+import com.example.rnd_transit_mtl.data.TripGenerationInput
+import com.example.rnd_transit_mtl.data.TripGenerationResult
 import com.example.rnd_transit_mtl.model.TransportRoute
 import com.example.rnd_transit_mtl.model.TransportType
+import com.example.rnd_transit_mtl.model.Trip
+import com.example.rnd_transit_mtl.state.LocalTripsStore
+import com.example.rnd_transit_mtl.state.TripActionResult
 import com.example.rnd_transit_mtl.ui.TripPlannerContent
 
 /**
- * Owns trip selections, validation, and saved summaries for the shared planner.
+ * Owns the saveable planner draft and coordinates GO/Resume.
  *
- * State is retained with rememberSaveable where supported by the saved-state host.
- * The GO action currently builds a text summary rather than calculating a travel route.
+ * onOpenCurrentTrip receives the generated or existing stored Trip.
+ * A true result means navigation was synchronously established.
  *
- * @param transportTypes Available transport options in display order.
- * @param transportRoutes Available routes, each linked to its owning transport type.
+ * onOpenPendingReview follows the same navigation contract.
+ * The pending event is acknowledged only after a true result.
+ *
+ * TripsStore remains the only owner of active/completed Trip records.
  */
 @Composable
 internal fun TransitOpeningScreen(
     transportTypes: List<TransportType>,
-    transportRoutes: List<TransportRoute>
+    transportRoutes: List<TransportRoute>,
+    onOpenCurrentTrip: ((Trip) -> Boolean)? = null,
+    onOpenPendingReview: ((String) -> Boolean)? = null,
+    isDestinationActive: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
-    /** Cache routes grouped by their owning transport type for selection checks and summary creation. */
-    val routesByTransport = remember(transportRoutes) {
-        transportRoutes.groupBy { it.transportTypeId }
+    val tripsStore = LocalTripsStore.current
+    val focusManager = LocalFocusManager.current
+    val generator = remember { MockTripGenerator() }
+
+    var tripTitle by rememberSaveable { mutableStateOf("") }
+    var tripDescription by rememberSaveable { mutableStateOf("") }
+    var imageUrl by rememberSaveable { mutableStateOf("") }
+    var minutes by rememberSaveable { mutableStateOf(30) }
+
+    var selectedTransportIds by rememberSaveable {
+        mutableStateOf(
+            if (transportTypes.any { it.id == "walk" }) {
+                listOf("walk")
+            } else {
+                emptyList<String>()
+            }
+        )
     }
 
-    /** Initialize saveable planner state with walking, 30 minutes, and 90% intensity selected. */
-    var minutes by rememberSaveable { mutableIntStateOf(30) }
-    var selectedTransportIds by rememberSaveable { mutableStateOf(listOf("walk")) }
-    var selectedRouteIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var selectedRouteIds by rememberSaveable {
+        mutableStateOf(emptyList<String>())
+    }
+    var expandedTransportId by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
     var intensity by rememberSaveable { mutableStateOf(90f) }
-    var savedTrips by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    var showTripResults by rememberSaveable { mutableStateOf(false) }
-    var validationMessage by rememberSaveable { mutableStateOf("") }
+    var validationAttempted by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var validationMessage by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    // This synchronous action lock is not a saved job or permanent form state.
+    var processingAction by remember { mutableStateOf(false) }
+
+    val latestDestinationActive by rememberUpdatedState(
+        isDestinationActive
+    )
+    val latestOpenCurrentTrip by rememberUpdatedState(
+        onOpenCurrentTrip
+    )
+    val latestOpenPendingReview by rememberUpdatedState(
+        onOpenPendingReview
+    )
+
+    val currentState by tripsStore.state
+    val activeState = currentState.activeTrip
+    val pendingReviewId = currentState.pendingReviewTripId
+    val pendingReviewTrip = pendingReviewId?.let { id ->
+        currentState.completedTrips.firstOrNull { it.id == id }
+    }
+
+    fun canChangeInputs(): Boolean =
+        latestDestinationActive && !processingAction
+
+    fun clearValidation() {
+        validationAttempted = false
+        validationMessage = ""
+    }
+
+    fun performPrimaryAction() {
+        if (!latestDestinationActive || processingAction) return
+
+        processingAction = true
+
+        try {
+            // Re-read the store at click time, including before generation.
+            val existingActive = tripsStore.activeTrip
+            if (existingActive != null) {
+                val openTrip = latestOpenCurrentTrip
+                if (openTrip == null) {
+                    validationMessage = "Current Trip navigation is unavailable."
+                    return
+                }
+
+                focusManager.clearFocus()
+                validationMessage = ""
+
+                if (!openTrip(existingActive)) {
+                    validationMessage =
+                        "Your unfinished trip is preserved. Tap Resume trip to retry."
+                }
+                return
+            }
+
+            val pendingId = tripsStore.pendingReviewTripId
+            if (pendingId != null) {
+                val openReview = latestOpenPendingReview
+                if (openReview == null) {
+                    validationMessage = "Review navigation is unavailable."
+                    return
+                }
+
+                focusManager.clearFocus()
+
+                if (openReview(pendingId)) {
+                    if (tripsStore.pendingReviewTripId == pendingId) {
+                        tripsStore.acknowledgeReviewNavigation(pendingId)
+                    }
+                    validationMessage = ""
+                } else {
+                    validationMessage =
+                        "The review has not opened. Your completed trip is preserved."
+                }
+                return
+            }
+
+            val openTrip = latestOpenCurrentTrip
+            if (openTrip == null) {
+                validationMessage = "Current Trip navigation is unavailable."
+                return
+            }
+
+            validationAttempted = true
+            validationMessage = ""
+
+            val input = TripGenerationInput(
+                title = tripTitle,
+                description = tripDescription,
+                imageUrl = imageUrl,
+                plannedMinutes = minutes,
+                selectedTransportIds = selectedTransportIds.toList(),
+                selectedRouteIds = selectedRouteIds.toList(),
+                attractionIntensity = intensity
+            )
+
+            val existingIds = buildSet {
+                addAll(tripsStore.completedTrips.map { it.id })
+                tripsStore.activeTrip?.let { add(it.id) }
+            }
+
+            when (
+                val generated = generator.generate(
+                    input = input,
+                    transportTypes = transportTypes,
+                    transportRoutes = transportRoutes,
+                    existingTripIds = existingIds
+                )
+            ) {
+                is TripGenerationResult.InvalidInput -> {
+                    validationMessage = generated.message
+                }
+
+                TripGenerationResult.IdUnavailable -> {
+                    validationMessage =
+                        "A unique trip ID could not be created. Please try again."
+                }
+
+                is TripGenerationResult.Success -> {
+                    when (val started = tripsStore.start(generated.trip)) {
+                        TripActionResult.Applied -> {
+                            focusManager.clearFocus()
+
+                            if (!openTrip(generated.trip)) {
+                                validationMessage =
+                                    "Your trip started and is preserved. " +
+                                            "Tap Resume trip to open it."
+                            }
+                        }
+
+                        is TripActionResult.ActiveTripExists -> {
+                            validationMessage =
+                                "An unfinished trip already exists. Use Resume trip."
+                        }
+
+                        is TripActionResult.InvalidInput -> {
+                            validationMessage = started.message
+                        }
+
+                        else -> {
+                            validationMessage =
+                                "The trip could not be started. Please try again."
+                        }
+                    }
+                }
+            }
+        } finally {
+            processingAction = false
+        }
+    }
+
+    val titleError = if (
+        validationAttempted && tripTitle.isBlank()
+    ) {
+        "Enter a trip title."
+    } else {
+        null
+    }
+
+    val descriptionError = if (
+        validationAttempted && tripDescription.isBlank()
+    ) {
+        "Enter a trip description."
+    } else {
+        null
+    }
+
+    val imageUrlError = if (
+        validationAttempted &&
+        !Trip.isSupportedImageUrl(imageUrl.trim())
+    ) {
+        "Enter an HTTPS image URL with a valid host."
+    } else {
+        null
+    }
+
+    val actionLabel = when {
+        activeState != null -> "Resume trip"
+        pendingReviewId != null -> "Continue review"
+        else -> "GO"
+    }
+
+    val actionHasCallback = if (pendingReviewId != null) {
+        onOpenPendingReview != null
+    } else {
+        onOpenCurrentTrip != null
+    }
 
     TripPlannerContent(
+        tripTitle = tripTitle,
+        onTripTitleChange = {
+            if (canChangeInputs()) {
+                tripTitle = it
+                clearValidation()
+            }
+        },
+        tripDescription = tripDescription,
+        onTripDescriptionChange = {
+            if (canChangeInputs()) {
+                tripDescription = it
+                clearValidation()
+            }
+        },
+        imageUrl = imageUrl,
+        onImageUrlChange = {
+            if (canChangeInputs()) {
+                imageUrl = it
+                clearValidation()
+            }
+        },
         minutes = minutes,
-
-        /** Changing a planner input clears previous validation feedback. */
         onMinutesChange = {
-            minutes = it
-            validationMessage = ""
+            if (canChangeInputs()) {
+                minutes = it
+                    .coerceIn(
+                        Trip.MIN_PLANNED_MINUTES,
+                        Trip.MAX_PLANNED_MINUTES
+                    )
+                    .let { bounded ->
+                        bounded -
+                                bounded % Trip.PLANNED_MINUTES_STEP
+                    }
+                clearValidation()
+            }
         },
         transportTypes = transportTypes,
         transportRoutes = transportRoutes,
         selectedTransportIds = selectedTransportIds,
         selectedRouteIds = selectedRouteIds,
-        savedTrips = savedTrips,
-        showTripResults = showTripResults,
-
-        /** Add an unselected transport ID or remove an already selected one. */
-        onToggleTransport = { transportId ->
-            selectedTransportIds = if (transportId in selectedTransportIds) {
-                selectedTransportIds - transportId
-            } else {
-                selectedTransportIds + transportId
+        expandedTransportId = expandedTransportId,
+        onExpandedTransportChange = { transportId ->
+            if (
+                canChangeInputs() &&
+                transportTypes.any {
+                    it.id == transportId && it.usesRoutes
+                }
+            ) {
+                expandedTransportId =
+                    if (expandedTransportId == transportId) {
+                        null
+                    } else {
+                        transportId
+                    }
             }
-            validationMessage = ""
+        },
+        onToggleTransport = { transportId ->
+            val transport = transportTypes.firstOrNull {
+                it.id == transportId
+            }
+
+            if (
+                canChangeInputs() &&
+                transport != null &&
+                !transport.usesRoutes
+            ) {
+                selectedTransportIds =
+                    selectedTransportIds.toggledPlannerId(transportId)
+                clearValidation()
+            }
         },
         onToggleRoute = { transportId, routeId ->
-            selectedRouteIds = selectedRouteIds.toggled(routeId)
-
-            /** After toggling the route, check whether this transport still has any selected routes. */
-            val hasSelectedRoute = routesByTransport[transportId]
-                .orEmpty()
-                .any { it.id in selectedRouteIds }
-
-            /** Include route-based transport only while at least one of its routes remains selected. */
-            selectedTransportIds = if (!hasSelectedRoute) {
-                selectedTransportIds - transportId
-            } else if (transportId !in selectedTransportIds) {
-                selectedTransportIds + transportId
-            } else {
-                selectedTransportIds
+            val transport = transportTypes.firstOrNull {
+                it.id == transportId && it.usesRoutes
             }
-            validationMessage = ""
+            val route = transportRoutes.firstOrNull {
+                it.id == routeId &&
+                        it.transportTypeId == transportId
+            }
+
+            if (
+                canChangeInputs() &&
+                transport != null &&
+                route != null
+            ) {
+                selectedRouteIds =
+                    selectedRouteIds.toggledPlannerId(routeId)
+
+                val hasSelectedRoute = transportRoutes.any {
+                    it.transportTypeId == transportId &&
+                            it.id in selectedRouteIds
+                }
+
+                selectedTransportIds = if (hasSelectedRoute) {
+                    if (transportId in selectedTransportIds) {
+                        selectedTransportIds
+                    } else {
+                        selectedTransportIds + transportId
+                    }
+                } else {
+                    selectedTransportIds.filterNot {
+                        it == transportId
+                    }
+                }
+
+                clearValidation()
+            }
         },
         intensity = intensity,
         onIntensityChange = {
-            intensity = it
-            validationMessage = ""
+            if (canChangeInputs() && it.isFinite()) {
+                intensity = it.coerceIn(
+                    Trip.MIN_ATTRACTION_INTENSITY,
+                    Trip.MAX_ATTRACTION_INTENSITY
+                )
+                clearValidation()
+            }
         },
+        titleError = titleError,
+        descriptionError = descriptionError,
+        imageUrlError = imageUrlError,
         validationMessage = validationMessage,
-        onTripResultsVisibilityChange = { shouldShowResults ->
-            /** Always allow returning to the planner, but open results only when a saved trip exists. */
-            if (!shouldShowResults || savedTrips.isNotEmpty()) {
-                showTripResults = shouldShowResults
-            }
-        },
-        onRemoveTrip = { tripIndex ->
-            /** Remove the requested zero-based position and return to the planner if no trips remain. */
-            savedTrips = savedTrips.filterIndexed { index, _ -> index != tripIndex }
-            if (savedTrips.isEmpty()) {
-                showTripResults = false
-            }
-        },
-        onGo = {
-            /** A summary requires at least one selected transport type. */
-            if (selectedTransportIds.isEmpty()) {
-                validationMessage = "Choose at least one transport type."
-            } else {
-                /** Build readable transport labels and append only their selected route labels. */
-                val choices = selectedTransportIds.joinToString(", ") { transportId ->
-                    val typeLabel = transportTypes
-                        .first { it.id == transportId }
-                        .label
-                    val routeLabels = routesByTransport[transportId]
-                        .orEmpty()
-                        .filter { it.id in selectedRouteIds }
-                        .map { it.label }
-                    if (routeLabels.isEmpty()) typeLabel
-                    else "$typeLabel ${routeLabels.joinToString("/")}"
-                }
+        actionLabel = actionLabel,
+        actionEnabled = isDestinationActive &&
+                !processingAction &&
+                actionHasCallback,
+        inputsEnabled = isDestinationActive && !processingAction,
+        activeTripSummary = activeState?.let {
+            val percentage = (
+                    it.elapsedMillis.toFloat() / 10_000f * 100f
+                    ).toInt().coerceIn(0, 99)
 
-                /** Append the new summary to a new list so Compose observes the state change. */
-                val trip = "$minutes min by $choices with ${intensity.toInt()}% intensity."
-                savedTrips = savedTrips + trip
-                validationMessage = ""
-                showTripResults = true
-            }
-        }
+            "Unfinished: ${it.trip.title} · $percentage%"
+        },
+        pendingReviewSummary = pendingReviewTrip?.let {
+            "Completed: ${it.title} · review ready"
+        },
+        onPrimaryAction = { performPrimaryAction() },
+        modifier = modifier
     )
 }
 
-/**
- * Adds an absent value or removes an already selected value from a new list.
- *
- * List addition and subtraction return a replacement list for Compose state updates.
- *
- * @receiver Current route selection list.
- *
- * @param value Route ID to add or remove.
- * @return A new selection list; the original list is unchanged.
- */
-private fun List<String>.toggled(value: String): List<String> =
-    if (value in this) this - value else this + value
+private fun List<String>.toggledPlannerId(id: String): List<String> =
+    if (id in this) {
+        filterNot { it == id }
+    } else {
+        this + id
+    }

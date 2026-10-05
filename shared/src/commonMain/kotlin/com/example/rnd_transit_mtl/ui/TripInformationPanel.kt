@@ -19,10 +19,10 @@ import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 import kotlin.math.roundToInt
 
 /**
- * Displays the stored planner information.
+ * Displays the stored planner snapshot and its separate reference image.
  *
- * The reference URL is independent of the bundled mock map.
- * Opening it is delegated to the screen coordinator.
+ * Image loading does not control or replace the bundled mock map.
+ * Opening the original link remains delegated to the screen coordinator.
  */
 @Composable
 fun TripInformationPanel(
@@ -98,9 +98,14 @@ fun TripInformationPanel(
         )
 
         Text(
-            text = "Image reference",
+            text = "Reference image",
             style = MaterialTheme.typography.titleMedium,
             color = TransitMain
+        )
+
+        TripReferenceImage(
+            imageUrl = trip.imageUrl,
+            tripTitle = trip.title
         )
 
         SelectionContainer {
@@ -115,7 +120,10 @@ fun TripInformationPanel(
             onClick = onOpenImageReference,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Open image reference")
+            Text(
+                text = "Open image reference",
+                color = TransitMain
+            )
         }
 
         Text(
