@@ -239,7 +239,7 @@ fun TripHistoryCard(
                         overflow = TextOverflow.Ellipsis
                     )
                     if (review.imageUrl.isNotEmpty()) {
-                        Text("Image linked · expand to open",
+                        Text("Photo attached · expand to view",
                             style = MaterialTheme.typography.bodySmall)
                     }
                 }

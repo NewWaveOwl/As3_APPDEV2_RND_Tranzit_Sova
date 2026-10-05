@@ -203,7 +203,7 @@ fun ReviewQuestionCard(
                 isError = invalidUrl,
                 supportingText = {
                     Text(if (invalidUrl) "Paste only an HTTPS URL, or leave this empty."
-                        else "Optional photo link. Paste the URL only; it opens in your browser after saving.")
+                        else "Optional photo link. Paste the URL only; the photo appears in your saved review.")
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 modifier = Modifier.fillMaxWidth()

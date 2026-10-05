@@ -87,8 +87,19 @@ fun TripReviewSummary(
                 color = TransitWhite
             )
 
-            ReviewImageLink(imageUrl = review.imageUrl, contentColor = TransitWhite,
-                enabled = linksEnabled)
+            if (review.imageUrl.isNotBlank()) {
+                Text(
+                    text = "Review photo",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = TransitWhite
+                )
+                ReviewImage(imageUrl = review.imageUrl, enabled = linksEnabled)
+                ReviewImageLink(
+                    imageUrl = review.imageUrl,
+                    contentColor = TransitWhite,
+                    enabled = linksEnabled
+                )
+            }
         }
     }
 }

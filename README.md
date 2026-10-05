@@ -73,9 +73,13 @@ Overall experience also has an optional **Image link** field. A nonempty link mu
 use HTTPS with a valid host. Save trims it and attaches it to that review; editing
 loads the saved link, Cancel preserves it, and Skip discards the draft link. It is
 included in review draft/snapshot restoration. Older reviews without the new field
-restore with an empty link. Expand a reviewed History card or open details to copy
-the URL or press **Open review image**. The browser opens it only on that action;
-review images are linked rather than downloaded/displayed inside the app.
+restore with an empty link. Expand a reviewed History card or open details to see
+the photo loaded from the saved URL. A loading indicator appears while fetching;
+failure shows an explanation and **Retry image** without affecting the review.
+The full photo fits inside a rounded frame. You can also copy the URL or press
+**Open review image** to open it in your browser. Blank links show no photo area.
+The host must return an image; browser security or host restrictions may prevent
+some images loading on Web even when the URL opens in a separate browser tab.
 
 ## History and details
 

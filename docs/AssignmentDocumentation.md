@@ -43,8 +43,9 @@ Overall experience is required to save; Quality/Interesting/Fun/comment are opti
 
 Reviews also accept an optional HTTPS image link. The URL is part of the draft and
 saved TripReview, separate from Trip.imageUrl. Blank is valid; invalid URLs prevent
-Save without replacing old feedback. History expansion/details offer a copyable
-link and browser-open action. The browser is responsible for displaying the image.
+Save without replacing old feedback. History expansion/details render the saved
+photo in a rounded frame with loading, failure and retry states, plus a copyable
+link and browser-open fallback. Loading does not change saved feedback or trip state.
 The nickname plus later review URL still does not satisfy the handout's multiple
 text inputs/image link on the first content screen; that gap remains unresolved.
 
