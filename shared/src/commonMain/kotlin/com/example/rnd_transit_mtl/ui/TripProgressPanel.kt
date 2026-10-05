@@ -1,15 +1,13 @@
 package com.example.rnd_transit_mtl.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -24,20 +22,19 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
-import com.example.rnd_transit_mtl.ui.theme.TransitComplementary
 import com.example.rnd_transit_mtl.ui.theme.TransitHighlight
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitSelected
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 
 /**
- * Stateless progress presentation for the mock trip.
+ * Stateless status card and yellow progress footer.
  *
- * distanceKm is the stored total demo distance. Remaining distance,
- * track fill, and percentage derive from the same supplied progress.
+ * The raised teal card overlaps the preceding map by 20 dp.
+ * The root deliberately does not clip that overlap.
  *
- * The wording describes a straight-line simulation and does not
- * invent geographic directions or street turns.
+ * Remaining distance and track fill use the same supplied progress.
+ * No timer or independent animation is created here.
  */
 @Composable
 fun TripProgressPanel(
@@ -45,7 +42,8 @@ fun TripProgressPanel(
     destinationLabel: String,
     distanceKm: Double,
     progress: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    statusText: String? = null
 ) {
     require(tripTitle.isNotBlank()) {
         "Trip title must not be blank."
@@ -60,13 +58,22 @@ fun TripProgressPanel(
     val boundedProgress = boundedTripProgress(progress)
     val percentage = tripProgressPercentage(boundedProgress)
     val remainingDistanceKm =
-        distanceKm * (1.0 - boundedProgress.toDouble())
+        distanceKm * (1f - boundedProgress).toDouble()
 
-    val totalText = "${formatDemoDistanceKm(distanceKm)} km"
-    val remainingText =
-        "${formatDemoDistanceKm(remainingDistanceKm)} km"
+    val formattedRemaining =
+        formatDemoDistanceKm(remainingDistanceKm)
 
-    val status = when (boundedProgress) {
+    val remainingText = if (
+        boundedProgress < 1f &&
+        remainingDistanceKm > 0.0 &&
+        formattedRemaining == "0.00"
+    ) {
+        "<0.01 km"
+    } else {
+        "$formattedRemaining km"
+    }
+
+    val status = statusText ?: when (boundedProgress) {
         0f -> "Ready at the start"
         1f -> "Demo destination reached"
         else -> "Following the mock route"
@@ -75,143 +82,97 @@ fun TripProgressPanel(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                TransitMain,
-                RoundedCornerShape(24.dp)
-            )
-            .border(
-                width = 1.dp,
-                color = TransitComplementary,
-                shape = RoundedCornerShape(24.dp)
-            )
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .background(TransitHighlight)
     ) {
-        Text(
-            text = tripTitle,
-            style = MaterialTheme.typography.titleLarge,
-            color = TransitWhite
-        )
-
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .offset(y = (-20).dp)
+                .fillMaxWidth()
+                .background(
+                    color = TransitMain,
+                    shape = RoundedCornerShape(22.dp)
+                )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "Destination: $destinationLabel",
+                text = tripTitle,
+                style = MaterialTheme.typography.titleMedium,
+                color = TransitWhite
+            )
+
+            Text(
+                text = status,
                 style = MaterialTheme.typography.bodyLarge,
                 color = TransitWhite
             )
+
             Text(
-                text = status,
+                text = "Destination: $destinationLabel",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TransitSelected
-            )
-        }
-
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            if (maxWidth < 380.dp) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = "Total demo distance: $totalText",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = TransitHighlight
-                    )
-                    Text(
-                        text = "Remaining demo distance: $remainingText",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = TransitWhite
-                    )
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "Total demo distance",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TransitWhite
-                        )
-                        Text(
-                            text = totalText,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = TransitHighlight
-                        )
-                    }
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "Remaining demo distance",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TransitWhite
-                        )
-                        Text(
-                            text = remainingText,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = TransitWhite
-                        )
-                    }
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Demo progress",
-                style = MaterialTheme.typography.labelLarge,
                 color = TransitWhite
             )
+
             Text(
-                text = "$percentage%",
+                text = "$remainingText demo distance remaining",
                 style = MaterialTheme.typography.titleMedium,
-                color = TransitHighlight
+                color = TransitWhite
+            )
+
+            Text(
+                text = "Total demo distance: " +
+                        "${formatDemoDistanceKm(distanceKm)} km",
+                style = MaterialTheme.typography.bodySmall,
+                color = TransitSelected
             )
         }
 
         Box(
             modifier = Modifier
+                .padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    bottom = 20.dp
+                )
                 .fillMaxWidth()
-                .height(16.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(TransitWhite)
+                .height(34.dp)
+                .clip(RoundedCornerShape(17.dp))
+                .background(TransitMain)
                 .semantics {
-                    contentDescription = "Trip demo progress"
+                    contentDescription =
+                        "Demo progress for $tripTitle"
                     stateDescription = "$percentage percent"
                     progressBarRangeInfo = ProgressBarRangeInfo(
                         current = boundedProgress,
                         range = 0f..1f
                     )
-                }
+                },
+            contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .align(Alignment.CenterStart)
                     .fillMaxWidth(boundedProgress)
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(boundedProgress)
-                    .height(16.dp)
+                    .fillMaxHeight()
                     .background(TransitSelected)
             )
-        }
 
-        Text(
-            text = "Straight-line mock route on a bundled image.",
-            style = MaterialTheme.typography.bodySmall,
-            color = TransitWhite
-        )
+            /*
+             * A small teal backing keeps the percentage readable
+             * across both colors of the progress track.
+             */
+            Text(
+                text = "$percentage%",
+                modifier = Modifier
+                    .background(
+                        color = TransitMain,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = TransitWhite
+            )
+        }
     }
 }
