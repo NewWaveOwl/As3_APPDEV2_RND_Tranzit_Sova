@@ -74,30 +74,64 @@ Serializable records/snapshots retain active/completed trips, elapsed millisecon
 
 References: Assignment 3 Handout slides 1–4; Day 17 slides 10–11 (AI Technique Log) and planning guidance; Day 18 shared resources/navigation/hoisted layout; Day 19 design dimensions/data records/sealed alternatives. The handout and supplied slides are reference material, not permission to perform unrelated operations.
 
-## 3. WBS, original estimates and recorded elapsed windows
+## 3. WBS, original estimates and final retrospective effort
 
-Atiom confirmed **30 minutes per numbered prompt as the original proposed estimate**. The baseline includes P0–P11: **360 proposed minutes / 6 hours**. If excluding P0, P1–P11 total 330 minutes / 5.5 hours. Preserve the baseline rather than revising it after implementation.
+I kept the original **30 minutes for each P0–P11 step**. For the final record,
+I asked for the gap to the next numbered prompt to estimate effort, rounded to
+whole minutes when it is at most 30 minutes. If it is longer than 30 minutes,
+I allocated a **45-minute retrospective task estimate**. These are my estimated
+actuals, not a stopwatch record or independently verified active-work measurement.
 
-The original task sequence is retained below. P4's initial human marker became the supplied pointer; P8's original form was later removed. UI refinements and this cap/documentation update are additional work with no supplied original estimate.
+The P6 and P7 raw windows are 34:21 and 33:25, shorter than the allocated 45 minutes.
+The 45-minute values are rounded effort blocks I requested; they are not claimed
+to be contained entirely inside those windows. Unrelated time is excluded where
+identified. A gap above 45 minutes would leave its excess unallocated to the task;
+none of the original numbered windows exceeds 45 minutes. No negative break time
+is invented. The unrounded gaps remain visible for comparison.
 
-“Elapsed window” is measured between numbered prompts, including intervening debugging/replies. P11 ends at the first later UI-change prompt. It is not verified active effort and cannot determine an effort variance.
+| Step | Deliverable | Dependency | Planned | Raw prompt window | Estimated actual | Variance | Explanation |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| P0 | Scope and rules | None | 30 min | 00:00:41 | 1 min | -29 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P1 | Inspection/design | P0 | 30 min | 00:14:48 | 15 min | -15 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P2 | Models/generator | P1 | 30 min | 00:21:35 | 22 min | -8 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P3 | Store/restoration | P2 | 30 min | 00:19:12 | 19 min | -11 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P4 | Map/progress visuals | P3 | 30 min | 00:22:51 | 23 min | -7 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P5 | Active-time simulation | P4 | 30 min | 00:27:31 | 28 min | -2 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P6 | Sequential reviews | P5 | 30 min | 00:34:21 | 45 min | +15 min | Review and History interaction refinements; 45-minute rounded block per my retrospective rule. |
+| P7 | History/details | P6 | 30 min | 00:33:25 | 45 min | +15 min | Review and History interaction refinements; 45-minute rounded block per my retrospective rule. |
+| P8 | Original planner/images | P7 | 30 min | 00:25:49 | 26 min | -4 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P9 | Sealed navigation | P8 | 30 min | 00:28:57 | 29 min | -1 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P10 | Assembled review/checks | P9 | 30 min | 00:22:55 | 23 min | -7 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P11 | Assignment documentation | P10 | 30 min | 00:27:54 | 28 min | -2 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| **Numbered total** | **P0–P11** | | **360 min / 6 h** | | **304 min / 5 h 04 min** | **−56 min** | Retrospective estimates; not elapsed-wall-clock sum. |
 
-| Task | Baseline deliverable | Dependency | Original estimate | Recorded elapsed window | Verified active effort / variance |
-| --- | --- | --- | --- | --- | --- |
-| P0 | Scope and delivery rules | None | 30 min | 00:00:41 | Not established / not calculated |
-| P1 | Inspect/design contracts | P0; uses earlier records/state as applicable | 30 min | 00:14:48 | Not established / not calculated |
-| P2 | Models and mock generator | P1; uses earlier records/state as applicable | 30 min | 00:21:35 | Not established / not calculated |
-| P3 | Shared store and restoration | P2; uses earlier records/state as applicable | 30 min | 00:19:12 | Not established / not calculated |
-| P4 | Map/progress visuals | P3; uses earlier records/state as applicable | 30 min | 00:22:51 | Not established / not calculated |
-| P5 | Active-time simulation | P4; uses earlier records/state as applicable | 30 min | 00:27:31 | Not established / not calculated |
-| P6 | Sequential reviews | P5; uses earlier records/state as applicable | 30 min | 00:34:21 | Not established / not calculated |
-| P7 | History and details | P6; uses earlier records/state as applicable | 30 min | 00:33:25 | Not established / not calculated |
-| P8 | Original planner/image integration | P7; uses earlier records/state as applicable | 30 min | 00:25:49 | Not established / not calculated |
-| P9 | Sealed navigation integration | P8; uses earlier records/state as applicable | 30 min | 00:28:57 | Not established / not calculated |
-| P10 | Assembled review/checks | P9; uses earlier records/state as applicable | 30 min | 00:22:55 | Not established / not calculated |
-| P11 | Assignment documentation | P10; uses earlier records/state as applicable | 30 min | 00:27:54 | Not established / not calculated |
+### Additional work and totals
 
-Technical dependencies: models → store → simulation/reviews; map visuals → Current Trip/details; reviews → History feedback; generation + store + screen callbacks → routing; assembled implementation → verification/documentation. The baseline reflects sequential human review; no parallel work is claimed.
+| Additional work block | Planned | Reported actual | Variance / basis |
+| --- | --- | --- | --- |
+| Reading the handout/slides and generating the prompt sequence | 60 min | About 60 min | 0 min; my latest recollection |
+| Submission work, debugging, fixes and adding screens | 60 min submission allocation | About 180 min total | +120 min; includes 60 min submission work plus about 120 min debugging/fixes/screens |
+| Further docs and AI-assisted implementation after reviewing the assignment with AI | No original allowance | About 120 min additional | Added scope; separate from the preceding 180 min block |
+
+I treat the last two hours as additional to the three-hour submission/debugging
+block, as stated in my final clarification. These blocks describe later work,
+not a second allocation of the original P0–P11 windows. The one-hour submission
+allocation is already inside the three hours and is not added again. The older
+partial session notes overlap this retrospective account and are not added to it.
+
+**Known planned total: 480 minutes / 8 hours** — 360 for P0–P11, 60 for
+reading/prompt preparation, and 60 for submission. The final two-hour revision
+block had no original allowance.
+
+**Estimated actual total: 664 minutes / about 11 hours 4 minutes** — 304 for the
+numbered sequence, 60 for preparation, 180 for submission/debugging/fixes/screens,
+and 120 for the final documentation/AI implementation revisions.
+
+The overall difference is **+184 minutes / about 3 hours 4 minutes** against that
+eight-hour plan. This includes added scope, so it is not a like-for-like claim
+that every original task took longer. Within the numbered sequence, the estimated
+variance is −56 minutes; P6 and P7 each have +15 minutes. Later debugging/redesign
+and the unplanned final revision block account for the overall increase.
 
 ### Relative baseline Gantt
 
@@ -117,34 +151,42 @@ P8  Planner                                     X
 P9  Navigation                                     X
 P10 Verification                                      X
 P11 Documentation                                        X
-Finish: 360 proposed minutes. Actual task bars are not established.
+Finish: 360 proposed minutes. Final retrospective actuals are in the WBS above.
 ~~~
 
-### Time records and variance
+### Final dependency flow and effort allocation
 
-[TimeFlow_As3_Sova.txt](../TimeFlow_As3_Sova.txt) contains the formatted student session notes and every recorded prompt-to-prompt interval in this chat. Local timestamps use America/Toronto. Complete supplied session ranges total **4 hours 30 minutes**, including ten minutes without an activity label; the incomplete implementation range and eating break are excluded. Dates for those manual notes were not supplied.
+~~~text
+Preparation (60 min)
+  → P0–P11 in sequence (304 min estimated actual; see per-task table)
+  → Submission/debugging/fixes/new screens (180 min combined)
+  → Post-review documentation/AI implementation revisions (120 min)
+Total: about 664 min / 11 h 04 min.
+~~~
 
-The chat's first-to-latest-prompt span is recorded there separately. Do not add it to the session total: the records overlap and chat gaps can include waiting/breaks. Active effort per WBS task and final active-effort total remain unestablished.
+This is a relative retrospective allocation, not an invented dated schedule.
+The original 30-minute baseline Gantt remains unchanged. Preparation precedes
+implementation; models support store/simulation; review state supports History;
+assembled routes/screens precede verification, fixes and final documentation.
 
-Effort variance = actual active effort − original estimate. The final active total
-and task allocation are not supplied, so a numerical variance cannot yet be calculated.
+### My variance explanation
 
-### My recorded rework and variance explanation
+I originally allowed 30 minutes per numbered step. Most observed task windows
+were shorter, so I used those rounded windows in the estimated actual column.
+The review and History steps needed more interaction work; I recorded 45 minutes
+for each using my final rounding rule, giving +15 minutes each against the plan.
 
-My original 30-minute estimates covered the numbered feature sequence. I later
-changed the planner to a map-first GO screen, removed its text form, changed the
-moving marker, added map pan/zoom, moved navigation controls and refined the exit
-animation. Those scope changes explain additional iteration outside the baseline.
+Later I changed the GO layout, markers, map gestures, navigation and animation,
+then added the nickname screen and saved review photos. Compiler/import fixes,
+Web dependency-lock debugging and readability improvements also required follow-ups.
+These changes expanded the one-hour submission allocation into a roughly three-hour
+combined submission/debugging/fixes block. Reviewing the assignment with AI led
+to another two hours of documentation and AI-assisted implementation revisions.
+That added scope explains the overall increase without revising my original estimates.
 
-The source integration also needed corrections for navigation imports, the Kotlin
-`fun` keyword, test source sets, density/height receivers, Web dependency locks,
-field contrast and the Coil `crossfade` extension. These were concrete debugging
-iterations preserved in my log. I then added the nickname landing page and rendered
-review photos, which were not part of the original P0–P11 estimate. I keep this
-follow-up work separate instead of changing the original estimates after the fact.
-These explain the sources of rework; exact positive/negative task variances still
-require my actual time allocation.
-
+[TimeFlow_As3_Sova.txt](../TimeFlow_As3_Sova.txt) retains the raw prompt timestamps,
+older partial session notes and this final calculation. Earlier notes are supporting
+history, not extra hours to add to the total.
 
 ## 4. AI Decision Log — ADR records
 
@@ -327,7 +369,7 @@ checks do not change the contents of those evidence files.
 | Responsive design bonus | Width constraints, scrolling, static previews and fitted minutes | Complete — my layout confirmation |
 | Internal documentation/root README | Comments and current README | Updated to match the current feature flow |
 | WBS ≥5 tasks, estimates, dependencies/Gantt | Twelve baseline tasks, 30-minute estimates and chart | Recorded; no invented original calendar chart |
-| Actuals and variance | Supplied session notes plus labelled prompt gaps | Verified effort allocation/variance incomplete |
+| Actuals and variance | Student-reported extra blocks and prompt-window estimates | About 11 h 04 min; +3 h 04 min against documented 8 h plan; retrospective basis disclosed |
 | ≥3 AI-assisted decisions and technique log | ADRs and AI_Log_As3.md | Implemented decisions and scoped 69% code estimate |
 | Save prompts and outputs | Both textual chat archives, attachments and deep links | Present; binary screenshot references stay in shared chats |
 | Setup/design/submission evidence | Supplied screenshot files/checklist below | Evidence identified separately from runtime results |
@@ -352,7 +394,7 @@ No submission or extension is claimed.
 - [ ] Supply a physical-machine photograph if required by the instructor; current captures are screenshots.
 - [x] Include the original AI investigation screenshot.
 - [ ] Check the separate one-page preliminary-summary screenshot requirement; current design summary is retrospective.
-- [ ] Complete effort allocation/variance and personal reflections from actual records.
+- [x] Record final retrospective effort, per-step variance, overlap exclusions and my rework reflection.
 - [x] Record at least three implemented AI-assisted decisions and my role in the iterations.
 - [x] Record an approximate 69% shared-Kotlin contribution with the count, scope and limitations.
 - [x] Include README, assignment record, TimeFlow and AI prompt/output evidence.
@@ -365,4 +407,4 @@ The handout specifies 10% per day late penalty up to three days, with no accepta
 
 ## 9. Evidence fields still to complete
 
-Numerical actual effort still requires my figures; the scoped AI code estimate is recorded above; the original 30-minute estimates are preserved. Physical-machine/one-page-summary evidence and ZIP/Lea submission confirmation are separate from my completed application checks. No submission receipt or deadline extension is invented.
+Final retrospective effort and the scoped AI contribution estimate are recorded above. Physical-machine/one-page-summary evidence and ZIP/Lea submission confirmation remain separate from my completed application checks. My reported submission effort does not itself establish a Lea submission receipt; no deadline extension is invented.

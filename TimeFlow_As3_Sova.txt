@@ -11,7 +11,8 @@ B. Chat intervals are measured from one human prompt/reply timestamp to the next
    They can include AI response time, debugging, waiting and breaks. They are not
    independently verified active-work durations. Do not add A and B together.
 C. Original estimate remains 30 minutes per numbered prompt (0–11: 6 hours).
-   Prompt gaps do not replace that original estimate.
+   My final retrospective actuals use the prompt-window rule recorded below, plus
+   reported preparation/follow-up blocks. They are estimates, not timed measurements.
 
 A. SELF-REPORTED SESSION NOTES
 --------------------------------------------------------------------------------------
@@ -36,325 +37,370 @@ break duration are not included. This is not a complete verified project total.
 B. RECORDED PROMPT-TO-PROMPT INTERVALS — THIS CHAT
 --------------------------------------------------------------------------------------
 Timezone: America/Toronto (EDT / UTC-04:00 for these recorded dates).
-I keep elapsed prompt gaps separate from active effort; they include response
-time, waiting and breaks. Do not add them to my overlapping session notes.
+Raw gaps include waiting/breaks; my estimated actual allocation is in section C.
+Do not add raw gaps to the reported blocks or historical session notes.
 
 01. Project context, complete feature specification, and response rules I will use this chat to extend my exi
     Prompt: 2026-10-04 18:57:09 EDT
     Next:   2026-10-04 18:57:50 EDT
-    Gap:    00:00:41 (elapsed, not active effort)
+    Gap:    00:00:41 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-001
 
 02. **Inspect the project and establish the design** Follow Prompt 0. This is a design step. Do not write fil
     Prompt: 2026-10-04 18:57:50 EDT
     Next:   2026-10-04 19:12:38 EDT
-    Gap:    00:14:48 (elapsed, not active effort)
+    Gap:    00:14:48 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-002
 
 03. **&#x20;Generate models and the mock-trip generator** Follow Prompt 0. Generate complete files in chat fo
     Prompt: 2026-10-04 19:12:38 EDT
     Next:   2026-10-04 19:31:54 EDT
-    Gap:    00:19:16 (elapsed, not active effort)
+    Gap:    00:19:16 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-003
 
 04. @Serializable\ data class TripReview(\ &#x20; val overall: Int,\ &#x20; val quality: Int? = null,\ &#x20;
     Prompt: 2026-10-04 19:31:54 EDT
     Next:   2026-10-04 19:34:13 EDT
-    Gap:    00:02:20 (elapsed, not active effort)
+    Gap:    00:02:20 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-004
 
 05. **Prompt 3: Generate TripsStore, the provider, and saved-state restoration** Follow Prompt 0. Generate th
     Prompt: 2026-10-04 19:34:13 EDT
     Next:   2026-10-04 19:45:28 EDT
-    Gap:    00:11:14 (elapsed, not active effort)
+    Gap:    00:11:14 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-005
 
 06. Unresolved reference 'rememberNavBackStack'. in - >fun App() {\ &#x20; val backStack = rememberNavBackSta
     Prompt: 2026-10-04 19:45:28 EDT
     Next:   2026-10-04 19:53:26 EDT
-    Gap:    00:07:58 (elapsed, not active effort)
+    Gap:    00:07:58 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-006
 
 07. **Prompt 4: Generate MockTripMap, the orange person, and progress visuals** Follow Prompt 0. Generate reu
     Prompt: 2026-10-04 19:53:26 EDT
     Next:   2026-10-04 20:14:04 EDT
-    Gap:    00:20:38 (elapsed, not active effort)
+    Gap:    00:20:38 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-007
 
 08. verify that trip looks similar to my mock-up <image name=[Image #1] path="C:\Users\NEWWAV~1\AppData\Local
     Prompt: 2026-10-04 20:14:04 EDT
     Next:   2026-10-04 20:16:17 EDT
-    Gap:    00:02:13 (elapsed, not active effort)
+    Gap:    00:02:13 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-008
 
 09. **Prompt 5: Generate CurrentTripScreen and the 10-second simulation** Follow Prompt 0. Generate CurrentTr
     Prompt: 2026-10-04 20:16:17 EDT
     Next:   2026-10-04 20:37:03 EDT
-    Gap:    00:20:46 (elapsed, not active effort)
+    Gap:    00:20:46 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-009
 
 10. in this file I have a lot of erros : Unresolved reference 'test'. Unresolved reference 'test'. Unresolved
     Prompt: 2026-10-04 20:37:03 EDT
     Next:   2026-10-04 20:43:49 EDT
-    Gap:    00:06:45 (elapsed, not active effort)
+    Gap:    00:06:45 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-010
 
 11. **Prompt 6: Generate TripReviewScreen and reusable star ratings** Follow Prompt 0. Generate the review sc
     Prompt: 2026-10-04 20:43:49 EDT
     Next:   2026-10-04 20:58:52 EDT
-    Gap:    00:15:04 (elapsed, not active effort)
+    Gap:    00:15:04 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-011
 
 12. TripReview we have the mopel already: package com.example.rnd_transit_mtl.model\ \ import kotlinx.seriali
     Prompt: 2026-10-04 20:58:52 EDT
     Next:   2026-10-04 21:08:06 EDT
-    Gap:    00:09:14 (elapsed, not active effort)
+    Gap:    00:09:14 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-012
 
 13. - failed &#x20; - New Minor Gradle Version Available &#x20; - Download info &#x20; - :shared:compileKotli
     Prompt: 2026-10-04 21:08:06 EDT
     Next:   2026-10-04 21:18:09 EDT
-    Gap:    00:10:03 (elapsed, not active effort)
+    Gap:    00:10:03 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-013
 
 14. **Prompt 7: Generate real History, history cards, and trip details** Follow Prompt 0. Replace History pla
     Prompt: 2026-10-04 21:18:09 EDT
     Next:   2026-10-04 21:51:34 EDT
-    Gap:    00:33:25 (elapsed, not active effort)
+    Gap:    00:33:25 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-014
 
 15. **Prompt 8: Replace GO behavior and add assignment-aligned planner inputs** Follow Prompt 0. Update the p
     Prompt: 2026-10-04 21:51:34 EDT
     Next:   2026-10-04 21:55:52 EDT
-    Gap:    00:04:18 (elapsed, not active effort)
+    Gap:    00:04:18 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-015
 
 16. <send_user_message_question_reply> [{"questionItemId":"[\"request_user_input_async\",\"call_MMzdhtnfgvXSR
     Prompt: 2026-10-04 21:55:52 EDT
     Next:   2026-10-04 22:17:22 EDT
-    Gap:    00:21:31 (elapsed, not active effort)
+    Gap:    00:21:31 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-016
 
 17. **Prompt 9: Integrate sealed routes and the complete Navigation 3 flow** Follow Prompt 0. Generate final
     Prompt: 2026-10-04 22:17:22 EDT
     Next:   2026-10-04 22:46:19 EDT
-    Gap:    00:28:57 (elapsed, not active effort)
+    Gap:    00:28:57 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-017
 
 18. **Prompt 10: Review the assembled code and provide verification** Follow Prompt 0. Do not write files or
     Prompt: 2026-10-04 22:46:19 EDT
     Next:   2026-10-04 23:09:15 EDT
-    Gap:    00:22:55 (elapsed, not active effort)
+    Gap:    00:22:55 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-018
 
 19. **Prompt 11: Generate accurate assignment documentation** Follow Prompt 0. Generate documentation in chat
     Prompt: 2026-10-04 23:09:15 EDT
     Next:   2026-10-04 23:12:11 EDT
-    Gap:    00:02:57 (elapsed, not active effort)
+    Gap:    00:02:57 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-019
 
 20. <send_user_message_question_reply> [{"questionItemId":"[\"request_user_input_async\",\"call_28lTturz7fqEc
     Prompt: 2026-10-04 23:12:11 EDT
     Next:   2026-10-04 23:13:10 EDT
-    Gap:    00:00:58 (elapsed, not active effort)
+    Gap:    00:00:58 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-020
 
 21. <send_user_message_question_reply> [{"questionItemId":"[\"request_user_input_async\",\"call_Mun55AfiibzYt
     Prompt: 2026-10-04 23:13:10 EDT
     Next:   2026-10-04 23:37:08 EDT
-    Gap:    00:23:58 (elapsed, not active effort)
+    Gap:    00:23:58 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-021
 
 22. I need to fix screen. Why we have url there??? Go should be as before <image name=[Image #1] path="C:\Use
     Prompt: 2026-10-04 23:37:08 EDT
     Next:   2026-10-04 23:43:40 EDT
-    Gap:    00:06:31 (elapsed, not active effort)
+    Gap:    00:06:31 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-022
 
 23. I need to fix screen. Why we have url there??? Go should be as before in the middle of the screen. ,plan
     Prompt: 2026-10-04 23:43:40 EDT
     Next:   2026-10-05 00:00:57 EDT
-    Gap:    00:17:17 (elapsed, not active effort)
+    Gap:    00:17:17 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-023
 
 24. why we have floting grren thing on top right , it shoi; not be there. the bottom of main go scrren the pa
     Prompt: 2026-10-05 00:00:57 EDT
     Next:   2026-10-05 00:14:16 EDT
-    Gap:    00:13:19 (elapsed, not active effort)
+    Gap:    00:13:19 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-024
 
 25. write a commit messege for this in the caht
     Prompt: 2026-10-05 00:14:16 EDT
     Next:   2026-10-05 00:14:51 EDT
-    Gap:    00:00:35 (elapsed, not active effort)
+    Gap:    00:00:35 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-025
 
 26. write a commit messege for this in the caht ( in oneline )
     Prompt: 2026-10-05 00:14:51 EDT
     Next:   2026-10-05 00:15:43 EDT
-    Gap:    00:00:52 (elapsed, not active effort)
+    Gap:    00:00:52 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-026
 
 27. 'val maxHeight: Dp' cannot be called in this context with an implicit receiver. Use an explicit receiver
     Prompt: 2026-10-05 00:15:43 EDT
     Next:   2026-10-05 00:27:31 EDT
-    Gap:    00:11:48 (elapsed, not active effort)
+    Gap:    00:11:48 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-027
 
 28. remove about from top bar, keep it in profilethis Attraction intecity bar , the grren filler should fill
     Prompt: 2026-10-05 00:27:31 EDT
     Next:   2026-10-05 00:54:19 EDT
-    Gap:    00:26:48 (elapsed, not active effort)
+    Gap:    00:26:48 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-028
 
 29. lest move settings to the right corner of the nav bar <image name=[Image #1] path="C:\Users\NEWWAV~1\AppD
     Prompt: 2026-10-05 00:54:19 EDT
     Next:   2026-10-05 00:57:00 EDT
-    Gap:    00:02:41 (elapsed, not active effort)
+    Gap:    00:02:41 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-029
 
 30. MAk animantio between GO and Current trip slower ( remined Types of tranport, Attrciotn intenceit ytslide
     Prompt: 2026-10-05 00:57:00 EDT
     Next:   2026-10-05 01:00:01 EDT
-    Gap:    00:03:01 (elapsed, not active effort)
+    Gap:    00:03:01 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-030
 
 31. when you pres GO , all UI ellemts of main scrren should slid down Even GO box asa aslo the res of boxes (
     Prompt: 2026-10-05 01:00:01 EDT
     Next:   2026-10-05 01:04:13 EDT
-    Gap:    00:04:12 (elapsed, not active effort)
+    Gap:    00:04:12 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-031
 
 32. The transition betweeenMAin scrren with GO is stilll instant to the Current trip, why?
     Prompt: 2026-10-05 01:04:13 EDT
     Next:   2026-10-05 01:11:10 EDT
-    Gap:    00:06:57 (elapsed, not active effort)
+    Gap:    00:06:57 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-032
 
 33. ASlo add oppotunit to cancnel curen trip when you press Current trip and add cradient to current trip tex
     Prompt: 2026-10-05 01:11:10 EDT
     Next:   2026-10-05 01:18:00 EDT
-    Gap:    00:06:50 (elapsed, not active effort)
+    Gap:    00:06:50 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-033
 
 34. According to AI log tamplete geenerat AI_Log_As3.md. file with full popmts and uoutputs form this caht (
     Prompt: 2026-10-05 01:18:00 EDT
     Next:   2026-10-05 01:36:48 EDT
-    Gap:    00:18:48 (elapsed, not active effort)
+    Gap:    00:18:48 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-034
 
 35. Alos update minunts in main scren make them that you can noot put more the n 999 and inshre that three nu
     Prompt: 2026-10-05 01:36:48 EDT
     Next:   2026-10-05 01:42:36 EDT
-    Gap:    00:05:48 (elapsed, not active effort)
+    Gap:    00:05:48 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-035
 
 36. lets keep the max time as 360 for go
     Prompt: 2026-10-05 01:42:36 EDT
     Next:   2026-10-05 01:55:55 EDT
-    Gap:    00:13:19 (elapsed, not active effort)
+    Gap:    00:13:19 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-036
 
 37. when it goes up to max top arrow should diapear and the same when it goes up to zero
     Prompt: 2026-10-05 01:55:55 EDT
     Next:   2026-10-05 02:04:20 EDT
-    Gap:    00:08:25 (elapsed, not active effort)
+    Gap:    00:08:25 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-037
 
 38. for windwos adn for Web make the box for Transport on top be roundsih to be more niceer. why my web app i
     Prompt: 2026-10-05 02:04:20 EDT
     Next:   2026-10-05 02:22:28 EDT
-    Gap:    00:18:07 (elapsed, not active effort)
+    Gap:    00:18:07 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-038
 
 39. veriviy that project done and ready for submmsiio. Update Ai log to include yhis and missing porpmts.
     Prompt: 2026-10-05 02:22:28 EDT
     Next:   2026-10-05 02:34:10 EDT
-    Gap:    00:11:43 (elapsed, not active effort)
+    Gap:    00:11:43 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-039
 
 40. waht this mean? I need to add scrrren for inputs? like seaprate? by the assignment?
     Prompt: 2026-10-05 02:34:10 EDT
     Next:   2026-10-05 02:35:19 EDT
-    Gap:    00:01:09 (elapsed, not active effort)
+    Gap:    00:01:09 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-040
 
 41. Can we make as first sedcrre login scrrene ( you cn put any user name it will be depicted in profli witho
     Prompt: 2026-10-05 02:35:19 EDT
     Next:   2026-10-05 02:37:20 EDT
-    Gap:    00:02:01 (elapsed, not active effort)
+    Gap:    00:02:01 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-041
 
 42. So lets add landing scrren with simple login with a nick name, add appotuini to link image to the revie a
     Prompt: 2026-10-05 02:37:20 EDT
     Next:   2026-10-05 02:51:25 EDT
-    Gap:    00:14:04 (elapsed, not active effort)
+    Gap:    00:14:04 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-042
 
 43. For etter in the first box make them cosntart as righ no they the same cloru as backgornd.
     Prompt: 2026-10-05 02:51:25 EDT
     Next:   2026-10-05 02:54:57 EDT
-    Gap:    00:03:33 (elapsed, not active effort)
+    Gap:    00:03:33 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-043
 
 44. same for the link text , aslos how it works, i amdding iamge lijnk like this and it does notallow me to c
     Prompt: 2026-10-05 02:54:57 EDT
     Next:   2026-10-05 02:55:53 EDT
-    Gap:    00:00:56 (elapsed, not active effort)
+    Gap:    00:00:56 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-044
 
 45. same for the link text amke it contrast as text in review, aslos how it works, i amdding iamge lijnk like
     Prompt: 2026-10-05 02:55:53 EDT
     Next:   2026-10-05 03:04:32 EDT
-    Gap:    00:08:39 (elapsed, not active effort)
+    Gap:    00:08:39 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-045
 
 46. Shoul we make image renderable on scrren for revie? Or it is fine for submision like this?
     Prompt: 2026-10-05 03:04:32 EDT
     Next:   2026-10-05 03:05:20 EDT
-    Gap:    00:00:47 (elapsed, not active effort)
+    Gap:    00:00:47 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-046
 
 47. Implemt render of imamge in review history
     Prompt: 2026-10-05 03:05:20 EDT
     Next:   2026-10-05 03:09:30 EDT
-    Gap:    00:04:11 (elapsed, not active effort)
+    Gap:    00:04:11 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-047
 
 48. - failed &#x20; - New Minor Gradle Version Available &#x20; - Download info &#x20; - :shared:compileAndro
     Prompt: 2026-10-05 03:09:30 EDT
     Next:   2026-10-05 03:13:16 EDT
-    Gap:    00:03:46 (elapsed, not active effort)
+    Gap:    00:03:46 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-048
 
 49. Assihnmet3 scrrenshots are here K:\CLASSES 26 FALL\APP_DEV\As3\MainRepo\As3_APPDEV2_RND_Tranzit_Sova\As3_
     Prompt: 2026-10-05 03:13:16 EDT
-    Gap:    Latest recorded human request; no next prompt yet.
+    Next:   2026-10-05 12:21:31 EDT
+    Gap:    09:08:14 (raw elapsed interval)
     Text:   AI_Log_As3.md#b-turn-049
 
-C. ORIGINAL PROMPT ESTIMATES AND MEASURED ELAPSED WINDOWS
+50. what does it mean, what i need to do?
+    Prompt: 2026-10-05 12:21:31 EDT
+    Next:   2026-10-05 12:25:35 EDT
+    Gap:    00:04:04 (raw elapsed interval)
+    Text:   AI_Log_As3.md#b-turn-050
+
+51. put planees 30 mins for ech step of propmt sequnce(in rality use actual time between porpmt sequone to de
+    Prompt: 2026-10-05 12:25:35 EDT
+    Gap:    Latest recorded human request; no next prompt yet.
+    Text:   AI_Log_As3.md#b-turn-051
+
+C. FINAL RETROSPECTIVE EFFORT, ORIGINAL ESTIMATES AND VARIANCE
 --------------------------------------------------------------------------------------
-Each P0–P11 window ends at the next numbered prompt. P11 ends at the first later
-UI-change prompt. These windows include intervening clarification/debugging replies.
+I kept the original 30 minutes for each P0–P11 step. For the final record,
+I asked for the gap to the next numbered prompt to estimate effort, rounded to
+whole minutes when it is at most 30 minutes. If it is longer than 30 minutes,
+I allocated a 45-minute retrospective task estimate. These are my estimated
+actuals, not a stopwatch record or independently verified active-work measurement.
 
-Task   Original estimate   Elapsed window   Verified active effort
-----   -----------------   --------------   ----------------------
-P0     00:30               00:00:41         Not established
-P1     00:30               00:14:48         Not established
-P2     00:30               00:21:35         Not established
-P3     00:30               00:19:12         Not established
-P4     00:30               00:22:51         Not established
-P5     00:30               00:27:31         Not established
-P6     00:30               00:34:21         Not established
-P7     00:30               00:33:25         Not established
-P8     00:30               00:25:49         Not established
-P9     00:30               00:28:57         Not established
-P10    00:30               00:22:55         Not established
-P11    00:30               00:27:54         Not established
+The P6 and P7 raw windows are 34:21 and 33:25, shorter than the allocated 45 minutes.
+The 45-minute values are rounded effort blocks I requested; they are not claimed
+to be contained entirely inside those windows. Unrelated time is excluded where
+identified. A gap above 45 minutes would leave its excess unallocated to the task;
+none of the original numbered windows exceeds 45 minutes. No negative break time
+is invented. The unrounded gaps remain visible for comparison.
 
-Original total: 06:00 (360 minutes).
-Active-effort variance cannot be computed from elapsed windows alone.
-Later UI/debugging/documentation prompts have no supplied original estimates.
+Step   Planned   Raw window   Estimated actual   Variance
+----   -------   ----------   ----------------   --------
+P0     30 min    00:00:41      1 min             -29 min
+P1     30 min    00:14:48     15 min             -15 min
+P2     30 min    00:21:35     22 min             -8 min
+P3     30 min    00:19:12     19 min             -11 min
+P4     30 min    00:22:51     23 min             -7 min
+P5     30 min    00:27:31     28 min             -2 min
+P6     30 min    00:34:21     45 min             +15 min
+P7     30 min    00:33:25     45 min             +15 min
+P8     30 min    00:25:49     26 min             -4 min
+P9     30 min    00:28:57     29 min             -1 min
+P10    30 min    00:22:55     23 min             -7 min
+P11    30 min    00:27:54     28 min             -2 min
+
+Numbered total: planned 360 min; estimated actual 304 min; variance -56 min.
+
+ADDITIONAL WORK I REPORTED
+
+Preparation: planned 60 min; reported actual about 60 min.
+Submission + debugging/fixes/new screens: planned submission 60 min; reported
+combined actual about 180 min. Submission is included, not added twice.
+Final docs + AI implementation revisions after the assignment review: about
+120 additional min, with no original allocation.
+
+Known planned total: 480 minutes / 8 hours — 360 for P0–P11, 60 for
+reading/prompt preparation, and 60 for submission. The final two-hour revision
+block had no original allowance.
+
+Estimated actual total: 664 minutes / about 11 hours 4 minutes — 304 for the
+numbered sequence, 60 for preparation, 180 for submission/debugging/fixes/screens,
+and 120 for the final documentation/AI implementation revisions.
+
+The overall difference is +184 minutes / about 3 hours 4 minutes against that
+eight-hour plan. This includes added scope, so it is not a like-for-like claim
+that every original task took longer. Within the numbered sequence, the estimated
+variance is −56 minutes; P6 and P7 each have +15 minutes. Later debugging/redesign
+and the unplanned final revision block account for the overall increase.
+
+These values supersede the incomplete actual-effort fields in earlier records.
+Section A remains my older partial notes; do not add its 270 minutes to this total.
 
 D. SOURCES AND COMPLETION FIELDS
 --------------------------------------------------------------------------------------
@@ -368,7 +414,8 @@ https://chatgpt.com/s/cx_6ac332cd06d48191a686a0a3777468a1
 Complete text transcripts and deep links: AI_Log_As3.md.
 Dates for the manually written sessions: Atiom to confirm.
 Missing implementation start/end and unlabeled activity: Atiom to complete.
-Verified active-work total and variance explanation: Atiom to complete.
+Final retrospective total: about 11 hours 4 minutes; +3 hours 4 minutes
+against the documented 8-hour plan. Basis and overlap exclusions are in section C.
 Documented implementation revision: 9612d72.
 Final Android, Desktop and Web checks: complete, confirmed by me on 5 October 2026.
 AI did not run builds/tests for the documentation update.

@@ -8,7 +8,7 @@ AI tool: **ChatGPT / Codex**. Exact model/version for each historical response i
 
 This document follows the **AI Technique Log Template on slide 11** of [Day 17 — Shared Layout, Group Gantt Chart and AI Technique Log](<K:/CLASSES 26 FALL/APP_DEV/powerpoints/AppDev2_Day_17_SharedLayout_Group-GanttChart_AITechniqueLog_after.pptx>). Slide 10 calls for an entry per key coding or design challenge, rather than per minor prompt, and says the technique log supplements the full conversations. Accordingly, the challenge entries below are followed by complete retrieved textual prompts and assistant responses.
 
-I used ChatGPT/Codex to plan, implement and refine this assignment. I supplied the feature requirements, map mockups and icons, reviewed the output, reported failures and chose the later UI changes. The historical entries retain the status recorded at the time; my latest confirmation below supersedes earlier pending application-check wording. Actual time still requires my figures. The approximate 69% shared-Kotlin contribution now has an explicit file/line-count basis below; no personal working time is inferred from timestamps.
+I used ChatGPT/Codex to plan, implement and refine this assignment. I supplied the feature requirements, map mockups and icons, reviewed the output, reported failures and chose the later UI changes. The historical entries retain the status recorded at the time; my latest confirmation below supersedes earlier pending application-check wording. My final retrospective effort allocation is now supplied and recorded below. The approximate 69% shared-Kotlin contribution now has an explicit file/line-count basis below; no personal working time is inferred from timestamps.
 
 ## Contents
 
@@ -25,6 +25,7 @@ I used ChatGPT/Codex to plan, implement and refine this assignment. I supplied t
 - [User-edited documentation snapshot](#edited-document-snapshot)
 - [Final confirmation and documentation update](#final-student-confirmation)
 - [Review photos and contrast corrections](#review-photos-update)
+- [Final effort clarification](#final-effort-clarification)
 - [Student completion checklist](#completion-checklist)
 
 <a id="sources"></a>
@@ -41,36 +42,74 @@ Both shared pages were opened and their titles and individual message element ID
 
 The local archive can contain progress updates or superseded messages that the immutable shared snapshot does not display. These are retained, rather than silently rewritten to match the final answer. Pasted-text attachments are reproduced separately when accessible. Screenshot references remain in the prompts; the shared chats provide the visual references. Temporary local attachment paths may cease to work on another machine.
 
-Main transcript B and its continuation now include the later landing implementation, text contrast, query-image URL question, rendered review photos, crossfade import correction, and my final verification/documentation request. User-edited snapshot parts remain separately preserved. The current turn's eventual final response cannot be archived before it is sent; the archive explicitly stops at the captured messages. No tool trace or internal reasoning is included.
+Main transcript B and its continuations now include the landing/image changes, compiler correction, final verification/documentation update and my final effort-allocation clarification through turn 51. User-edited snapshot parts remain separately preserved. The archive stops at the latest captured progress messages; this ongoing turn's eventual final reply is not claimed to be already captured. No tool trace or internal reasoning is included.
 
 <a id="time-records"></a>
 ## Original estimates and actual-time distinction
 
 The student answered **“30 mins for each propmt”** and clarified **“Original proposed estimate.”** See [estimate answer](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-39) and [clarification](https://chatgpt.com/s/cx_6ac332b2d3888191bd989e18aa194765#message-41).
 
-| Numbered prompt | Original proposed estimate | Recorded elapsed window | Verified active effort / variance |
+I kept the original **30 minutes for each P0–P11 step**. For the final record,
+I asked for the gap to the next numbered prompt to estimate effort, rounded to
+whole minutes when it is at most 30 minutes. If it is longer than 30 minutes,
+I allocated a **45-minute retrospective task estimate**. These are my estimated
+actuals, not a stopwatch record or independently verified active-work measurement.
+
+The P6 and P7 raw windows are 34:21 and 33:25, shorter than the allocated 45 minutes.
+The 45-minute values are rounded effort blocks I requested; they are not claimed
+to be contained entirely inside those windows. Unrelated time is excluded where
+identified. A gap above 45 minutes would leave its excess unallocated to the task;
+none of the original numbered windows exceeds 45 minutes. No negative break time
+is invented. The unrounded gaps remain visible for comparison.
+
+| Step | Deliverable | Dependency | Planned | Raw prompt window | Estimated actual | Variance | Explanation |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| P0 | Scope and rules | None | 30 min | 00:00:41 | 1 min | -29 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P1 | Inspection/design | P0 | 30 min | 00:14:48 | 15 min | -15 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P2 | Models/generator | P1 | 30 min | 00:21:35 | 22 min | -8 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P3 | Store/restoration | P2 | 30 min | 00:19:12 | 19 min | -11 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P4 | Map/progress visuals | P3 | 30 min | 00:22:51 | 23 min | -7 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P5 | Active-time simulation | P4 | 30 min | 00:27:31 | 28 min | -2 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P6 | Sequential reviews | P5 | 30 min | 00:34:21 | 45 min | +15 min | Review and History interaction refinements; 45-minute rounded block per my retrospective rule. |
+| P7 | History/details | P6 | 30 min | 00:33:25 | 45 min | +15 min | Review and History interaction refinements; 45-minute rounded block per my retrospective rule. |
+| P8 | Original planner/images | P7 | 30 min | 00:25:49 | 26 min | -4 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P9 | Sealed navigation | P8 | 30 min | 00:28:57 | 29 min | -1 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P10 | Assembled review/checks | P9 | 30 min | 00:22:55 | 23 min | -7 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| P11 | Assignment documentation | P10 | 30 min | 00:27:54 | 28 min | -2 min | I used the observed prompt window rounded to whole minutes; less than my 30-minute allocation. |
+| **Numbered total** | **P0–P11** | | **360 min / 6 h** | | **304 min / 5 h 04 min** | **−56 min** | Retrospective estimates; not elapsed-wall-clock sum. |
+
+| Additional work block | Planned | Reported actual | Variance / basis |
 | --- | --- | --- | --- |
-| 0 — Context/rules | 30 minutes | 00:00:41 | Not established / not calculated |
-| 1 — Inspection/design | 30 minutes | 00:14:48 | Not established / not calculated |
-| 2 — Models/generator | 30 minutes | 00:21:35 | Not established / not calculated |
-| 3 — Shared state/restoration | 30 minutes | 00:19:12 | Not established / not calculated |
-| 4 — Map/progress | 30 minutes | 00:22:51 | Not established / not calculated |
-| 5 — Simulation | 30 minutes | 00:27:31 | Not established / not calculated |
-| 6 — Reviews | 30 minutes | 00:34:21 | Not established / not calculated |
-| 7 — History/details | 30 minutes | 00:33:25 | Not established / not calculated |
-| 8 — Original planner/images | 30 minutes | 00:25:49 | Not established / not calculated |
-| 9 — Navigation | 30 minutes | 00:28:57 | Not established / not calculated |
-| 10 — Review/verification | 30 minutes | 00:22:55 | Not established / not calculated |
-| 11 — Documentation | 30 minutes | 00:27:54 | Not established / not calculated |
+| Reading the handout/slides and generating the prompt sequence | 60 min | About 60 min | 0 min; my latest recollection |
+| Submission work, debugging, fixes and adding screens | 60 min submission allocation | About 180 min total | +120 min; includes 60 min submission work plus about 120 min debugging/fixes/screens |
+| Further docs and AI-assisted implementation after reviewing the assignment with AI | No original allowance | About 120 min additional | Added scope; separate from the preceding 180 min block |
 
-For prompts 0–11 inclusive, this sums to **360 proposed minutes / 6 hours**; prompts 1–11 alone sum to **330 proposed minutes / 5.5 hours**. These totals exclude the separate prompt-preparation chat and later UI/debugging follow-ups, for which original estimates were not supplied.
+I treat the last two hours as additional to the three-hour submission/debugging
+block, as stated in my final clarification. These blocks describe later work,
+not a second allocation of the original P0–P11 windows. The one-hour submission
+allocation is already inside the three hours and is not added again. The older
+partial session notes overlap this retrospective account and are not added to it.
 
-Template **Time** means total interaction effort including relevant iterations and debugging, excluding unrelated breaks. Neither timestamps nor the app's “Worked for” durations establish the student's total actual effort. Do not substitute the proposed estimates for actual time or add overlapping challenge estimates twice. The supplied manual session notes are now formatted in [TimeFlow_As3_Sova.txt](TimeFlow_As3_Sova.txt); complete clock ranges total 4 hours 30 minutes, including an unlabeled ten-minute interval. Their dates and one implementation interval are incomplete, so a complete active-work total is not established.
+**Known planned total: 480 minutes / 8 hours** — 360 for P0–P11, 60 for
+reading/prompt preparation, and 60 for submission. The final two-hour revision
+block had no original allowance.
 
+**Estimated actual total: 664 minutes / about 11 hours 4 minutes** — 304 for the
+numbered sequence, 60 for preparation, 180 for submission/debugging/fixes/screens,
+and 120 for the final documentation/AI implementation revisions.
+
+The overall difference is **+184 minutes / about 3 hours 4 minutes** against that
+eight-hour plan. This includes added scope, so it is not a like-for-like claim
+that every original task took longer. Within the numbered sequence, the estimated
+variance is −56 minutes; P6 and P7 each have +15 minutes. Later debugging/redesign
+and the unplanned final revision block account for the overall increase.
+
+Older 4 h 30 min partial notes remain in TimeFlow as historical evidence; they
+overlap this final allocation and must not be added to it.
 
 ### Recorded intervals between human prompts in this chat
 
-At Atiom’s request, these are timestamp differences to the **next** human prompt/reply, measured from the local conversation archive. Local times are America/Toronto (EDT). Durations are calculated from milliseconds and rounded to seconds. They include response/waiting time and possible breaks; they are not certified active effort. The latest prompt has no following prompt yet. Application-generated writing-block snapshot parts are not separate work prompts. TimeFlow_As3_Sova.txt retains its earlier cutoff; the table below extends the recorded intervals through this review request.
+At Atiom’s request, these are timestamp differences to the **next** human prompt/reply, measured from the local conversation archive. Local times are America/Toronto (EDT). Durations are calculated from milliseconds and rounded to seconds. They include response/waiting time and possible breaks; they are not certified active effort. The latest prompt has no following prompt yet. Application-generated writing-block snapshot parts are not separate work prompts. The original table below is retained through the earlier review request; later continuation tables and TimeFlow extend the record. Final effort estimates are separate from all raw intervals.
 
 | Prompt/reply | Local timestamp | Gap to next prompt | Full text |
 | --- | --- | --- | --- |
@@ -485,7 +524,7 @@ is the source of the current completion status. Source revision documented: `961
 | Map and distance | Bundled PNG, fixed random normalized points, straight mock route and synthetic distance |
 | Completed review opening | Tap the 100% bar, not automatic navigation |
 | Saved state | Android restoration; not a permanent database |
-| Effort/contribution | Scoped AI estimate: 69% (6,509 / 9,452 nonblank shared-Kotlin lines); original estimates/partial sessions preserved; final active time requires my figures |
+| Effort/contribution | Scoped AI estimate: 69% (6,509 / 9,452 nonblank shared-Kotlin lines); original estimates/partial sessions preserved; final retrospective effort: about 11 h 04 min, with the basis and overlaps disclosed |
 | Submission | ZIP/Lea receipt not supplied; no completed submission is claimed |
 
 The obsolete readiness report has been removed at my request. Its historical
@@ -23555,7 +23594,7 @@ Retrieved snapshot parts: 48 / 48. No missing text was invented.
 - [x] Update README with the exact conditions for seeing a review photo.
 - [x] Disclose the remaining first-screen input/evidence limitations.
 - [x] Record the scoped 69% contribution with a reproducible basis.
-- [ ] Supply my final actual active effort/task allocation.
+- [x] Record my final retrospective effort/task allocation with the raw-gap distinction.
 - [ ] Preserve evidence, clean manually, inspect the complete ZIP and submit through Lea.
 
 Historical prompts, outputs and user-edited snapshots are unchanged. The final
@@ -24415,6 +24454,191 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Cannot i
 BUILD FAILED in 3s
 47 actionable tasks: 2 executed, 45 up-to-date
 Configuration cache entry reused.
+
+````
+
+
+
+<a id="final-effort-clarification"></a>
+## TL-15 — Final retrospective effort and variance allocation
+
+**Challenge/context:** My previous record had original estimates and partial session
+notes, but no complete per-step actual-effort allocation. I asked what was missing
+and then supplied my final accounting rule and additional work blocks.
+
+**AI tool:** ChatGPT / Codex.
+
+**Prompting approaches:** Clarification, explicit calculation rules, retrospective
+self-report and targeted updates to the WBS, AI log, README and TimeFlow.
+
+**Prompt elements:** 30 planned minutes for each numbered step; use the next-prompt
+gap for estimated actuals; record 45-minute blocks when a gap exceeds 30 minutes;
+one hour reading/generating prompts; one-hour submission allocation within about
+three hours of submission/debugging/fixes/new screens; two more hours after the
+assignment review for docs and AI-assisted implementation.
+
+**Iteration/adaptation:** The incomplete fields were replaced with per-step estimates
+and variances. Raw gaps are preserved. For P6/P7, 34:21 and 33:25 become my requested
+45-minute retrospective blocks; these are estimates rather than measured time.
+A longer-than-45-minute numbered gap would have its excess excluded, but none
+exists. The one-hour submission is inside the three hours, not counted twice;
+the later two hours are additional. Earlier overlapping session notes remain history.
+
+**Verification:** The calculation gives 304 numbered-step minutes plus 60 preparation,
+180 combined submission/debugging and 120 final-revision minutes: **664 minutes,
+about 11 h 04 min**. The documented plan is 360 + 60 + 60 = 480 minutes, giving
+**+184 minutes / about 3 h 04 min**. The original twelve 30-minute step estimates
+remain unchanged. Additional one-hour allocations were supplied in this final
+clarification; no earlier calendar plan or timed task measurement is invented.
+
+**How the output was used:** I updated the WBS, effort/variance explanations, relative
+allocation chart, TimeFlow, current AI-log summary and README. Historical transcript
+messages and the previous estimate/actual distinction are preserved verbatim.
+
+**Approximate code impact:** Documentation only; no production Kotlin code changed.
+The already documented scoped AI contribution estimate remains about 69%.
+
+**Time spent:** Reading/preparation about 1 h; numbered sequence about 5 h 04 min
+under my retrospective rule; submission/debugging/fixes/screens about 3 h combined;
+final documentation/AI implementation revisions about 2 h additional. Total about
+11 h 04 min. These blocks are not added again to challenge-entry time fields.
+
+**Result/reflection:** I learned to distinguish my original plan, raw chat elapsed
+time and a retrospective active-effort estimate. Most numbered windows were under
+30 minutes, but later layout changes, compiler debugging, additional screens and
+assignment/documentation review expanded the overall work. I kept the original
+estimates so the +3 h 04 min difference and the added scope remain visible.
+
+**Full clarification:** [B — Turn 51](#b-turn-051).
+
+### Final effort continuation index
+
+| Turn | Full prompt | Timestamp (UTC) |
+| --- | --- | --- |
+| 50 | [Meaning of actual effort and variance](#b-turn-050) | 2026-10-05T16:21:31.047Z |
+| 51 | [Final effort-allocation rule and additional hours](#b-turn-051) | 2026-10-05T16:25:35.009Z |
+
+### Complete captured follow-up messages
+
+### B — Turn 49: assistant message
+
+**Assistant — 2026-10-05T07:28:18.980Z**
+Message ID: msg_0e90a4f05dac5be7016ac35192334887d2b40b4ad318f3f04d
+
+````text
+I found a concrete basis for the AI contribution summary: the new shared Kotlin files developed in this chat account for 6,509 of 9,452 nonblank lines—about 69%. I’ll label that as a scoped code estimate, excluding resources and configuration. It also leaves AI changes to older files out of the count. Actual working time still needs your confirmation.
+
+````
+
+### B — Turn 49: assistant message
+
+**Assistant — 2026-10-05T07:31:50.187Z**
+Message ID: msg_0e90a4f05dac5be7016ac35265755487d2be03eb717f389487
+
+````text
+The AI log now includes the later prompts, replies and image-build error, and its earlier archived text remains unchanged. The README, image instructions and screenshot links are updated. I’m checking the documentation changes before committing and pushing; actual hours remain unfilled because the supplied notes cover only part of the work.
+
+````
+
+### B — Turn 49: assistant message
+
+**Assistant — 2026-10-05T07:33:26.212Z**
+Message ID: msg_0e90a4f05dac5be7016ac352c5e96887d2a49a49893573aa69
+
+````text
+The documentation commit is saved as `ade9dfc`. I’ll verify the repository and account details before retrying the push.
+
+Automatic approval review rejected the push because it considered ownership and authorization for the `main` branch unverified. Your request explicitly included pushing; I’m checking the destination against the repository evidence you supplied.
+
+````
+
+### B — Turn 49: assistant message
+
+**Assistant — 2026-10-05T07:34:38.898Z**
+Message ID: msg_0e90a4f05dac5be7016ac3530b844087d2a2a70f90a7224d47
+
+````text
+Committed and pushed [ade9dfc](https://github.com/NewWaveOwl/As3_APPDEV2_RND_Tranzit_Sova/commit/ade9dfc): **docs: refresh assignment records and final trip instructions**.
+
+- Updated README/docs in first person, including when review photos appear.
+- Marked checks complete based on your confirmation.
+- Extended the AI log and linked screenshots.
+- Added the scoped **69% AI contribution estimate** and rework explanations.
+- Deleted SubmissionReadiness_As3.md.
+
+**Actual hours and numerical task variances still need your figures.** Partial time records and original estimates remain preserved.
+
+Working tree is clean.
+````
+
+<a id="b-turn-050"></a>
+### B — Turn 50
+
+**User — 2026-10-05T16:21:31.047Z**
+Message ID: msg_01a10cde-cf27-7fe3-b00a-27af9de464fd
+
+````text
+
+# Response annotations:
+Each item contains text selected from an earlier Codex response and may include a user comment. Treat items as Annotation 1, Annotation 2, and so on in array order. Use every selection as context and address every comment. For every annotation you address, include its inline directive `:codex-annotation{index="N"}`, where N is its one-based array position (for example, `:codex-annotation{index="1"}`). Do not use unstructured annotation labels.
+<response-annotations>
+[{"text":"Actual hours and numerical task variances still need your figures","source":{"messageId":"msg_0e90a4f05dac5be7016ac3530b844087d2a2a70f90a7224d47","startOffset":362,"endOffset":427}}]
+</response-annotations>
+
+## My request:
+what does it mean, what i need to do?
+
+````
+
+### B — Turn 50: assistant message
+
+**Assistant — 2026-10-05T16:22:01.891Z**
+Message ID: msg_0e90a4f05dac5be7016ac3cea5ca5887d2a3c1432df9c5a4cb
+
+````text
+We have your **planned time—30 minutes per prompt—but not your complete actual working time**. :codex-annotation{index="1"}
+
+Tell me:
+
+- Roughly how many hours you worked in total, excluding meals and breaks.
+- Which parts took the longest: coding, debugging, UI changes, testing, or documentation.
+- Any approximate time breakdown you remember.
+
+Your recorded sessions currently cover **4 hours 30 minutes**, but one implementation session is missing.
+
+“Variance” means **actual time minus estimated time**. For example, 30 minutes planned and 45 minutes worked gives **+15 minutes**.
+
+Honest approximate figures are fine—label them as estimates. I can then calculate the differences and update the documents.
+````
+
+<a id="b-turn-051"></a>
+### B — Turn 51
+
+**User — 2026-10-05T16:25:35.009Z**
+Message ID: msg_01a10ce2-8821-72b0-b77b-8ee07f435bd4
+
+````text
+put planees 30 mins for ech step of propmt sequnce(in rality use actual time between porpmt sequone to dertmine actual time spen implemting them if it is more then 30 minsutes , write spent 45 and the rest was doing somthing easl bewtween promts), and 1 ours for reading and gebrating propmt squience, and 1 hours on submisison(In total on submisison + debuging and fixing ading new scrren spend 3 hors~). After revieng asssignmen with AI spent 2 more hors in total with adding and fixing doc and AI implemtnation. Updeted neede files to imcldue tthis in peopmt log time flow
+
+````
+
+### B — Turn 51: assistant message
+
+**Assistant — 2026-10-05T16:25:39.495Z**
+Message ID: msg_0e90a4f05dac5be7016ac3cf8247d887d2ac75b1eb9e39b884
+
+````text
+I’ll update the effort records using your reported one-hour preparation, roughly three-hour submission/debugging block, and two-hour final revision block. I’ll label the prompt-gap figures as retrospective estimates and keep the raw timestamps alongside them.
+
+````
+
+### B — Turn 51: assistant message
+
+**Assistant — 2026-10-05T16:26:53.457Z**
+Message ID: msg_0e90a4f05dac5be7016ac3cfcad74087d2a5b91019483781c7
+
+````text
+The prompt-step estimate comes to **5 hours 4 minutes** using your rule: round gaps under 30 minutes to whole minutes, and record longer steps as 45-minute estimates. With your additional work blocks, the total is **about 11 hours 4 minutes**. The two longer gaps were actually 34 and 33 minutes, so I’ll keep those raw values visible beside your 45-minute estimates.
 
 ````
 

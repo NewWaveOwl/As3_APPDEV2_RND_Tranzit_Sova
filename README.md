@@ -206,4 +206,12 @@ device names or build timings are invented.
 - [Time flow](TimeFlow_As3_Sova.txt): supplied work notes plus measured intervals between chat prompts.
 - [Assignment screenshots](As3_screenshots/): repository, Android Studio/Git Branches, emulator and preliminary AI investigation captures.
 
-Original estimate: 30 minutes per numbered prompt. Chat intervals include response/waiting time and possible breaks; they are recorded as elapsed intervals, not automatically treated as active work.
+Original estimate: 30 minutes for each P0–P11 step, plus one hour of
+reading/prompt preparation and one hour for submission (8 hours documented plan).
+My final retrospective estimate is **about 11 hours 4 minutes**: 5 h 04 min for
+numbered steps using my stated prompt-window rule, 1 h preparation, about 3 h
+submission/debugging/fixes/screens, and 2 h further docs/AI implementation revisions.
+The submission hour is included in the three-hour block. Overall variance: about
+**+3 hours 4 minutes**. Raw chat gaps and the rounded effort estimates remain distinct;
+older overlapping session notes are not added twice. See the assignment record and
+TimeFlow for the per-task breakdown and its retrospective basis.
