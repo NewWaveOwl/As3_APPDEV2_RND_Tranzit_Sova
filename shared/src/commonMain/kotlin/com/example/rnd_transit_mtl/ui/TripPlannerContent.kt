@@ -2,14 +2,12 @@ package com.example.rnd_transit_mtl.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +32,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -73,8 +73,18 @@ fun TripPlannerContent(
     onPrimaryAction: () -> Unit,
     modifier: Modifier = Modifier,
     controlsVisible: Boolean = true,
-    onMapViewportReady: (TripGenerationBounds) -> Unit = {}
+    onMapViewportReady: (TripGenerationBounds) -> Unit = {},
+    onControlsHidden: () -> Unit = {}
 ) {
+    val controlsState = remember { MutableTransitionState(controlsVisible) }
+    val latestControlsHidden by rememberUpdatedState(onControlsHidden)
+    SideEffect { controlsState.targetState = controlsVisible }
+    LaunchedEffect(controlsVisible, controlsState.isIdle, controlsState.currentState) {
+        if (!controlsVisible && controlsState.isIdle && !controlsState.currentState) {
+            latestControlsHidden()
+        }
+    }
+
     val mapPainter = painterResource(Res.drawable.map_sample)
     val sourceSize = validMapSourceSize(mapPainter.intrinsicSize)
     var viewport by remember { mutableStateOf(Size.Zero) }
@@ -88,7 +98,7 @@ fun TripPlannerContent(
     }
 
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize().background(TransitMain)
+        modifier = modifier.fillMaxSize().clipToBounds().background(TransitMain)
             .onSizeChanged { viewport = Size(it.width.toFloat(), it.height.toFloat()) },
         contentAlignment = Alignment.TopCenter
     ) {
@@ -106,74 +116,64 @@ fun TripPlannerContent(
             modifier = Modifier.fillMaxSize()
         )
 
-        Column(
-            modifier = Modifier
-                .widthIn(max = 620.dp)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+        // Move every planner control down as one group; the map stays still.
+        AnimatedVisibility(
+            visibleState = controlsState,
+            modifier = Modifier.widthIn(max = 620.dp).fillMaxSize(),
+            enter = EnterTransition.None,
+            exit = slideOutVertically(
+                tween(GO_TRIP_TRANSITION_MILLIS),
+                targetOffsetY = { it }
+            )
         ) {
-            Spacer(Modifier.height(topSpace))
-
-            AnimatedVisibility(
-                visible = controlsVisible,
-                enter = EnterTransition.None,
-                exit = slideOutHorizontally(tween(400), targetOffsetX = { it }) +
-                    fadeOut(tween(400))
+            Column(
+                modifier = Modifier.fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    GOBox(
-                        minutes = minutes,
-                        onMinutesChange = onMinutesChange,
-                        onGo = onPrimaryAction,
-                        layoutScale = layoutScale,
-                        actionLabel = actionLabel,
-                        actionEnabled = actionEnabled,
-                        minutesEnabled = actionEnabled,
-                        modifier = Modifier.fillMaxWidth(0.92f)
-                    )
-                }
-            }
+                Spacer(Modifier.height(topSpace))
 
-            // Starting updates the store before navigation. Do not flash a new
-            // "Unfinished" card into the outgoing planner during its exit.
-            val summary = (activeTripSummary ?: pendingReviewSummary)
-                .takeIf { controlsVisible }
-            if (summary != null || (controlsVisible && validationMessage.isNotEmpty())) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                        .background(TransitWhite, RoundedCornerShape(12.dp))
-                        .padding(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (summary != null) {
-                        Text(summary, color = TransitMain,
-                            style = MaterialTheme.typography.bodyMedium)
-                    }
-                    if (validationMessage.isNotEmpty()) {
-                        Text(
-                            text = validationMessage,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.semantics {
-                                liveRegion = LiveRegionMode.Polite
-                            }
-                        )
-                    }
-                }
-            } else {
-                Spacer(Modifier.height(12.dp))
-            }
+                GOBox(
+                    minutes = minutes,
+                    onMinutesChange = onMinutesChange,
+                    onGo = onPrimaryAction,
+                    layoutScale = layoutScale,
+                    actionLabel = actionLabel,
+                    actionEnabled = actionEnabled,
+                    minutesEnabled = actionEnabled,
+                    modifier = Modifier.fillMaxWidth(0.92f)
+                )
 
-            // The map stays still; transport and intensity slide down on GO.
-            AnimatedVisibility(
-                visible = controlsVisible,
-                enter = EnterTransition.None,
-                exit = slideOutVertically(tween(400), targetOffsetY = { it }) +
-                    fadeOut(tween(400))
-            ) {
+                // The parent freezes these labels while the group slides away.
+                val summary = activeTripSummary ?: pendingReviewSummary
+                if (summary != null || validationMessage.isNotEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                            .background(TransitWhite, RoundedCornerShape(12.dp))
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        if (summary != null) {
+                            Text(summary, color = TransitMain,
+                                style = MaterialTheme.typography.bodyMedium)
+                        }
+                        if (validationMessage.isNotEmpty()) {
+                            Text(
+                                text = validationMessage,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.semantics {
+                                    liveRegion = LiveRegionMode.Polite
+                                }
+                            )
+                        }
+                    }
+                } else {
+                    Spacer(Modifier.height(12.dp))
+                }
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

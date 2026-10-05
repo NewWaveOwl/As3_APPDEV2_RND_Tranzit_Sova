@@ -1,6 +1,7 @@
 package com.example.rnd_transit_mtl
 
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -21,6 +22,7 @@ import com.example.rnd_transit_mtl.model.TransportRoute
 import com.example.rnd_transit_mtl.model.TransportType
 import com.example.rnd_transit_mtl.model.Trip
 import com.example.rnd_transit_mtl.model.TripReviewMode
+import com.example.rnd_transit_mtl.ui.GO_TRIP_TRANSITION_MILLIS
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -315,13 +317,20 @@ fun Router(
             }
         },
         transitionSpec = {
-            if (isPlannerMapTransition(
+            if (isPlannerToTripTransition(
                     initialState.entries.lastOrNull()?.contentKey,
                     targetState.entries.lastOrNull()?.contentKey
                 )
             ) {
-                // Incoming map stays stationary under outgoing planner controls.
-                (EnterTransition.None togetherWith fadeOut(tween(400))).apply {
+                // Planner controls have already slid out before changing the stack.
+                EnterTransition.None togetherWith ExitTransition.None
+            } else if (isPlannerMapTransition(
+                    initialState.entries.lastOrNull()?.contentKey,
+                    targetState.entries.lastOrNull()?.contentKey
+                )
+            ) {
+                // Returning to the planner crossfades over the stationary map.
+                (EnterTransition.None togetherWith fadeOut(tween(GO_TRIP_TRANSITION_MILLIS))).apply {
                     targetContentZIndex = -1f
                 }
             } else {
@@ -330,12 +339,19 @@ fun Router(
             }
         },
         popTransitionSpec = {
-            if (isPlannerMapTransition(
+            if (isPlannerToTripTransition(
                     initialState.entries.lastOrNull()?.contentKey,
                     targetState.entries.lastOrNull()?.contentKey
                 )
             ) {
-                (EnterTransition.None togetherWith fadeOut(tween(400))).apply {
+                // Planner controls have already slid out before changing the stack.
+                EnterTransition.None togetherWith ExitTransition.None
+            } else if (isPlannerMapTransition(
+                    initialState.entries.lastOrNull()?.contentKey,
+                    targetState.entries.lastOrNull()?.contentKey
+                )
+            ) {
+                (EnterTransition.None togetherWith fadeOut(tween(GO_TRIP_TRANSITION_MILLIS))).apply {
                     targetContentZIndex = -1f
                 }
             } else {
@@ -344,12 +360,19 @@ fun Router(
             }
         },
         predictivePopTransitionSpec = {
-            if (isPlannerMapTransition(
+            if (isPlannerToTripTransition(
                     initialState.entries.lastOrNull()?.contentKey,
                     targetState.entries.lastOrNull()?.contentKey
                 )
             ) {
-                (EnterTransition.None togetherWith fadeOut(tween(400))).apply {
+                // Planner controls have already slid out before changing the stack.
+                EnterTransition.None togetherWith ExitTransition.None
+            } else if (isPlannerMapTransition(
+                    initialState.entries.lastOrNull()?.contentKey,
+                    targetState.entries.lastOrNull()?.contentKey
+                )
+            ) {
+                (EnterTransition.None togetherWith fadeOut(tween(GO_TRIP_TRANSITION_MILLIS))).apply {
                     targetContentZIndex = -1f
                 }
             } else {
@@ -368,3 +391,7 @@ private fun isPlannerMapTransition(initialKey: Any?, targetKey: Any?): Boolean =
         targetKey is String && targetKey.startsWith(TRIP_MAP_CONTENT_KEY_PREFIX)) ||
         (targetKey == PLANNER_MAP_CONTENT_KEY &&
             initialKey is String && initialKey.startsWith(TRIP_MAP_CONTENT_KEY_PREFIX))
+
+private fun isPlannerToTripTransition(initialKey: Any?, targetKey: Any?): Boolean =
+    initialKey == PLANNER_MAP_CONTENT_KEY &&
+        targetKey is String && targetKey.startsWith(TRIP_MAP_CONTENT_KEY_PREFIX)

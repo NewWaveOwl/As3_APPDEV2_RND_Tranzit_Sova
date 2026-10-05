@@ -7,16 +7,21 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +32,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -34,7 +41,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.rnd_transit_mtl.model.Trip
+import com.example.rnd_transit_mtl.ui.theme.TransitHighlight
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
+import com.example.rnd_transit_mtl.ui.theme.TransitSelected
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 
 /** Map and compact progress footer; trip information appears only in a popup. */
@@ -79,26 +88,44 @@ fun CurrentTripContent(
             modifier = Modifier.fillMaxSize()
         )
 
-        Text(
-            text = "Current trip",
-            textAlign = TextAlign.End,
-            color = TransitWhite,
-            style = MaterialTheme.typography.titleLarge,
+        Box(
             modifier = Modifier.align(Alignment.TopCenter)
                 .fillMaxWidth().height(56.dp)
-                .background(TransitMain)
-                .clickable(enabled = actionsEnabled, role = Role.Button, onClick = onShowInformation)
-                .semantics { contentDescription = "Current trip. Open trip information." }
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-        )
+                .background(TransitMain),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            // Measure the text at its own width so the gradient spans its letters.
+            Text(
+                text = "Current trip",
+                textAlign = TextAlign.End,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    brush = Brush.horizontalGradient(
+                        listOf(TransitWhite, TransitSelected)
+                    )
+                ),
+                modifier = Modifier.padding(horizontal = 8.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .clickable(
+                        enabled = actionsEnabled,
+                        role = Role.Button,
+                        onClickLabel = "Open trip information and cancellation",
+                        onClick = onShowInformation
+                    )
+                    .semantics {
+                        contentDescription = "Current trip. Open trip information and cancellation."
+                    }
+                    .heightIn(min = 48.dp)
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
+            )
+        }
 
         var footerVisible by remember(trip.id) { mutableStateOf(!animateEntrance) }
         LaunchedEffect(trip.id, animateEntrance) { footerVisible = true }
         AnimatedVisibility(
             visible = footerVisible,
             modifier = Modifier.align(Alignment.BottomCenter),
-            enter = slideInVertically(tween(400), initialOffsetY = { it }) +
-                fadeIn(tween(400))
+            enter = slideInVertically(tween(GO_TRIP_TRANSITION_MILLIS), initialOffsetY = { it }) +
+                fadeIn(tween(GO_TRIP_TRANSITION_MILLIS))
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -148,24 +175,40 @@ fun CurrentTripContent(
                             trip = trip,
                             onOpenImageReference = onOpenImageReference
                         )
-                        if (!completed) {
-                            TextButton(
-                                onClick = onCancel,
-                                enabled = actionsEnabled
-                            ) {
-                                Text("Cancel trip", color = TransitMain)
-                            }
-                        }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = onDismissInformation) {
-                        Text("Close", color = TransitMain)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = onLeave, enabled = actionsEnabled) {
-                        Text("Return to GO", color = TransitMain)
+                    // Keep cancellation outside the scrollable information body.
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (!completed) {
+                            Button(
+                                onClick = onCancel,
+                                enabled = actionsEnabled,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = TransitHighlight,
+                                    contentColor = TransitMain
+                                ),
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            ) {
+                                Text("Cancel trip")
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(onClick = onLeave, enabled = actionsEnabled) {
+                                Text("Return to GO", color = TransitMain)
+                            }
+                            TextButton(onClick = onDismissInformation) {
+                                Text("Close", color = TransitMain)
+                            }
+                        }
                     }
                 }
             )

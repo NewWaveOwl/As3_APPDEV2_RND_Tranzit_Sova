@@ -121,6 +121,17 @@ fun CurrentTripInformationPopupPreview() {
     CurrentTripExample(progress = 0.5f, showInformation = true)
 }
 
+@Preview(
+    name = "Completed trip information — no cancellation",
+    showBackground = true,
+    widthDp = 390,
+    heightDp = 850
+)
+@Composable
+fun CompletedTripInformationPopupPreview() {
+    CurrentTripExample(progress = 1f, isRunning = false, showInformation = true)
+}
+
 @Composable
 private fun CurrentTripExample(
     progress: Float,

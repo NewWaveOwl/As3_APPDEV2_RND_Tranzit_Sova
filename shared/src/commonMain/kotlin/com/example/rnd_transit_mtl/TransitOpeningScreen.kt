@@ -1,6 +1,7 @@
 package com.example.rnd_transit_mtl
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,10 @@ internal fun TransitOpeningScreen(
 
     // Blocks overlapping GO actions; the store also prevents another active trip.
     var processingAction by remember { mutableStateOf(false) }
+    // Save only the opening intent and temporary labels, not a second Trip.
+    var pendingOpenTripId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingActionLabel by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingSummary by rememberSaveable { mutableStateOf<String?>(null) }
 
     val latestDestinationActive by rememberUpdatedState(
         isDestinationActive
@@ -77,15 +82,69 @@ internal fun TransitOpeningScreen(
         currentState.completedTrips.firstOrNull { it.id == id }
     }
 
+    val actionLabel = when {
+        activeState != null -> "Resume trip"
+        pendingReviewId != null -> "100%"
+        else -> "GO"
+    }
+    val activeSummary = activeState?.let {
+        val percentage = (it.elapsedMillis.toFloat() / 10_000f * 100f)
+            .toInt().coerceIn(0, 99)
+        "Unfinished: ${it.trip.title} · $percentage%"
+    }
+    val completedSummary = pendingReviewTrip?.let {
+        "Completed: ${it.title} · tap 100% to open your trip"
+    }
+
+    // Choosing another section cancels the opening intent, keeping the trip.
+    LaunchedEffect(isDestinationActive) {
+        if (!isDestinationActive) {
+            pendingOpenTripId = null
+            pendingActionLabel = null
+            pendingSummary = null
+        }
+    }
+
+    fun queueTripOpening(tripId: String) {
+        pendingActionLabel = actionLabel
+        pendingSummary = activeSummary ?: completedSummary
+        pendingOpenTripId = tripId
+    }
+
+    fun finishPlannerExit() {
+        val tripId = pendingOpenTripId ?: return
+        if (!latestDestinationActive) return
+
+        // Resolve the current stored record after the actual animation finishes.
+        val active = tripsStore.activeTrip?.takeIf { it.id == tripId }
+        val completed = tripsStore.findCompleted(tripId)
+        val handled = when {
+            active != null -> latestOpenCurrentTrip?.invoke(active) == true
+            completed != null -> latestOpenCompletedTrip?.invoke(tripId) == true
+            else -> false
+        }
+
+        pendingOpenTripId = null
+        pendingActionLabel = null
+        pendingSummary = null
+        if (!handled) {
+            validationMessage = if (active == null && completed == null) {
+                "This trip is no longer available. Please try GO again."
+            } else {
+                "Your trip is preserved. Tap the trip button to open it again."
+            }
+        }
+    }
+
     fun canChangeInputs(): Boolean =
-        latestDestinationActive && !processingAction
+        latestDestinationActive && !processingAction && pendingOpenTripId == null
 
     fun clearValidation() {
         validationMessage = ""
     }
 
     fun performPrimaryAction() {
-        if (!latestDestinationActive || processingAction) return
+        if (!latestDestinationActive || processingAction || pendingOpenTripId != null) return
 
         processingAction = true
 
@@ -100,20 +159,18 @@ internal fun TransitOpeningScreen(
                 }
                 validationMessage = ""
 
-                if (!openTrip(existingActive)) {
-                    validationMessage =
-                        "Your unfinished trip is preserved. Tap Resume trip to retry."
-                }
+                queueTripOpening(existingActive.id)
                 return
             }
 
             val pendingId = tripsStore.pendingReviewTripId
             if (pendingId != null) {
                 val openCompleted = latestOpenCompletedTrip
-                if (openCompleted == null || !openCompleted(pendingId)) {
+                if (openCompleted == null) {
                     validationMessage = "Your completed trip is saved. Try opening it again."
                 } else {
                     validationMessage = ""
+                    queueTripOpening(pendingId)
                 }
                 return
             }
@@ -167,12 +224,7 @@ internal fun TransitOpeningScreen(
                 is TripGenerationResult.Success -> {
                     when (val started = tripsStore.start(generated.trip)) {
                         TripActionResult.Applied -> {
-
-                            if (!openTrip(generated.trip)) {
-                                validationMessage =
-                                    "Your trip started and is preserved. " +
-                                            "Tap Resume trip to open it."
-                            }
+                            queueTripOpening(generated.trip.id)
                         }
 
                         is TripActionResult.ActiveTripExists -> {
@@ -194,12 +246,6 @@ internal fun TransitOpeningScreen(
         } finally {
             processingAction = false
         }
-    }
-
-    val actionLabel = when {
-        activeState != null -> "Resume trip"
-        pendingReviewId != null -> "100%"
-        else -> "GO"
     }
 
     val actionHasCallback = if (activeState == null && pendingReviewId != null) {
@@ -307,23 +353,17 @@ internal fun TransitOpeningScreen(
             }
         },
         validationMessage = validationMessage,
-        actionLabel = actionLabel,
+        actionLabel = pendingActionLabel ?: actionLabel,
         actionEnabled = isDestinationActive &&
                 !processingAction &&
+                pendingOpenTripId == null &&
                 actionHasCallback &&
                 (activeState != null || pendingReviewId != null || generationBounds != null),
-        activeTripSummary = activeState?.let {
-            val percentage = (
-                    it.elapsedMillis.toFloat() / 10_000f * 100f
-                    ).toInt().coerceIn(0, 99)
-
-            "Unfinished: ${it.trip.title} · $percentage%"
-        },
-        pendingReviewSummary = pendingReviewTrip?.let {
-            "Completed: ${it.title} · tap 100% to open your trip"
-        },
+        activeTripSummary = if (pendingOpenTripId != null) pendingSummary else activeSummary,
+        pendingReviewSummary = if (pendingOpenTripId != null) null else completedSummary,
         onPrimaryAction = { performPrimaryAction() },
-        controlsVisible = isDestinationActive,
+        controlsVisible = isDestinationActive && pendingOpenTripId == null,
+        onControlsHidden = { finishPlannerExit() },
         onMapViewportReady = { generationBounds = it },
         modifier = modifier
     )
