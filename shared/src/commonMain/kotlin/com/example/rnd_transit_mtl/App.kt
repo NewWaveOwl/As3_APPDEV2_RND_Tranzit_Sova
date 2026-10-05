@@ -19,25 +19,18 @@ import com.example.rnd_transit_mtl.state.TripsStore
 import com.example.rnd_transit_mtl.ui.theme.RNDTransitTheme
 import kotlinx.coroutines.CancellationException
 
-/**
- * Keeps successfully loaded transport types and routes together.
- *
- * Publishing one TransportData value makes both lists available
- * to the UI together.
- */
 private data class TransportData(
     val types: List<TransportType>,
     val routes: List<TransportRoute>
 )
 
 /**
- * Owns the shared navigation stack and restorable TripsStore.
+ * Owns one saved back stack, one Navigator, and one restorable TripsStore.
  *
- * Transport resources are reloaded when App enters composition.
- * TripsStore restores records, active elapsed time, pending review,
- * and review drafts through its explicit String Saver.
+ * TripNavigation is recreated from those restored objects. Its temporary
+ * callbacks are not part of saved state.
  *
- * The shared theme and MainLayout remain above Router.
+ * MainLayout remains outside NavDisplay's destination transitions.
  */
 @Composable
 fun App() {
@@ -53,6 +46,10 @@ fun App() {
         saver = TripsStore.Saver
     ) {
         TripsStore()
+    }
+
+    val tripNavigation = remember(navigator, tripsStore) {
+        TripNavigation(navigator, tripsStore)
     }
 
     var transportData by remember {
@@ -80,14 +77,15 @@ fun App() {
     RNDTransitTheme {
         CompositionLocalProvider(
             LocalNavigator provides navigator,
-            LocalTripsStore provides tripsStore
+            LocalTripsStore provides tripsStore,
+            LocalTripNavigation provides tripNavigation
         ) {
             MainLayout {
                 Router(
-                    backStack,
-                    transportData?.types,
-                    transportData?.routes,
-                    loadingError
+                    backStack = backStack,
+                    transportTypes = transportData?.types,
+                    transportRoutes = transportData?.routes,
+                    loadingError = loadingError
                 )
             }
         }

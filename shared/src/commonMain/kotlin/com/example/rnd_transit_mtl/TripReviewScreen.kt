@@ -40,20 +40,10 @@ import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 
 /**
- * Coordinates review drafts and finishing behavior for one stable trip ID.
+ * Coordinates the latest stored record and its ID-associated review draft.
  *
- * Reads the latest completed record and draft from LocalTripsStore.
- * Does not keep another mutable Trip or completed collection.
- *
- * onOpenHistory and onReturnToOrigin must synchronously return true
- * only after the destination is established or already present.
- * They must be idempotent so restoration cannot insert duplicate routes.
- *
- * onReturnToOrigin returns to the originating History/details entry.
- * If that origin no longer exists, its navigation owner should use History.
- *
- * isDestinationActive must identify the current entry rather than merely
- * indicate that outgoing content remains composed during a transition.
+ * Navigation callbacks return true only after their destination exists.
+ * registerBackHandler connects the shared header to this screen's close action.
  */
 @Composable
 fun TripReviewScreen(
@@ -62,7 +52,8 @@ fun TripReviewScreen(
     isDestinationActive: Boolean,
     onOpenHistory: () -> Boolean,
     onReturnToOrigin: () -> Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    registerBackHandler: RegisterReviewBackHandler? = null
 ) {
     val tripsStore = LocalTripsStore.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -72,9 +63,7 @@ fun TripReviewScreen(
     val trip = snapshot.completedTrips.firstOrNull { it.id == tripId }
     val draft = snapshot.reviewDrafts[tripId]
 
-    val latestDestinationActive by rememberUpdatedState(
-        isDestinationActive
-    )
+    val latestDestinationActive by rememberUpdatedState(isDestinationActive)
     val latestOpenHistory by rememberUpdatedState(onOpenHistory)
     val latestReturnToOrigin by rememberUpdatedState(onReturnToOrigin)
 
@@ -83,17 +72,11 @@ fun TripReviewScreen(
             lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
         )
     }
-
     var errorMessage by remember(tripId, mode) {
         mutableStateOf<String?>(null)
     }
 
-    /*
-     * These are navigation UI state, not another saved review.
-     *
-     * Once a store operation finishes, restoration must not initialize
-     * another draft or apply that operation again while exit is pending.
-     */
+    // These flags prevent replaying Save/Skip while navigation is pending.
     var exitMessage by rememberSaveable(tripId, mode.name) {
         mutableStateOf<String?>(null)
     }
@@ -106,9 +89,7 @@ fun TripReviewScreen(
             isAppResumed = lifecycle.currentState
                 .isAtLeast(Lifecycle.State.RESUMED)
         }
-
         lifecycle.addObserver(observer)
-
         isAppResumed = lifecycle.currentState
             .isAtLeast(Lifecycle.State.RESUMED)
 
@@ -151,10 +132,6 @@ fun TripReviewScreen(
     fun discardAndExit() {
         if (!isInteractive()) return
 
-        /*
-         * If already finished, Back/Close retries only navigation.
-         * It never discards or saves another review.
-         */
         if (exitMessage != null) {
             requestExit()
             return
@@ -170,31 +147,24 @@ fun TripReviewScreen(
                     }
                 )
             }
-
             is TripActionResult.MissingTrip -> {
                 finish("This trip is no longer available.")
             }
-
             is TripActionResult.InvalidInput -> {
                 errorMessage = result.message
             }
-
-            else -> {
-                errorMessage = "The review could not be closed."
-            }
+            else -> errorMessage = "The review could not be closed."
         }
     }
 
     fun updateDraft(transform: (ReviewDraft) -> ReviewDraft) {
         if (!canEdit()) return
-
-        val latestDraft = tripsStore.reviewDrafts[tripId]
-            ?: return
+        val latestDraft = tripsStore.reviewDrafts[tripId] ?: return
 
         when (
             val result = tripsStore.updateReviewDraft(
-                tripId = tripId,
-                draft = transform(latestDraft)
+                tripId,
+                transform(latestDraft)
             )
         ) {
             TripActionResult.Applied -> errorMessage = null
@@ -204,45 +174,41 @@ fun TripReviewScreen(
             is TripActionResult.InvalidInput -> {
                 errorMessage = result.message
             }
-            else -> {
-                errorMessage = "The review draft could not be updated."
-            }
+            else -> errorMessage = "The review draft could not be updated."
         }
     }
 
     fun saveAndExit() {
         if (!canEdit()) return
 
-        /*
-         * The store resolves the latest record and latest draft by ID.
-         * It validates Overall and cannot recreate a deleted trip.
-         */
         when (val result = tripsStore.saveReview(tripId)) {
-            TripActionResult.Applied -> {
-                finish("Review saved.")
-            }
-
+            TripActionResult.Applied -> finish("Review saved.")
             is TripActionResult.MissingTrip -> {
                 finish("This trip is no longer available.")
             }
-
             is TripActionResult.InvalidInput -> {
                 errorMessage = result.message
             }
-
-            else -> {
-                errorMessage = "The review could not be saved."
-            }
+            else -> errorMessage = "The review could not be saved."
         }
     }
 
-    /*
-     * beginReview preserves an existing draft after rotation.
-     * Without a draft, it copies the latest saved review or starts unrated.
-     *
-     * A matching pending event can remain after restoration between
-     * completion and navigation. This active review destination handles it.
-     */
+    val latestClose: () -> Unit by rememberUpdatedState(
+        newValue = { discardAndExit() }
+    )
+
+    DisposableEffect(registerBackHandler, isDestinationActive) {
+        val unregister = if (isDestinationActive) {
+            registerBackHandler?.invoke { latestClose() }
+        } else {
+            null
+        }
+
+        onDispose {
+            unregister?.invoke()
+        }
+    }
+
     LaunchedEffect(
         tripsStore,
         tripId,
@@ -251,37 +217,24 @@ fun TripReviewScreen(
         trip != null,
         exitMessage
     ) {
-        if (
-            isDestinationActive &&
-            trip != null &&
-            exitMessage == null
-        ) {
+        if (isDestinationActive && trip != null && exitMessage == null) {
             when (val result = tripsStore.beginReview(tripId)) {
                 TripActionResult.Applied -> {
                     if (tripsStore.pendingReviewTripId == tripId) {
                         tripsStore.acknowledgeReviewNavigation(tripId)
                     }
                 }
-
                 is TripActionResult.MissingTrip -> {
                     errorMessage = "This trip is no longer available."
                 }
-
                 is TripActionResult.InvalidInput -> {
                     errorMessage = result.message
                 }
-
-                else -> {
-                    errorMessage = "The review could not be opened."
-                }
+                else -> errorMessage = "The review could not be opened."
             }
         }
     }
 
-    /*
-     * Exit is retried after restoration if it was not acknowledged.
-     * A successful exit is not automatically requested again on rotation.
-     */
     LaunchedEffect(
         tripId,
         mode,
@@ -300,11 +253,6 @@ fun TripReviewScreen(
         }
     }
 
-    /*
-     * Common Navigation Event API supplied by the existing Navigation 3
-     * dependency. This nested handler consumes a completed Back action.
-     * Cancelling a predictive gesture makes no draft/store change.
-     */
     val backState = rememberNavigationEventState(
         currentInfo = NavigationEventInfo.None
     )
@@ -312,9 +260,7 @@ fun TripReviewScreen(
     NavigationBackHandler(
         state = backState,
         isBackEnabled = isDestinationActive && isAppResumed,
-        onBackCompleted = {
-            discardAndExit()
-        }
+        onBackCompleted = { discardAndExit() }
     )
 
     when {
@@ -333,14 +279,12 @@ fun TripReviewScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     color = TransitMain
                 )
-
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage.orEmpty(),
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-
                 Button(
                     onClick = { requestExit() },
                     enabled = isDestinationActive && isAppResumed,
@@ -370,14 +314,12 @@ fun TripReviewScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     color = TransitMain
                 )
-
                 Text(
                     text = "This completed trip was removed or is not " +
                             "available in the current session.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = TransitMain
                 )
-
                 Button(
                     onClick = {
                         if (isInteractive()) {
@@ -405,14 +347,12 @@ fun TripReviewScreen(
                     style = MaterialTheme.typography.titleLarge,
                     color = TransitMain
                 )
-
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage.orEmpty(),
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-
                 Button(
                     onClick = { discardAndExit() },
                     enabled = isDestinationActive && isAppResumed
@@ -431,9 +371,6 @@ fun TripReviewScreen(
                 errorMessage = errorMessage,
                 onRatingChange = { question, rating ->
                     updateDraft { latest ->
-                        /*
-                         * Ignore callbacks from an outgoing animated panel.
-                         */
                         if (latest.step == question) {
                             latest.withRating(question, rating)
                         } else {
@@ -450,20 +387,19 @@ fun TripReviewScreen(
                         }
                     }
                 },
-                onStepChange = { requestedStep ->
+                onStepChange = { requested ->
                     updateDraft { latest ->
                         val adjacent =
-                            requestedStep == latest.step.previousOrNull() ||
-                                    requestedStep == latest.step.nextOrNull()
-
-                        val movingForward =
-                            requestedStep.ordinal > latest.step.ordinal
+                            requested == latest.step.previousOrNull() ||
+                                    requested == latest.step.nextOrNull()
+                        val forward =
+                            requested.ordinal > latest.step.ordinal
 
                         if (
                             adjacent &&
-                            (!movingForward || latest.overall != null)
+                            (!forward || latest.overall != null)
                         ) {
-                            latest.copy(step = requestedStep)
+                            latest.copy(step = requested)
                         } else {
                             latest
                         }

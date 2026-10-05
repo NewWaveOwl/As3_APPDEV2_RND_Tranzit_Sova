@@ -5,11 +5,19 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.example.rnd_transit_mtl.model.TransportRoute
@@ -22,7 +30,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 /**
- * Restricted shared destinations with titles for MainLayout's header.
+ * Literal sealed-class route hierarchy required by the assignment.
  */
 @Serializable
 sealed class ScreenKey : NavKey {
@@ -55,10 +63,9 @@ data object HistoryScreenKey : ScreenKey() {
 }
 
 /**
- * Carries the generated record into the second content screen.
+ * Demonstrates passing the generated item to the second content screen.
  *
- * CurrentTripScreen resolves runtime state using this record's stable ID.
- * The parameter cannot recreate a missing trip.
+ * The screen uses trip.id to resolve authoritative runtime state.
  */
 @Serializable
 data class CurrentTripScreenKey(
@@ -67,19 +74,48 @@ data class CurrentTripScreenKey(
     override val screenTitle = "Current trip"
 }
 
+@Serializable
+data class TripDetailsScreenKey(
+    val tripId: String
+) : ScreenKey() {
+    override val screenTitle = "Trip details"
+}
+
 /**
- * Review coordination uses the stable ID and explicit initial/edit behavior.
+ * Restricted, serializable return destinations for review editing.
+ *
+ * Saving the origin avoids relying on a transient callback after rotation.
  */
+@Serializable
+sealed class ReviewOrigin {
+    abstract fun destination(): ScreenKey
+
+    @Serializable
+    data object History : ReviewOrigin() {
+        override fun destination(): ScreenKey = HistoryScreenKey
+    }
+
+    @Serializable
+    data class Details(
+        val tripId: String
+    ) : ReviewOrigin() {
+        override fun destination(): ScreenKey =
+            TripDetailsScreenKey(tripId)
+    }
+}
+
 @Serializable
 data class TripReviewScreenKey(
     val tripId: String,
-    val mode: TripReviewMode
+    val mode: TripReviewMode,
+    val origin: ReviewOrigin = ReviewOrigin.History
 ) : ScreenKey() {
     override val screenTitle = "Rate your trip"
 }
 
 /**
- * Explicit registration remains necessary for the NavKey back-stack serializer.
+ * Every concrete NavKey remains explicitly registered.
+ * ReviewOrigin uses its generated sealed serializer inside the review key.
  */
 val backStackConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
@@ -97,19 +133,22 @@ val backStackConfig = SavedStateConfiguration {
                 TripReviewScreenKey::class,
                 TripReviewScreenKey.serializer()
             )
+            subclass(
+                TripDetailsScreenKey::class,
+                TripDetailsScreenKey.serializer()
+            )
         }
     }
 }
 
 val LocalNavigator = compositionLocalOf<Navigator> {
-    error("No Navigator found! Wrap your UI with CompositionLocalProvider.")
+    error("Navigator must be provided by App.")
 }
 
 /**
- * Owns destination changes while screens coordinate store operations.
+ * Renders destinations beneath the already-hoisted MainLayout.
  *
- * Destination-active flags are computed from the actual stack top.
- * Outgoing content cannot continue the simulation during transitions.
+ * All outgoing-screen callbacks check the live stack top.
  */
 @Composable
 fun Router(
@@ -119,96 +158,55 @@ fun Router(
     loadingError: Boolean
 ) {
     val navigator = LocalNavigator.current
+    val navigation = LocalTripNavigation.current
     val tripsStore = LocalTripsStore.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    fun returnToPlanner(): Boolean {
-        if (MainScreenKey !in backStack) return false
-        navigator.popUntil(MainScreenKey)
-        return navigator.current == MainScreenKey
+    val lifecycleFlow = remember(lifecycle) {
+        lifecycle.currentStateFlow
     }
+    val lifecycleState by lifecycleFlow.collectAsState()
 
-    fun openHistory(): Boolean {
-        if (navigator.current == HistoryScreenKey) return true
-
-        val existingHistory = backStack.lastOrNull {
-            it == HistoryScreenKey
-        }
-
-        if (existingHistory != null) {
-            navigator.popUntil(existingHistory)
-        } else {
-            if (!returnToPlanner()) return false
-            navigator.navigate(HistoryScreenKey)
-        }
-
-        return navigator.current == HistoryScreenKey
+    val pendingReviewId by remember(tripsStore) {
+        derivedStateOf { tripsStore.pendingReviewTripId }
     }
+    val currentKey = navigator.current as? ScreenKey
 
-    fun openInitialReview(tripId: String): Boolean {
-        if (tripsStore.findCompleted(tripId) == null) return false
+    /*
+     * CurrentTripScreen handles completion while it is the current destination.
+     * This fallback handles completion flushed during departure, or a restored
+     * pending event whose current destination is Home/History/another section.
+     *
+     * Existing review destinations acknowledge their own matching event.
+     */
+    LaunchedEffect(
+        pendingReviewId,
+        currentKey,
+        lifecycleState
+    ) {
+        val pendingId = pendingReviewId
+        val matchingCurrentTrip =
+            currentKey is CurrentTripScreenKey &&
+                    currentKey.trip.id == pendingId
 
-        val destination = TripReviewScreenKey(
-            tripId = tripId,
-            mode = TripReviewMode.INITIAL
-        )
-        val current = navigator.current
-
-        if (current == destination) return true
-
-        val fromCurrentTrip =
-            current is CurrentTripScreenKey &&
-                    current.trip.id == tripId
-
-        val fromPendingAction =
-            tripsStore.pendingReviewTripId == tripId &&
-                    (current == MainScreenKey ||
-                            current == HistoryScreenKey)
-
-        if (!fromCurrentTrip && !fromPendingAction) return false
-
-        val existingDestination = backStack.lastOrNull {
-            it == destination
+        if (
+            pendingId != null &&
+            lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
+            !matchingCurrentTrip &&
+            currentKey !is TripReviewScreenKey
+        ) {
+            navigation.recoverPendingReview()
         }
-
-        when {
-            existingDestination != null -> {
-                navigator.popUntil(existingDestination)
-            }
-
-            fromCurrentTrip -> {
-                // Remove the finished simulation entry from the top.
-                navigator.replace(destination)
-            }
-
-            else -> {
-                navigator.navigate(destination)
-            }
-        }
-
-        // The caller acknowledges the pending event after this succeeds.
-        return navigator.current == destination
     }
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
         backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator()
+        ),
         onBack = {
-            val current = navigator.current
-
-            if (current is TripReviewScreenKey) {
-                // Fallback for Back events not consumed by the review screen.
-                // skipReview also discards an edit draft without changing
-                // an existing saved review.
-                tripsStore.skipReview(current.tripId)
-
-                if (current.mode == TripReviewMode.INITIAL) {
-                    openHistory()
-                } else {
-                    navigator.pop()
-                }
-            } else {
-                navigator.pop()
-            }
+            navigation.back()
         },
         entryProvider = entryProvider {
             entry<MainScreenKey> {
@@ -219,37 +217,32 @@ fun Router(
                     isDestinationActive =
                         navigator.current == MainScreenKey,
                     onOpenCurrentTrip = { trip ->
-                        val storedActive = tripsStore.activeTrip
+                        val current = navigator.current
+                        val alreadyOpened =
+                            current is CurrentTripScreenKey &&
+                                    current.trip.id == trip.id
 
                         if (
-                            navigator.current != MainScreenKey ||
-                            storedActive == null ||
-                            storedActive.id != trip.id
+                            current == MainScreenKey ||
+                            alreadyOpened
                         ) {
-                            false
+                            navigation.openCurrentTrip(trip)
                         } else {
-                            val existing = backStack
-                                .filterIsInstance<CurrentTripScreenKey>()
-                                .lastOrNull {
-                                    it.trip.id == storedActive.id
-                                }
-
-                            if (existing != null) {
-                                navigator.popUntil(existing)
-                            } else {
-                                navigator.navigate(
-                                    CurrentTripScreenKey(storedActive)
-                                )
-                            }
-
-                            val current = navigator.current
-                            current is CurrentTripScreenKey &&
-                                    current.trip.id == storedActive.id
+                            false
                         }
                     },
                     onOpenPendingReview = { tripId ->
-                        if (navigator.current == MainScreenKey) {
-                            openInitialReview(tripId)
+                        val current = navigator.current
+                        val alreadyOpened =
+                            current is TripReviewScreenKey &&
+                                    current.tripId == tripId &&
+                                    current.mode == TripReviewMode.INITIAL
+
+                        if (
+                            current == MainScreenKey ||
+                            alreadyOpened
+                        ) {
+                            navigation.openInitialReview(tripId)
                         } else {
                             false
                         }
@@ -262,47 +255,29 @@ fun Router(
                     trip = key.trip,
                     isDestinationActive = navigator.current == key,
                     onReviewRequested = { tripId ->
-                        openInitialReview(tripId)
+                        val current = navigator.current
+                        val alreadyOpened =
+                            current is TripReviewScreenKey &&
+                                    current.tripId == tripId &&
+                                    current.mode == TripReviewMode.INITIAL
+
+                        if (
+                            tripId == key.trip.id &&
+                            (current == key || alreadyOpened)
+                        ) {
+                            navigation.openInitialReview(tripId)
+                        } else {
+                            false
+                        }
                     },
                     onLeave = {
                         if (navigator.current == key) {
-                            returnToPlanner()
+                            navigation.returnToPlanner()
                         }
                     },
                     onReturnToPlanner = {
                         if (navigator.current == key) {
-                            returnToPlanner()
-                        }
-                    }
-                )
-            }
-
-            entry<TripReviewScreenKey> { key ->
-                TripReviewScreen(
-                    tripId = key.tripId,
-                    mode = key.mode,
-                    isDestinationActive = navigator.current == key,
-                    onOpenHistory = {
-                        when {
-                            navigator.current == HistoryScreenKey -> true
-                            navigator.current == key -> openHistory()
-                            else -> false
-                        }
-                    },
-                    onReturnToOrigin = {
-                        when {
-                            navigator.current == HistoryScreenKey -> true
-
-                            navigator.current == key -> {
-                                if (navigator.hasPrevious()) {
-                                    navigator.pop()
-                                    true
-                                } else {
-                                    openHistory()
-                                }
-                            }
-
-                            else -> false
+                            navigation.returnToPlanner()
                         }
                     }
                 )
@@ -312,27 +287,67 @@ fun Router(
                 HistoryScreen(
                     isDestinationActive =
                         navigator.current == HistoryScreenKey,
+                    onOpenDetails = { tripId ->
+                        if (navigator.current == HistoryScreenKey) {
+                            navigation.openDetails(tripId)
+                        }
+                    },
                     onReview = { tripId ->
-                        if (
-                            navigator.current == HistoryScreenKey &&
-                            tripsStore.findCompleted(tripId) != null
-                        ) {
-                            if (tripsStore.pendingReviewTripId == tripId) {
-                                if (openInitialReview(tripId)) {
-                                    tripsStore.acknowledgeReviewNavigation(
-                                        tripId
-                                    )
-                                }
-                            } else {
-                                navigator.navigate(
-                                    TripReviewScreenKey(
-                                        tripId = tripId,
-                                        mode = TripReviewMode.EDIT
-                                    )
-                                )
-                            }
+                        if (navigator.current == HistoryScreenKey) {
+                            navigation.openReview(
+                                tripId = tripId,
+                                origin = ReviewOrigin.History
+                            )
                         }
                     }
+                )
+            }
+
+            entry<TripDetailsScreenKey> { key ->
+                TripDetailsScreen(
+                    tripId = key.tripId,
+                    isDestinationActive = navigator.current == key,
+                    onReturnToHistory = {
+                        if (navigator.current == key) {
+                            navigation.openSection(HistoryScreenKey)
+                        }
+                    },
+                    onReview = { tripId ->
+                        if (
+                            navigator.current == key &&
+                            tripId == key.tripId
+                        ) {
+                            navigation.openReview(
+                                tripId = tripId,
+                                origin = ReviewOrigin.Details(key.tripId)
+                            )
+                        }
+                    }
+                )
+            }
+
+            entry<TripReviewScreenKey> { key ->
+                val registerBack: RegisterReviewBackHandler =
+                    remember(navigation, key) {
+                        { onBack ->
+                            navigation.registerReviewBackHandler(
+                                key = key,
+                                onBack = onBack
+                            )
+                        }
+                    }
+
+                TripReviewScreen(
+                    tripId = key.tripId,
+                    mode = key.mode,
+                    isDestinationActive = navigator.current == key,
+                    onOpenHistory = {
+                        navigation.finishReview(key)
+                    },
+                    onReturnToOrigin = {
+                        navigation.finishReview(key)
+                    },
+                    registerBackHandler = registerBack
                 )
             }
 

@@ -5,21 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.rememberNavBackStack
 import com.example.rnd_transit_mtl.HistoryScreen
 import com.example.rnd_transit_mtl.HistoryScreenKey
-import com.example.rnd_transit_mtl.LocalNavigator
 import com.example.rnd_transit_mtl.MainScreenKey
-import com.example.rnd_transit_mtl.Navigator
-import com.example.rnd_transit_mtl.backStackConfig
-import com.example.rnd_transit_mtl.layout.MainLayout
 import com.example.rnd_transit_mtl.model.Trip
-import com.example.rnd_transit_mtl.state.LocalTripsStore
+import com.example.rnd_transit_mtl.state.TripsState
 import com.example.rnd_transit_mtl.ui.HistoryContent
 import com.example.rnd_transit_mtl.ui.TripHistoryCard
 import com.example.rnd_transit_mtl.ui.TripHistoryFilter
@@ -138,37 +131,18 @@ fun ExpandedTripHistoryCardPreview() {
     }
 }
 
-/**
- * Supplies both providers required by the real screen/shared layout.
- * Records are fixed; no simulation or random generation runs.
- */
 @Composable
 private fun HistoryPreviewHost(
     trips: List<Trip> = historyPreviewTrips
 ) {
-    val backStack = rememberNavBackStack(
-        backStackConfig,
+    NavigationPreviewHost(
         MainScreenKey,
-        HistoryScreenKey
-    )
-    val navigator = remember(backStack) {
-        Navigator(backStack)
-    }
-    val tripsStore = remember(trips) {
-        createHistoryPreviewStore(trips)
-    }
-
-    RNDTransitTheme {
-        CompositionLocalProvider(
-            LocalNavigator provides navigator,
-            LocalTripsStore provides tripsStore
-        ) {
-            MainLayout {
-                HistoryScreen(
-                    onOpenDetails = {},
-                    onReview = {}
-                )
-            }
-        }
+        HistoryScreenKey,
+        tripsState = TripsState(completedTrips = trips)
+    ) {
+        HistoryScreen(
+            onOpenDetails = {},
+            onReview = {}
+        )
     }
 }
