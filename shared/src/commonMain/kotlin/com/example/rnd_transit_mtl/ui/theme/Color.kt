@@ -16,3 +16,6 @@ val TransitSelected = Color(0xFF9ACA45)
 
 /** Complementary colour for outlines and secondary accents. */
 val TransitComplementary = Color(0xFFBC9E5C)
+
+/** Orange used specifically for the mock trip's moving person. */
+val TransitOrange = Color(0xFFFF7A1A)
