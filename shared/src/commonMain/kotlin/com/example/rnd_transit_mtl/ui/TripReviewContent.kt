@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.rnd_transit_mtl.model.TripReviewMode
+import com.example.rnd_transit_mtl.model.Trip
 import com.example.rnd_transit_mtl.state.ReviewDraft
 import com.example.rnd_transit_mtl.state.ReviewStep
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
@@ -66,6 +67,7 @@ fun TripReviewContent(
     errorMessage: String?,
     onRatingChange: (ReviewStep, Int?) -> Unit,
     onCommentChange: (String) -> Unit,
+    onImageUrlChange: (String) -> Unit,
     onStepChange: (ReviewStep) -> Unit,
     onSave: () -> Unit,
     onDiscard: () -> Unit,
@@ -194,6 +196,7 @@ fun TripReviewContent(
                     step = question,
                     rating = draft.ratingFor(question),
                     comment = draft.comment,
+                    imageUrl = draft.imageUrl,
                     enabled = panelEnabled,
                     onRatingChange = { rating ->
                         onRatingChange(question, rating)
@@ -201,7 +204,8 @@ fun TripReviewContent(
                     onClearRating = {
                         onRatingChange(question, null)
                     },
-                    onCommentChange = onCommentChange
+                    onCommentChange = onCommentChange,
+                    onImageUrlChange = onImageUrlChange
                 )
             }
 
@@ -217,6 +221,24 @@ fun TripReviewContent(
             }
 
             val next = draft.step.nextOrNull()
+            val imageUrl = draft.imageUrl.trim()
+            val validImageUrl = imageUrl.isEmpty() || Trip.isSupportedImageUrl(imageUrl)
+            val continueHint = when {
+                draft.overall == null -> "Select Overall experience stars to continue."
+                !validImageUrl -> "Correct the image link or leave it empty to continue."
+                else -> null
+            }
+
+            if (controlsEnabled && continueHint != null) {
+                Text(
+                    text = continueHint,
+                    color = TransitMain,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.semantics {
+                        liveRegion = LiveRegionMode.Polite
+                    }
+                )
+            }
 
             Button(
                 onClick = {
@@ -228,7 +250,7 @@ fun TripReviewContent(
                         onStepChange(next)
                     }
                 },
-                enabled = controlsEnabled && draft.overall != null,
+                enabled = controlsEnabled && draft.overall != null && validImageUrl,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 52.dp)

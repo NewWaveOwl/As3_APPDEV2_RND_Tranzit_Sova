@@ -50,6 +50,7 @@ internal val reviewedHistoryPreviewTrip = Trip(
         quality = 4,
         interesting = 5,
         `fun` = 4,
+        imageUrl = "https://example.com/review-photo.jpg",
         comment = "Nice route and interesting places. " +
             "The relaxed pace made it easy to enjoy the trip."
     )

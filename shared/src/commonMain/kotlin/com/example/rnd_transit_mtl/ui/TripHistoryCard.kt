@@ -238,6 +238,10 @@ fun TripHistoryCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
+                    if (review.imageUrl.isNotEmpty()) {
+                        Text("Image linked · expand to open",
+                            style = MaterialTheme.typography.bodySmall)
+                    }
                 }
 
                 AnimatedVisibility(
@@ -247,7 +251,8 @@ fun TripHistoryCard(
                 ) {
                     TripReviewSummary(
                         review = review,
-                        includeOverall = false
+                        includeOverall = false,
+                        linksEnabled = actionsEnabled
                     )
                 }
 

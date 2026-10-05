@@ -7,6 +7,13 @@ RND Transit is a map-based trip demo. Its three main content screens are **Home 
 
 ## The three main screens
 
+The app first shows a simple nickname landing screen. Enter any nonblank nickname
+and press **Continue to GO**; Profile displays it. This is demo access, with no
+password, account service, file or database. The nickname stays in process memory
+through Android rotation and is forgotten when the process restarts or the browser
+reloads. An unfinished landing-field entry may reset on rotation. The landing page
+is an introduction; it does not replace the three related trip content screens.
+
 | Screen | What the user does |
 | --- | --- |
 | Home / GO | Choose planned minutes, transport types/routes and attraction intensity; press GO or resume the existing trip |
@@ -62,6 +69,14 @@ Initial review Save, Skip, Close and Back lead to History. Later editing loads a
 
 Draft ratings, comment and question step are included in saved state. Missing/deleted IDs show a recovery action and cannot be recreated by saving.
 
+Overall experience also has an optional **Image link** field. A nonempty link must
+use HTTPS with a valid host. Save trims it and attaches it to that review; editing
+loads the saved link, Cancel preserves it, and Skip discards the draft link. It is
+included in review draft/snapshot restoration. Older reviews without the new field
+restore with an empty link. Expand a reviewed History card or open details to copy
+the URL or press **Open review image**. The browser opens it only on that action;
+review images are linked rather than downloaded/displayed inside the app.
+
 ## History and details
 
 History reads the shared completed List<Trip>, newest completion first, using stable IDs.
@@ -93,6 +108,10 @@ This is **saved-state restoration, not permanent database storage**. A fresh lau
 The map is a mock image, the route is straight, coordinates are normalized image positions, and distance is synthetic demo distance. There is no GPS, real street routing, turn guidance or live map service.
 
 The three main screens, provider collection, parameter passing, details/removal, shared layout and sealed routes remain implemented in source. **The assignment's first-screen multiple-text-input and image-link requirements are currently unmet after removal of that form.** Reviews provide text input elsewhere, but that does not satisfy the literal first-screen requirement.
+
+The new nickname introduction and later review-image input do **not** close this
+gap: information must be entered together on the first content screen, passed to
+the second, and represented in the third screen's provider-backed collection.
 
 Final runtime timing, rotation, gestures, phone/keyboard/desktop layouts and current compilation/tests still require evidence.
 

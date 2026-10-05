@@ -4,6 +4,7 @@ import com.example.rnd_transit_mtl.model.Trip
 import com.example.rnd_transit_mtl.model.TripPoint
 import com.example.rnd_transit_mtl.model.TripReview
 import com.example.rnd_transit_mtl.model.TripTransportSnapshot
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -49,6 +50,7 @@ class TripReviewStateTest {
         assertNull(review.interesting)
         assertNull(review.`fun`)
         assertEquals("", review.comment)
+        assertEquals("", review.imageUrl)
         assertEquals(1, store.completedTrips.size)
         assertNull(store.reviewDrafts[id])
     }
@@ -62,7 +64,8 @@ class TripReviewStateTest {
             quality = 4,
             interesting = 3,
             `fun` = 2,
-            comment = "Saved feedback"
+            comment = "Saved feedback",
+            imageUrl = "https://example.com/saved-review.jpg"
         )
 
         assertEquals(
@@ -80,6 +83,7 @@ class TripReviewStateTest {
                 draft.copy(
                     overall = 1,
                     comment = "Unsaved changes",
+                    imageUrl = "https://example.com/unsaved-review.jpg",
                     step = ReviewStep.INTERESTING
                 )
             )
@@ -97,6 +101,7 @@ class TripReviewStateTest {
 
         assertEquals(saved.overall, reopened.overall)
         assertEquals(saved.comment, reopened.comment)
+        assertEquals(saved.imageUrl, reopened.imageUrl)
         assertEquals(ReviewStep.OVERALL, reopened.step)
     }
 
@@ -111,6 +116,7 @@ class TripReviewStateTest {
             overall = 4,
             interesting = 5,
             comment = "Draft survives rotation",
+            imageUrl = "https://example.com/draft.jpg",
             step = ReviewStep.FUN
         )
 
@@ -140,6 +146,57 @@ class TripReviewStateTest {
         assertNull(restored.findCompleted(id))
         assertNull(restored.reviewDrafts[id])
         assertEquals(0, restored.completedTrips.size)
+    }
+
+    @Test
+    fun reviewImageLinkIsTrimmedSavedAndRestoredWithoutAddingATrip() {
+        val store = completedStore()
+        val id = sampleTrip().id
+        store.beginReview(id)
+        val url = "https://example.com/review.jpg"
+        store.updateReviewDraft(id, ReviewDraft(overall = 4, imageUrl = "  $url  "))
+        assertNull(store.findCompleted(id)?.review)
+
+        assertEquals(TripActionResult.Applied, store.saveReview(id))
+        val restored = assertNotNull(
+            TripsStore.fromSavedStateJson(store.toSavedStateJson(), nowEpochMillis = { 2_000L })
+        )
+        assertEquals(1, restored.completedTrips.size)
+        assertEquals(id, restored.completedTrips.single().id)
+        assertEquals(url, restored.completedTrips.single().review?.imageUrl)
+    }
+
+    @Test
+    fun thumbnailQueryUrlCanBeSavedButOverallIsStillRequired() {
+        val store = completedStore()
+        val id = sampleTrip().id
+        val url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgjJV2ADwJIiu9ObRGmB9WgBAFTeuvQrcHyoVY3zcnQkwXAlmkbiCP0fo&s=10"
+        store.beginReview(id)
+        store.updateReviewDraft(id, ReviewDraft(imageUrl = url))
+
+        assertIs<TripActionResult.InvalidInput>(store.saveReview(id))
+        assertNull(store.findCompleted(id)?.review)
+
+        store.updateReviewDraft(id, ReviewDraft(overall = 3, imageUrl = url))
+        assertEquals(TripActionResult.Applied, store.saveReview(id))
+        assertEquals(url, store.findCompleted(id)?.review?.imageUrl)
+        assertEquals(1, store.completedTrips.size)
+    }
+
+    @Test
+    fun invalidImageLinkPreservesSavedFeedbackAndOldJsonHasNoImage() {
+        val store = completedStore()
+        val id = sampleTrip().id
+        val saved = TripReview(overall = 5, imageUrl = "https://example.com/saved.jpg")
+        store.saveReview(id, saved)
+        store.beginReview(id)
+        store.updateReviewDraft(id, ReviewDraft(overall = 2, imageUrl = "not a link"))
+
+        assertIs<TripActionResult.InvalidInput>(store.saveReview(id))
+        assertEquals(saved, store.findCompleted(id)?.review)
+        assertEquals("not a link", store.reviewDrafts[id]?.imageUrl)
+        assertEquals("", Json.decodeFromString(TripReview.serializer(), "{\"overall\":4}").imageUrl)
+        assertEquals("", Json.decodeFromString(ReviewDraft.serializer(), "{}").imageUrl)
     }
 
     private fun completedStore(): TripsStore {

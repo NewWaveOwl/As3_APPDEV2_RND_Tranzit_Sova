@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
  *
  * Overall is required. Unselected optional ratings remain null.
  * An empty comment means no written feedback was supplied.
+ * imageUrl is optional saved review feedback, separate from Trip.imageUrl.
  */
 @Serializable
 data class TripReview(
@@ -14,9 +15,13 @@ data class TripReview(
     val quality: Int? = null,
     val interesting: Int? = null,
     val `fun`: Int? = null,
-    val comment: String = ""
+    val comment: String = "",
+    val imageUrl: String = ""
 ) {
     init {
+        require(imageUrl.isEmpty() || Trip.isSupportedImageUrl(imageUrl)) {
+            "Review image link must be empty or a valid HTTPS URL."
+        }
         require(overall in 1..5) {
             "Overall rating must be between 1 and 5."
         }

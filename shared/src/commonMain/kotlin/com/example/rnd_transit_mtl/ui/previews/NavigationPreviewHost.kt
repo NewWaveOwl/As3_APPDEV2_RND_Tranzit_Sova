@@ -12,6 +12,8 @@ import com.example.rnd_transit_mtl.TripNavigation
 import com.example.rnd_transit_mtl.backStackConfig
 import com.example.rnd_transit_mtl.layout.MainLayout
 import com.example.rnd_transit_mtl.state.LocalTripsStore
+import com.example.rnd_transit_mtl.state.LocalNicknameSession
+import com.example.rnd_transit_mtl.state.NicknameSession
 import com.example.rnd_transit_mtl.state.TripsState
 import com.example.rnd_transit_mtl.state.TripsStore
 import com.example.rnd_transit_mtl.ui.theme.RNDTransitTheme
@@ -49,12 +51,16 @@ internal fun NavigationPreviewHost(
     val navigation = remember(navigator, store) {
         TripNavigation(navigator, store)
     }
+    val nicknameSession = remember {
+        NicknameSession().apply { signIn("Atiom") }
+    }
 
     RNDTransitTheme {
         CompositionLocalProvider(
             LocalNavigator provides navigator,
             LocalTripsStore provides store,
-            LocalTripNavigation provides navigation
+            LocalTripNavigation provides navigation,
+            LocalNicknameSession provides nicknameSession
         ) {
             MainLayout(content = content)
         }

@@ -283,7 +283,8 @@ class TripsStore private constructor(
                 quality = savedReview.quality,
                 interesting = savedReview.interesting,
                 `fun` = savedReview.`fun`,
-                comment = savedReview.comment
+                comment = savedReview.comment,
+                imageUrl = savedReview.imageUrl
             )
         }
 
@@ -331,12 +332,20 @@ class TripsStore private constructor(
                 "Select an overall rating before saving."
             )
 
+        val imageUrl = draft.imageUrl.trim()
+        if (imageUrl.isNotEmpty() && !Trip.isSupportedImageUrl(imageUrl)) {
+            return TripActionResult.InvalidInput(
+                "Enter a valid HTTPS image link, or leave it empty."
+            )
+        }
+
         val review = TripReview(
             overall = overall,
             quality = draft.quality,
             interesting = draft.interesting,
             `fun` = draft.`fun`,
-            comment = draft.comment.trim()
+            comment = draft.comment.trim(),
+            imageUrl = imageUrl
         )
 
         return saveReview(tripId, review)

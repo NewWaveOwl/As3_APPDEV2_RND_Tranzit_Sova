@@ -180,7 +180,7 @@ fun TripDetailsContent(
                     color = TransitMain
                 )
 
-                TripReviewSummary(review = trip.review)
+                TripReviewSummary(review = trip.review, linksEnabled = actionsEnabled)
 
                 if (errorMessage != null) {
                     Text(

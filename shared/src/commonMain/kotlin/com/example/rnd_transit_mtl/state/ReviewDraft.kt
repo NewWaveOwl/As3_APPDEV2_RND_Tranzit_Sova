@@ -13,6 +13,7 @@ import kotlinx.serialization.Serializable
  *
  * step restores the current question after rotation.
  * Animation progress, focus, and keyboard state are not stored.
+ * imageUrl may be incomplete while typing; the store validates it on Save.
  */
 @Serializable
 data class ReviewDraft(
@@ -21,7 +22,8 @@ data class ReviewDraft(
     val interesting: Int? = null,
     val `fun`: Int? = null,
     val comment: String = "",
-    val step: ReviewStep = ReviewStep.OVERALL
+    val step: ReviewStep = ReviewStep.OVERALL,
+    val imageUrl: String = ""
 ) {
     init {
         require(overall == null || overall in 1..5) {

@@ -387,6 +387,15 @@ fun TripReviewScreen(
                         }
                     }
                 },
+                onImageUrlChange = { imageUrl ->
+                    updateDraft { latest ->
+                        if (latest.step == ReviewStep.OVERALL) {
+                            latest.copy(imageUrl = imageUrl)
+                        } else {
+                            latest
+                        }
+                    }
+                },
                 onStepChange = { requested ->
                     updateDraft { latest ->
                         val adjacent =

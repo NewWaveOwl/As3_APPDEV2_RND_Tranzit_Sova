@@ -36,7 +36,8 @@ fun TripReviewOverallPreview() {
     ReviewExample(
         draft = ReviewDraft(
             overall = 3,
-            comment = "I enjoyed the relaxed pace."
+            comment = "I enjoyed the relaxed pace.",
+            imageUrl = "https://example.com/trip-photo.jpg"
         )
     )
 }
@@ -109,6 +110,7 @@ private fun ReviewExample(
             errorMessage = null,
             onRatingChange = { _, _ -> },
             onCommentChange = {},
+            onImageUrlChange = {},
             onStepChange = {},
             onSave = {},
             onDiscard = {}

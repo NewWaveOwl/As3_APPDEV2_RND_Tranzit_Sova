@@ -17,6 +17,12 @@ This document describes the current source implementation and available records.
 
 Supporting destinations: sequential TripReviewScreen, static TripDetailsScreen, Profile, Settings and About. About remains the information screen and is reached through Profile. Settings is right-aligned in the shared bar.
 
+An introductory landing page now asks for a nonblank nickname before entering the
+trip UI. A memory-only process session supplies it to Profile and retains it across
+Android activity recreation; no credentials, database or nickname Saver is used.
+Fresh process/browser reload starts at the landing page. The three main content
+screens remain GO, Current Trip and History.
+
 ### Current GO behavior
 
 Planned minutes are **0–360 in five-minute steps**, default 30. Up from 355 reaches 360; further increases stop. Down from 360 reaches 355. The number area fits three digits between dividers and uses text measurement to reduce font size when necessary.
@@ -34,6 +40,13 @@ One authoritative elapsed value produces position, percentage, progress track an
 The gradient Current trip title opens stored information and unfinished-trip cancellation. Cancel returns to GO without History. At completion, the store records the trip once and keeps the display at 100%. **The user taps 100% to open review; navigation is not automatic.**
 
 Overall experience is required to save; Quality/Interesting/Fun/comment are optional. Nullable ratings distinguish unrated feedback from valid 1–5 stars. Initial Save/Skip/Close/Back opens History. Editing uses an ID-associated draft; Save replaces feedback and Cancel preserves it. Missing IDs recover without reconstructing deleted trips.
+
+Reviews also accept an optional HTTPS image link. The URL is part of the draft and
+saved TripReview, separate from Trip.imageUrl. Blank is valid; invalid URLs prevent
+Save without replacing old feedback. History expansion/details offer a copyable
+link and browser-open action. The browser is responsible for displaying the image.
+The nickname plus later review URL still does not satisfy the handout's multiple
+text inputs/image link on the first content screen; that gap remains unresolved.
 
 Details displays the original completed map at 100% with no simulation or point generation. Normal GO trips have no reference URL; optional image loading/failure/retry remains available for stored records with a URL and never replaces the mock map.
 

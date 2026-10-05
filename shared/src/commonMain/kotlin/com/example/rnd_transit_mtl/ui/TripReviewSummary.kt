@@ -22,7 +22,8 @@ import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 fun TripReviewSummary(
     review: TripReview?,
     modifier: Modifier = Modifier,
-    includeOverall: Boolean = true
+    includeOverall: Boolean = true,
+    linksEnabled: Boolean = true
 ) {
     Column(
         modifier = modifier
@@ -85,6 +86,9 @@ fun TripReviewSummary(
                 style = MaterialTheme.typography.bodyLarge,
                 color = TransitWhite
             )
+
+            ReviewImageLink(imageUrl = review.imageUrl, contentColor = TransitWhite,
+                enabled = linksEnabled)
         }
     }
 }
