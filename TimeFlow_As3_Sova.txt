@@ -1,2 +1,3 @@
 17:00 - 17:30 -> Moved Projects code to new repo for AS3
+18:30 - 19:00 -> genetratingvahin prop for reasling project
 19:-- - Implemting ptoject 

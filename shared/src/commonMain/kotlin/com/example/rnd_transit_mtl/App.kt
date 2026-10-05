@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.example.rnd_transit_mtl.data.FakeTransportRouteRepository
@@ -13,16 +14,16 @@ import com.example.rnd_transit_mtl.data.FakeTransportTypeRepository
 import com.example.rnd_transit_mtl.layout.MainLayout
 import com.example.rnd_transit_mtl.model.TransportRoute
 import com.example.rnd_transit_mtl.model.TransportType
+import com.example.rnd_transit_mtl.state.LocalTripsStore
+import com.example.rnd_transit_mtl.state.TripsStore
 import com.example.rnd_transit_mtl.ui.theme.RNDTransitTheme
 import kotlinx.coroutines.CancellationException
 
 /**
  * Keeps successfully loaded transport types and routes together.
  *
- * Publishing one TransportData value makes both lists available to the UI together.
- *
- * @param types Available transport options in display order.
- * @param routes Available routes, each linked to its owning transport type.
+ * Publishing one TransportData value makes both lists available
+ * to the UI together.
  */
 private data class TransportData(
     val types: List<TransportType>,
@@ -30,44 +31,64 @@ private data class TransportData(
 )
 
 /**
- * Loads shared transport data and provides the navigator, theme, and common layout.
+ * Owns the shared navigation stack and restorable TripsStore.
  *
- * Creates one restorable navigation stack rooted at Home. Transport data is loaded
- * when the effect enters composition, and failures are passed to the main screen.
+ * Transport resources are reloaded when App enters composition.
+ * TripsStore restores records, active elapsed time, pending review,
+ * and review drafts through its explicit String Saver.
+ *
+ * The shared theme and MainLayout remain above Router.
  */
 @Composable
 fun App() {
-    /** Restore or create the shared back stack, starting at Home for a new stack. */
-    val backStack = rememberNavBackStack(backStackConfig, MainScreenKey)
+    val backStack = rememberNavBackStack(
+        backStackConfig,
+        MainScreenKey
+    )
+    val navigator = remember(backStack) {
+        Navigator(backStack)
+    }
 
-    /** Reuse the navigator while it controls the same back stack. */
-    val navigator = remember(backStack) { Navigator(backStack) }
+    val tripsStore = rememberSaveable(
+        saver = TripsStore.Saver
+    ) {
+        TripsStore()
+    }
 
-    var transportData by remember { mutableStateOf<TransportData?>(null) }
-    var loadingError by remember { mutableStateOf(false) }
+    var transportData by remember {
+        mutableStateOf<TransportData?>(null)
+    }
+    var loadingError by remember {
+        mutableStateOf(false)
+    }
 
-    /** Load both repository lists once per effect lifetime, rather than on every recomposition. */
     LaunchedEffect(Unit) {
         try {
-            /** Assign the data only after both repository calls complete successfully. */
             transportData = TransportData(
-                types = FakeTransportTypeRepository().getTransportTypes(),
-                routes = FakeTransportRouteRepository().getTransportRoutes()
+                types = FakeTransportTypeRepository()
+                    .getTransportTypes(),
+                routes = FakeTransportRouteRepository()
+                    .getTransportRoutes()
             )
         } catch (cancelled: CancellationException) {
-            /** Preserve coroutine cancellation instead of reporting it as a loading failure. */
             throw cancelled
         } catch (_: Exception) {
-            /** Expose ordinary loading failures so MainScreen can display its error message. */
             loadingError = true
         }
     }
 
     RNDTransitTheme {
-        /** Supply the same navigator to the common layout, router, and all descendant screens. */
-        CompositionLocalProvider(LocalNavigator provides navigator) {
+        CompositionLocalProvider(
+            LocalNavigator provides navigator,
+            LocalTripsStore provides tripsStore
+        ) {
             MainLayout {
-                Router(backStack, transportData?.types, transportData?.routes, loadingError)
+                Router(
+                    backStack,
+                    transportData?.types,
+                    transportData?.routes,
+                    loadingError
+                )
             }
         }
     }
