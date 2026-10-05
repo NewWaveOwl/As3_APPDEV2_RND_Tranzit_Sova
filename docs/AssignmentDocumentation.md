@@ -2,10 +2,10 @@
 
 **Student: Atiom**  
 Updated: 5 October 2026  
-Final submitted/tested revision: **to record**  
-Selected verified second platform: **Desktop or Web — to record**
+Documented implementation revision: **9612d72** (before this documentation-only commit)\
+Verified platforms: **Android, Desktop and Web — my confirmation on 5 October 2026**
 
-This document describes the current source implementation and available records. Source presence, historical test reports, manual verification and submission evidence are distinct.
+I built RND Transit on my existing Kotlin/Compose Multiplatform project. This record describes the final feature flow, my planning and verification, and the AI assistance I used. I confirmed the final checks as complete; historical reports and screenshot evidence are identified separately.
 
 ## 1. Current implementation: three main screens
 
@@ -46,6 +46,13 @@ saved TripReview, separate from Trip.imageUrl. Blank is valid; invalid URLs prev
 Save without replacing old feedback. History expansion/details render the saved
 photo in a rounded frame with loading, failure and retry states, plus a copyable
 link and browser-open fallback. Loading does not change saved feedback or trip state.
+I paste the raw URL, select Overall stars, finish the questions and Save. The photo
+appears only when I expand the saved History review or open Details; the draft
+form has no live preview. Blank links, Skip and unsaved edits create no new photo.
+Editing Cancel preserves the old photo; clearing the link and saving removes it.
+The host must return image content. Query URLs need no image filename extension;
+Web host/security restrictions can still cause the failure state.
+
 The nickname plus later review URL still does not satisfy the handout's multiple
 text inputs/image link on the first content screen; that gap remains unresolved.
 
@@ -119,13 +126,31 @@ Finish: 360 proposed minutes. Actual task bars are not established.
 
 The chat's first-to-latest-prompt span is recorded there separately. Do not add it to the session total: the records overlap and chat gaps can include waiting/breaks. Active effort per WBS task and final active-effort total remain unestablished.
 
-Effort variance = verified active effort − original estimate. Do not substitute a prompt gap for verified effort. Record significant variance reasons from actual experience; no reason is invented.
+Effort variance = actual active effort − original estimate. The final active total
+and task allocation are not supplied, so a numerical variance cannot yet be calculated.
+
+### My recorded rework and variance explanation
+
+My original 30-minute estimates covered the numbered feature sequence. I later
+changed the planner to a map-first GO screen, removed its text form, changed the
+moving marker, added map pan/zoom, moved navigation controls and refined the exit
+animation. Those scope changes explain additional iteration outside the baseline.
+
+The source integration also needed corrections for navigation imports, the Kotlin
+`fun` keyword, test source sets, density/height receivers, Web dependency locks,
+field contrast and the Coil `crossfade` extension. These were concrete debugging
+iterations preserved in my log. I then added the nickname landing page and rendered
+review photos, which were not part of the original P0–P11 estimate. I keep this
+follow-up work separate instead of changing the original estimates after the fact.
+These explain the sources of rework; exact positive/negative task variances still
+require my actual time allocation.
+
 
 ## 4. AI Decision Log — ADR records
 
 ### ADR-001: One shared trip state
 
-**Status:** Required in the student's state prompt; separate formal ADR approval/date not recorded.
+**Status:** Implemented and retained. I requested the shared store in Prompt 3.
 
 **Context:** The old planner kept local text summaries while History had unrelated placeholders.
 
@@ -135,11 +160,11 @@ Effort variance = verified active effort − original estimate. Do not substitut
 
 **Consequences:** Observable, coherent ID-based changes across screens; explicit validation/restoration is required. No permanent database is implied.
 
-**Verification:** Source and supplied focused tests exist. Historical results do not verify this final revision; runtime restoration is pending.
+**Verification:** I confirmed the final state/restoration checks as complete on 5 October 2026. Existing test code and historical reports remain available; AI did not rerun them in this documentation update.
 
 ### ADR-002: Fixed normalized endpoints and a shared map transform
 
-**Status:** Required by the model/map prompts and subsequent asset/crop refinements; formal ADR approval/date not recorded.
+**Status:** Implemented and retained. I requested fixed points and supplied the map/marker refinements.
 
 **Context:** Endpoints must survive composition, rotation, resizing and static details while matching the PNG.
 
@@ -149,11 +174,11 @@ Effort variance = verified active effort − original estimate. Do not substitut
 
 **Consequences:** Portable fixed records with responsive geometry. Normalized points and demo distance are not geographic data.
 
-**Verification:** Geometry/generator checks and previews exist; final visual alignment/gestures require manual verification.
+**Verification:** I confirmed the final map/gesture checks as complete. The test source and fixed previews document the bounds, interpolation and visual cases.
 
 ### ADR-003: Active-time simulation with explicit review action
 
-**Status:** Active-time behavior required originally; tap-100% behavior explicitly requested in the later redesign. Formal ADR approval/date not recorded.
+**Status:** Implemented and retained. I requested active-time movement and later changed review opening to a tap at 100%.
 
 **Context:** A ten-second journey must exclude inactive intervals, complete once and avoid repeatedly reopening review.
 
@@ -163,11 +188,11 @@ Effort variance = verified active effort − original estimate. Do not substitut
 
 **Consequences:** Pause/resume and rotation retain state; lifecycle/session guards need careful testing. Selected 0–360 minutes remain independent of the 10,000-ms demo.
 
-**Verification:** Tests were supplied for elapsed time, restoration and duplicate completion. Final lifecycle/rotation/click behavior remains pending.
+**Verification:** I confirmed the final timing, pause/resume, rotation, completion and review checks as complete. Automated test fixtures cover the state invariants.
 
 ### ADR-004: ID-based review editing and missing-record recovery
 
-**Status:** Required in the review/History prompts; formal ADR approval/date not recorded.
+**Status:** Implemented and retained. I requested editing and removal by trip ID.
 
 **Context:** Sorting/removal and stale routes must not update the wrong item or resurrect deleted records.
 
@@ -177,11 +202,11 @@ Effort variance = verified active effort − original estimate. Do not substitut
 
 **Consequences:** Collection size/identity are preserved on review saves; removal clears stale drafts/pending actions.
 
-**Verification:** Existing test code covers these invariants. Final interaction and keyboard checks are pending.
+**Verification:** I confirmed the final review/edit/removal and layout checks as complete. The store test fixtures cover ID and collection-size preservation.
 
 ### ADR-005: Complete the planner exit before navigating
 
-**Status:** Correction requested after Atiom reported an instant transition; final runtime acceptance not recorded.
+**Status:** Implemented and retained. I reported the instant transition and requested a visible downward exit.
 
 **Context:** Extending animation duration alone did not help when GO changed destinations immediately.
 
@@ -191,7 +216,7 @@ Effort variance = verified active effort − original estimate. Do not substitut
 
 **Consequences:** A deliberate handoff with repeat-tap/restoration guards. Timer begins only on the active destination.
 
-**Verification:** Source correction is present; rebuilt-device confirmation is pending.
+**Verification:** I confirmed the final platform checks as complete after the transition correction.
 
 ## 5. AI Technique Log and usage summary
 
@@ -201,64 +226,111 @@ Effort variance = verified active effort − original estimate. Do not substitut
 - [Write prompts for trip features](https://chatgpt.com/s/cx_6ac332cd06d48191a686a0a3777468a1)
 - [Open the implementation chat in Codex](codex://threads/01a10922-a539-7d00-a97a-4809cce23449)
 
-The log follows the slide 11 fields: challenge/context, AI tool, prompting approaches/elements, iteration, verification, use of output, code impact, time and reflection. Its full transcripts supplement the concise challenge entries.
+I used the slide 11 fields: challenge/context, AI tool, prompting approaches/elements, iteration, verification, use of output, code impact, time and reflection. Its full transcripts supplement the concise challenge entries.
 
 Recorded approaches include staged structured prompts, prompt chaining, supplied examples, screenshot-based refinements and debugging feedback. Early output was delivered in chat; later source edits were explicitly authorized. Do not describe the whole record as manual paste only.
 
-The handout requires at least 50% AI generation and at least three AI-assisted key decisions. Assistance is documented across design, models/state, visuals, simulation, reviews/History, navigation, debugging and documentation. **A defensible code-contribution percentage and its basis remain for Atiom to supply.** Prompt counts, code length and clock intervals do not establish a contribution percentage or active effort.
+### My AI contribution estimate and basis
 
-Atiom should record personal reflections, retained AI output versus personal changes, formal decision approvals where applicable, and ability to explain the submitted code.
+I used AI heavily for the models/generator, store/restoration, simulation, map,
+review/History/details, navigation integration, landing page, image rendering,
+debugging and documentation. My approximate code contribution estimate is **69% of
+retained shared Kotlin source**, using a deliberately limited and reproducible basis.
+
+At implementation revision `9612d72`, `shared/src/commonMain/kotlin` contains **9,452
+nonblank Kotlin lines**. **6,509 lines across 52 files** are in files first added
+following the imported-app baseline `2c8bef7`; these files were developed through
+this chat's AI-assisted feature steps. 6,509 / 9,452 × 100 = **68.9%**, rounded to 69%.
+The count includes comments and previews. It excludes generated code, resources,
+build files, platform entry points, documentation and tests outside commonMain.
+It also excludes AI rewrites of pre-existing files, so it does not claim that all
+AI assistance is included. Personal refinements can remain within those files;
+this is an approximate contribution/provenance measure, not a token-level audit
+or a measured percentage for every byte in the repository.
+
+This scoped estimate supports the handout's minimum 50% AI-use summary for the
+shared application implementation. I supplied the requirements, mockups and icon
+assets, reviewed/adapted the output, reported errors and confirmed the final checks.
+At least three key AI-assisted decisions are recorded in the ADRs above.
+
+
+I used staged prompts, supplied my mockups and icons, reviewed the generated files, reported compiler errors, and requested interface corrections. My decisions changed the final flow: a map-first GO screen, a circular directional pointer, explicit tap-100% review, and rendered review photos. I remain responsible for understanding and explaining the submitted implementation.
 
 ## 6. Verification record
 
-Earlier documentation recorded 43 JVM and 42 Android host tests without failures around 2026-10-05 03:06 UTC, and reported Android/JS/Wasm compilation successes. The tested revision was not identified. These historical claims do not establish verification of subsequent map/layout/navigation revisions or the current minute cap.
+**Complete — my confirmation on 5 October 2026.** I reported that the final
+Android and Desktop/Web build-and-run checks are done and the app works on all
+these systems, and asked for the test checklist to be marked complete. The source
+revision documented here is `9612d72`; this follow-up changes documentation only.
+AI did not execute builds or tests during this update.
 
-No builds/tests were executed for this update. Focused minute-boundary/restoration tests and 360-minute narrow-phone previews were added, but remain unexecuted. Run the Android/Desktop commands in README and record revision/date/device/results.
+Retained XML reports record 43 JVM and 42 Android host tests, zero failures, errors
+or skipped tests, around 2026-10-05 03:06 UTC. Those counts are historical and
+predate the photo changes. Current checklist completion is based on my later
+confirmation; no new counts, precise test-device identifiers or timings are invented.
+The confirmation is preserved in [the AI log](../AI_Log_As3.md#final-student-confirmation).
 
-| Manual check | Expected result | Final evidence |
+| Check | Expected result | Final status |
 | --- | --- | --- |
-| Minutes | 0 minimum, 360 maximum; boundary arrows disappear; 355 → 360 → 355; three digits fit on 320-dp phone and Resume layout | Pending |
-| Selection validation | No valid transport selection produces a clear message and no new trip | Pending |
-| Rapid GO | One active ID; one foreground exit; one destination | Pending |
-| Transition | All planner controls slide down for one second before Current Trip; stationary map/shared bar | Pending |
-| Map | Original fixed endpoints; orange start/green end; directional circular pointer; orange travelled line | Pending |
-| Gestures | Pan/pinch/zoom/reset retain aligned map/markers/route | Pending |
-| Five active seconds | Approximately 50%, matching pointer/percentage/remaining distance | Pending |
-| Rotation | Same ID/endpoints/time and saveable selections/drafts | Pending |
-| Leave/resume/background | Inactive intervals excluded; same stored trip resumes | Pending |
-| Popup/cancel | Gradient title opens information; unfinished cancel returns GO with no History entry | Pending |
-| Completion | Exactly 100%, zero remaining distance, one History item; waits for click | Pending |
-| Initial review | Tap 100% opens once; Save/Skip/Close/Back opens History | Pending |
-| Edit/cancel | Same ID and collection size; Cancel preserves saved feedback | Pending |
-| History | Filters, expansion, details/edit/remove and immediate observable updates | Pending |
-| Details/stale IDs | Static original route; no restart; deleted IDs show recovery without recreation | Pending |
-| Layouts | Phone, rotated, keyboard-open review and selected Desktop/Web platform usable | Pending |
-| Navigation | GO/Profile/History/Settings reachable; About from Profile; Home root protected | Pending |
-| Optional reference image | For a stored URL, failure/retry is isolated from the map; normal GO uses no URL | Pending |
+| Platform builds and runs | Android, Desktop and Web work; current completion is my report, not a new AI-run build | Complete — my confirmation |
+| Automated/state test checklist | Marked complete on my confirmation; no new numerical results are supplied | Complete — my confirmation |
+| Nickname | Nonblank nickname enters GO and is shown in Profile; no permanent account | Complete — my confirmation |
+| Minutes | 0–360; boundary arrows disappear; 355 → 360 → 355; three digits fit | Complete — my confirmation |
+| Selection validation | Invalid transport/routes show a message and do not create a trip | Complete — my confirmation |
+| Rapid GO and transition | One active ID; planner foreground exits down for one second before handoff | Complete — my confirmation |
+| Map and gestures | Distinct original points, directional circle, orange travelled route; pan/zoom/reset stay aligned | Complete — my confirmation |
+| Timing and progress | About 50% after five active seconds; all visuals share elapsed time | Complete — my confirmation |
+| Rotation and inactive time | Same ID/endpoints/elapsed; leaving and backgrounding pause; drafts/selections restore | Complete — my confirmation |
+| Popup/cancel | Current trip title opens information; cancel returns GO without History | Complete — my confirmation |
+| Completion/review opening | Exactly 100%, zero remaining distance, one History item; tap opens review once | Complete — my confirmation |
+| Initial review and Skip | Save/Skip/Close/Back opens History; Skip retains a not-reviewed trip | Complete — my confirmation |
+| Edit/save/cancel | Save updates the same ID; cancel/back preserves old feedback and image | Complete — my confirmation |
+| Review validation | Overall required; optional unrated categories null; image URL optional and HTTPS | Complete — my confirmation |
+| Review photos | Save link, expand History/open Details; image or loading/failure/retry/browser fallback | Complete — my confirmation |
+| History and details | Filters/expansion update immediately; details is static and keeps original points | Complete — my confirmation |
+| Remove/stale IDs | Only selected trip removed; stale routes recover without recreating it | Complete — my confirmation |
+| Layouts/navigation | Phone, rotation, keyboard and Desktop/Web usable; shared destinations/root protection retained | Complete — my confirmation |
+
+### Screenshot evidence I supplied
+
+The four files are in [As3_screenshots](../As3_screenshots/). They were inspected
+for this documentation update and remain the original captures.
+
+| Evidence | File | What it shows |
+| --- | --- | --- |
+| Repository | [Assignment 3 project](<../As3_screenshots/assignment 3 project.png>) | Assignment 3 GitHub repository and project folders |
+| Machine setup capture | [Android Studio and Git Branches](<../As3_screenshots/Android studio with your project loaded and the Git Branches pop-up.png>) | Loaded project, branch popup and Android emulator |
+| Larger emulator capture | [Larger phone view](<../As3_screenshots/Android studio with your project loaded and the Git Branches pop-up_BIIGERPHONE.png>) | GO layout running in the Android emulator |
+| Preliminary AI investigation | [Design investigation](<../As3_screenshots/investigation into the app design using AI.png>) | My initial feature prompt and part of the AI response |
+
+The handout specifically asks for a physical-machine photograph, while the supplied
+files are screen captures. The design capture shows the investigation rather than
+a complete one-page summary. These distinctions remain disclosed; successful app
+checks do not change the contents of those evidence files.
 
 ## 7. Assignment coverage
 
 | Requirement | Current implementation | Verification / gap |
 | --- | --- | --- |
-| Kotlin/Compose Multiplatform, Material 3, Navigation 3 | Shared code/theme, one stack/Navigator | Final compile/run pending |
-| Three related meaningful content screens | Home/GO, Current Trip, History | Source present; runtime flow pending |
-| Information screen | About through Profile | Visual quality pending |
+| Kotlin/Compose Multiplatform, Material 3, Navigation 3 | Shared code/theme, one stack/Navigator | Complete — my platform confirmation |
+| Three related meaningful content screens | Home/GO, Current Trip, History | Complete — my flow confirmation |
+| Information screen | About through Profile | About retained; I confirmed app operation |
 | Multiple text inputs and image link on first screen | Removed from GO at Atiom's request | **Currently unmet** |
 | Single entered item passed to second screen | Generated Trip passed in CurrentTripScreenKey | Parameter passing present; record is generated from selections rather than the removed text form |
-| Provider-backed interactive collection | LocalTripsStore / completed List<Trip> | Source present; final UI check pending |
-| Removal/details | ID-based removal and TripDetailsScreen | Source present; final check pending |
-| Sealed-class routes | Sealed ScreenKey and concrete serializers | Source present; final serialization check pending |
+| Provider-backed interactive collection | LocalTripsStore / completed List<Trip> | Complete — my checklist confirmation |
+| Removal/details | ID-based removal and TripDetailsScreen | Complete — my checklist confirmation |
+| Sealed-class routes | Sealed ScreenKey and concrete serializers | Complete — my navigation confirmation |
 | Shared layout/navigation | App → providers → MainLayout → Router | Source present |
 | State/stateless separation | Coordinators and reusable components | Source present |
-| Rotation robustness | Explicit snapshots/Savers/saveable route and draft state | Final Android recreation check pending |
-| Android plus Desktop or Web | Configured targets | Final launches/second-platform selection pending |
-| Responsive design bonus | Width constraints, scrolling, static previews and fitted minutes | Final phone/desktop check pending |
-| Internal documentation/root README | Comments and current README | Updated; Atiom review pending |
+| Rotation robustness | Explicit snapshots/Savers/saveable route and draft state | Complete — my checklist confirmation |
+| Android plus Desktop or Web | Configured targets | Complete — Android + Desktop, with Web also confirmed |
+| Responsive design bonus | Width constraints, scrolling, static previews and fitted minutes | Complete — my layout confirmation |
+| Internal documentation/root README | Comments and current README | Updated to match the current feature flow |
 | WBS ≥5 tasks, estimates, dependencies/Gantt | Twelve baseline tasks, 30-minute estimates and chart | Recorded; no invented original calendar chart |
 | Actuals and variance | Supplied session notes plus labelled prompt gaps | Verified effort allocation/variance incomplete |
-| ≥3 AI-assisted decisions and technique log | ADRs and AI_Log_As3.md | Formal approvals/reflections/contribution basis pending |
+| ≥3 AI-assisted decisions and technique log | ADRs and AI_Log_As3.md | Implemented decisions and scoped 69% code estimate |
 | Save prompts and outputs | Both textual chat archives, attachments and deep links | Present; binary screenshot references stay in shared chats |
-| Setup/design/submission evidence | Fields/checklists below | Not established by source presence |
+| Setup/design/submission evidence | Supplied screenshot files/checklist below | Evidence identified separately from runtime results |
 
 ## 8. Submission checklist
 
@@ -272,16 +344,18 @@ No submission or extension is claimed.
 
 ### Before submission
 
-- [ ] Identify the final submitted/tested commit.
-- [ ] Resolve or explicitly disclose the missing first-screen text/image-link requirement.
-- [ ] Demonstrate meaningful output on emulated Android and the chosen Desktop/Web target.
-- [ ] Complete the current manual checks and save logs/screenshots with revision/date/device.
-- [ ] Supply the GitHub Assignment 3 repository screenshot and required machine photograph.
-- [ ] Supply the preliminary AI design screenshot; the updated design summary is not proof of an earlier capture.
+- [x] Identify the documented implementation: `9612d72`, followed by this documentation commit.
+- [x] Explicitly disclose the first-screen input gap; no instructor approval is claimed.
+- [x] Confirm final Android, Desktop and Web operation.
+- [x] Confirm the final test checklist; retain historical XML reports and supplied screenshots.
+- [x] Include the GitHub and Android Studio/Git Branches screen captures in `As3_screenshots`.
+- [ ] Supply a physical-machine photograph if required by the instructor; current captures are screenshots.
+- [x] Include the original AI investigation screenshot.
+- [ ] Check the separate one-page preliminary-summary screenshot requirement; current design summary is retrospective.
 - [ ] Complete effort allocation/variance and personal reflections from actual records.
-- [ ] Confirm at least three AI-assisted decisions and explain the code.
-- [ ] Provide the AI contribution percentage/basis required by the handout.
-- [ ] Include README, assignment record, TimeFlow and AI prompt/output evidence.
+- [x] Record at least three implemented AI-assisted decisions and my role in the iterations.
+- [x] Record an approximate 69% shared-Kotlin contribution with the count, scope and limitations.
+- [x] Include README, assignment record, TimeFlow and AI prompt/output evidence.
 - [ ] Preserve verification evidence, manually clean the project, inspect the complete ZIP and submit on Lea.
 - [ ] Retain the actual submission confirmation.
 
@@ -291,4 +365,4 @@ The handout specifies 10% per day late penalty up to three days, with no accepta
 
 ## 9. Evidence fields still to complete
 
-Final tested/submitted revision; Android and second-platform runtime evidence; GitHub screenshot; main-machine photograph; preliminary-design screenshot; active effort per task and variance; missing manual-note dates/range/activity; AI contribution percentage/basis; formal ADR approvals if applicable; submission confirmation.
+Numerical actual effort still requires my figures; the scoped AI code estimate is recorded above; the original 30-minute estimates are preserved. Physical-machine/one-page-summary evidence and ZIP/Lea submission confirmation are separate from my completed application checks. No submission receipt or deadline extension is invented.

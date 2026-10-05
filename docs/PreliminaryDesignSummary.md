@@ -4,6 +4,9 @@
 
 This summary reflects the current implementation after the UI revisions. It is not backdated evidence of a preliminary screenshot.
 
+I enter a nickname on the landing screen; Profile shows it for the current
+process session. It is demo access, with no password service or permanent account.
+
 ## Three main content screens
 
 **Home / GO → Current Trip → History**
@@ -21,6 +24,11 @@ GO/transport/intensity controls slide down together for one second before naviga
 Tap the gradient Current trip title for information and unfinished-trip cancellation. Leaving/backgrounding pauses; Resume retains ID/endpoints/elapsed time. Cancel adds no History item.
 
 Completion records once and waits at 100%. Tapping 100% opens the review questions. Save or Skip opens History. Overall is required; other ratings/comment are optional. Editing Save updates the same ID; Cancel preserves old feedback. Details shows a static completed map.
+
+I can attach an optional raw HTTPS image link on the Overall question. After Save,
+expanding a reviewed History card or opening Details renders the photo. Loading,
+failure, Retry and browser fallback are separate from the saved review and map.
+Blank or skipped links show no photo. An unsaved draft has no History image.
 
 ## Architecture
 
@@ -42,4 +50,9 @@ Saved state retains trips, elapsed time, pending review handling, planner select
 
 About remains the information destination. Parameter passing, shared collection, details/removal, shared layout and sealed routes are present in source. The removed first-screen text/image-link form leaves that literal assignment requirement unmet.
 
-Android/Desktop/Web are configured; current builds, device rotation/timing and layouts remain unverified. Normal generated trips have no reference URL. The map/distance are synthetic, with no live navigation. See README, assignment records and the AI log for evidence and limitations.
+I confirmed the Android, Desktop and Web checks as complete on 5 October 2026.
+This is my verification statement; no new checks were executed by AI for the
+documentation update. Setup/design screenshots are in `As3_screenshots`.
+Normal generated trips have no reference URL; review photos are a separate field.
+The map/distance are synthetic, with no live navigation. See README, assignment
+records and the AI log for evidence and limitations.

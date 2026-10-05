@@ -53,7 +53,7 @@ The map uses the same proportional crop as GO. It supports drag/pinch zoom and z
 
 The simulation lasts **10,000 milliseconds of active time**, independently of planned minutes—even a 360-minute selection still has a ten-second demo.
 
-Leaving Current Trip or backgrounding pauses the simulation. Returning/resuming retains the same trip ID, endpoints and elapsed time. Android saved-state restoration is intended to retain these through rotation.
+Leaving Current Trip or backgrounding pauses the simulation. Returning/resuming retains the same trip ID, endpoints and elapsed time. Android saved-state restoration retains these through rotation.
 
 Tap the gradient **Current trip** title to open the information popup. It contains stored trip information and a prominent **Cancel trip** action while unfinished. Cancellation returns to GO and adds no History record. The visible Current Trip Back control was removed; GO remains in the shared bar.
 
@@ -81,6 +81,21 @@ The full photo fits inside a rounded frame. You can also copy the URL or press
 The host must return an image; browser security or host restrictions may prevent
 some images loading on Web even when the URL opens in a separate browser tab.
 
+### When will I see my review photo?
+
+1. Finish the trip and tap the **100%** progress bar, or choose **Review / Edit review** for a completed trip.
+2. Select at least one **Overall experience** star. Paste a raw HTTPS image URL into **Image link (optional)**; do not paste Markdown brackets or a search-results page.
+3. Continue through the optional questions and press **Save review**. Comment and other ratings may stay empty. The link itself is optional.
+4. In History, tap the reviewed card to expand it, or choose **Details**. A nonblank saved link loads a photo in the review section.
+
+The review form keeps a draft; it does not show an image preview. An unsaved link
+is not displayed in History. Skip discards a new draft; Cancel while editing keeps
+the previously saved review and image. Clearing the link and saving removes the
+photo from that review. A valid HTTPS format does not guarantee that the host will
+return a supported image. Links with query parameters work without a `.jpg` or
+`.png` suffix when the server returns an image. Retry or use the browser fallback
+if an image is unavailable. The bundled trip map is always separate from the photo.
+
 ## History and details
 
 History reads the shared completed List<Trip>, newest completion first, using stable IDs.
@@ -92,6 +107,10 @@ History reads the shared completed List<Trip>, newest completion first, using st
 - Immediate observable collection updates after saving or removal.
 
 Details resolves the current stored trip by ID and displays its original endpoints, static completed route, selections and saved ratings/comment. It does not generate points or run the simulation.
+
+Profile displays the session nickname and opens About. Its Email/Change password
+labels are placeholders, not account features. Settings keeps the Trip Settings
+shortcut to GO; Theme and Language cards remain placeholders.
 
 ## Images and resources
 
@@ -117,11 +136,16 @@ The new nickname introduction and later review-image input do **not** close this
 gap: information must be entered together on the first content screen, passed to
 the second, and represented in the third screen's provider-backed collection.
 
-Final runtime timing, rotation, gestures, phone/keyboard/desktop layouts and current compilation/tests still require evidence.
+I confirmed on 5 October 2026 that the final checks are complete and the app works
+on Android, Desktop and Web. Verification is recorded as my confirmation; the AI
+did not execute builds or tests for this documentation update.
 
 ## Platforms and manual commands
 
-Android, Desktop JVM, Web JavaScript/Wasm and iOS targets are configured. The assignment requires Android plus Desktop or Web; the selected verified second platform has not been recorded.
+I tested Android, Desktop JVM and Web. Desktop is the required second platform;
+Web is additional coverage. Both JavaScript and Wasm Web targets are configured,
+but my confirmation does not identify which Web target I ran. iOS is configured
+and requires macOS/Xcode; no specific iOS run is recorded.
 
 Run from the project root:
 
@@ -162,9 +186,17 @@ For iOS, open iosApp with Xcode on macOS. No iOS run is claimed.
 
 ## Verification status
 
-Earlier documentation recorded 43 JVM and 42 Android host tests without failures around 2026-10-05 03:06 UTC, plus reported build/compilation successes. Those historical records do **not** establish verification of the later UI revisions or the 360-minute change. The tested revision was not identified.
+**Complete — student confirmed, 5 October 2026.** I confirmed that the final
+Android/Desktop/Web build-and-run checks and test checklist are done and working.
+The documented implementation is revision `9612d72` (image preview and its Coil
+import fix); the documentation commit following it changes no production code.
 
-No builds or tests were run for this update. Focused source tests and 360-minute phone previews were added; execute the appropriate commands and record the final revision/results yourself.
+The retained XML reports separately record **43 JVM tests and 42 Android host tests,
+zero failures/errors/skips**, around 2026-10-05 03:06 UTC. Those reports are older
+than the image changes. They are preserved as historical counts, not presented as
+a newly generated final report. Current completion is based on my later confirmation
+in the [AI log](AI_Log_As3.md#final-student-confirmation). No fresh test counts,
+device names or build timings are invented.
 
 ## Assignment records
 
@@ -172,5 +204,6 @@ No builds or tests were run for this update. Focused source tests and 360-minute
 - [Current design summary](docs/PreliminaryDesignSummary.md): current three-screen architecture; no earlier screenshot is implied.
 - [AI technique log and complete chat evidence](AI_Log_As3.md): both conversations, prompts/outputs and deep links.
 - [Time flow](TimeFlow_As3_Sova.txt): supplied work notes plus measured intervals between chat prompts.
+- [Assignment screenshots](As3_screenshots/): repository, Android Studio/Git Branches, emulator and preliminary AI investigation captures.
 
 Original estimate: 30 minutes per numbered prompt. Chat intervals include response/waiting time and possible breaks; they are recorded as elapsed intervals, not automatically treated as active work.
