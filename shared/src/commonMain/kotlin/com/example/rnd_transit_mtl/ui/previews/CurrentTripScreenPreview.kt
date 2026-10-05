@@ -110,10 +110,22 @@ fun CurrentTripDesktopPreview() {
     CurrentTripExample(progress = 0.5f)
 }
 
+@Preview(
+    name = "Current trip information popup",
+    showBackground = true,
+    widthDp = 390,
+    heightDp = 850
+)
+@Composable
+fun CurrentTripInformationPopupPreview() {
+    CurrentTripExample(progress = 0.5f, showInformation = true)
+}
+
 @Composable
 private fun CurrentTripExample(
     progress: Float,
-    isRunning: Boolean = true
+    isRunning: Boolean = true,
+    showInformation: Boolean = false
 ) {
     val record = currentTripPreviewRecord.copy(
         completedAtEpochMillis = if (progress == 1f) {
@@ -133,7 +145,8 @@ private fun CurrentTripExample(
             onLeave = {},
             onCancel = {},
             onRequestReview = {},
-            onOpenImageReference = {}
+            onOpenImageReference = {},
+            showTripInformation = showInformation
         )
     }
 }

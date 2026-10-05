@@ -6,32 +6,22 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.rnd_transit_mtl.model.Trip
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 
-/**
- * Stateless active-trip presentation.
- *
- * Previews supply fixed progress and callbacks.
- * Runtime state, lifecycle, timers, and navigation belong to the screen.
- *
- * The compact teal heading, raised status card, yellow footer,
- * and pill-shaped track follow the supplied mockup's layout.
- */
+/** Map and compact progress footer; trip information appears only in a popup. */
 @Composable
 fun CurrentTripContent(
     trip: Trip,
@@ -43,124 +33,101 @@ fun CurrentTripContent(
     onCancel: () -> Unit,
     onRequestReview: () -> Unit,
     onOpenImageReference: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showTripInformation: Boolean = false,
+    onDismissInformation: () -> Unit = {},
+    mapInteractive: Boolean = false
 ) {
     val boundedProgress = boundedTripProgress(progress)
     val completed = boundedProgress == 1f
-
     val status = when {
-        completed -> "Demo destination reached"
-        !isRunning -> "Demo paused"
-        boundedProgress == 0f -> "Starting the mock route"
-        else -> "Travelling toward ${trip.destination.label}"
+        completed -> "Destination reached"
+        !isRunning -> "Trip paused"
+        else -> "Following the mock route"
     }
 
     BoxWithConstraints(
-        modifier = modifier
-            .fillMaxSize()
-            .background(TransitWhite)
+        modifier = modifier.fillMaxSize().background(TransitMain)
     ) {
-        val wideLayout = maxWidth >= 700.dp
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .widthIn(max = 820.dp)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    horizontal = if (wideLayout) 24.dp else 0.dp,
-                    vertical = if (wideLayout) 16.dp else 0.dp
-                )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(TransitMain)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = trip.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = TransitWhite
-                )
-
-                Text(
-                    text = "${formatDemoDistanceKm(trip.distanceKm)} km demo",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = TransitWhite
-                )
-            }
-
+        val availableHeight = maxHeight
+        Column(Modifier.fillMaxSize()) {
             MockTripMap(
                 start = trip.start,
                 destination = trip.destination,
                 progress = boundedProgress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(if (wideLayout) 360.dp else 280.dp)
-            )
-
-            TripProgressPanel(
-                tripTitle = trip.title,
-                destinationLabel = trip.destination.label,
-                distanceKm = trip.distanceKm,
-                progress = boundedProgress,
-                statusText = status,
-                onCompletedClick = onRequestReview,
-                actionsEnabled = actionsEnabled
+                interactive = mapInteractive && actionsEnabled,
+                modifier = Modifier.weight(1f).fillMaxWidth()
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .heightIn(max = availableHeight * 0.65f)
+                    .verticalScroll(rememberScrollState())
             ) {
                 if (message != null) {
                     Text(
                         text = message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxWidth()
+                            .background(TransitWhite).padding(12.dp)
                     )
                 }
+                TripProgressPanel(
+                    tripTitle = trip.title,
+                    destinationLabel = trip.destination.label,
+                    distanceKm = trip.distanceKm,
+                    progress = boundedProgress,
+                    statusText = status,
+                    onCompletedClick = onRequestReview,
+                    actionsEnabled = actionsEnabled
+                )
+            }
+        }
 
-                if (completed) {
-                    OutlinedButton(
-                        onClick = onLeave,
-                        enabled = actionsEnabled,
-                        modifier = Modifier.fillMaxWidth()
+        if (showTripInformation) {
+            AlertDialog(
+                onDismissRequest = onDismissInformation,
+                containerColor = TransitWhite,
+                titleContentColor = TransitMain,
+                textContentColor = TransitMain,
+                title = {
+                    Text(trip.title, style = MaterialTheme.typography.titleLarge)
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.heightIn(max = availableHeight * 0.6f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Return")
+                        Text(
+                            text = "${formatDemoDistanceKm(trip.distanceKm)} km demo",
+                            color = TransitMain
+                        )
+                        TripInformationPanel(
+                            trip = trip,
+                            onOpenImageReference = onOpenImageReference
+                        )
+                        if (!completed) {
+                            TextButton(
+                                onClick = onCancel,
+                                enabled = actionsEnabled
+                            ) {
+                                Text("Cancel trip", color = TransitMain)
+                            }
+                        }
                     }
-                } else {
-                    OutlinedButton(
-                        onClick = onLeave,
-                        enabled = actionsEnabled,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Pause and return")
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismissInformation) {
+                        Text("Close", color = TransitMain)
                     }
-
-                    Button(
-                        onClick = onCancel,
-                        enabled = actionsEnabled,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Cancel trip")
+                },
+                dismissButton = {
+                    TextButton(onClick = onLeave, enabled = actionsEnabled) {
+                        Text("Return to GO", color = TransitMain)
                     }
                 }
-            }
-
-            TripInformationPanel(
-                trip = trip,
-                onOpenImageReference = onOpenImageReference,
-                modifier = Modifier.padding(
-                    start = 8.dp,
-                    end = 8.dp,
-                    bottom = 16.dp
-                )
             )
         }
     }

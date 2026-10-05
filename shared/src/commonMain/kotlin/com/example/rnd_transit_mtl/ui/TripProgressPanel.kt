@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -31,8 +30,8 @@ import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 /**
  * Stateless status card and yellow progress footer.
  *
- * The raised teal card overlaps the preceding map by 20 dp.
- * The root deliberately does not clip that overlap.
+ * The compact card stays within the footer so small-window scrolling
+ * cannot clip its status text.
  *
  * Remaining distance and track fill use the same supplied progress.
  * No timer or independent animation is created here.
@@ -88,34 +87,22 @@ fun TripProgressPanel(
         modifier = modifier
             .fillMaxWidth()
             .background(TransitHighlight)
+            .padding(top = 12.dp)
     ) {
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .offset(y = (-20).dp)
                 .fillMaxWidth()
                 .background(
                     color = TransitMain,
                     shape = RoundedCornerShape(22.dp)
                 )
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = tripTitle,
-                style = MaterialTheme.typography.titleMedium,
-                color = TransitWhite
-            )
-
-            Text(
                 text = status,
                 style = MaterialTheme.typography.bodyLarge,
-                color = TransitWhite
-            )
-
-            Text(
-                text = "Destination: $destinationLabel",
-                style = MaterialTheme.typography.bodyMedium,
                 color = TransitWhite
             )
 
@@ -125,12 +112,7 @@ fun TripProgressPanel(
                 color = TransitWhite
             )
 
-            Text(
-                text = "Total demo distance: " +
-                        "${formatDemoDistanceKm(distanceKm)} km",
-                style = MaterialTheme.typography.bodySmall,
-                color = TransitSelected
-            )
+
         }
 
         Box(
@@ -138,6 +120,7 @@ fun TripProgressPanel(
                 .padding(
                     start = 24.dp,
                     end = 24.dp,
+                    top = 12.dp,
                     bottom = 20.dp
                 )
                 .fillMaxWidth()

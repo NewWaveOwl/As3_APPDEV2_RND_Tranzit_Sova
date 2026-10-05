@@ -23,9 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,7 +47,6 @@ import com.example.rnd_transit_mtl.SettingsScreenKey
 import com.example.rnd_transit_mtl.TripDetailsScreenKey
 import com.example.rnd_transit_mtl.TripReviewScreenKey
 import com.example.rnd_transit_mtl.model.TripReviewMode
-import com.example.rnd_transit_mtl.state.LocalTripsStore
 import com.example.rnd_transit_mtl.ui.theme.TransitHighlight
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitSelected
@@ -69,36 +65,11 @@ import rnd_transit_mtl.shared.generated.resources.ic_settings
 fun SharedTopBar() {
     val navigator = LocalNavigator.current
     val navigation = LocalTripNavigation.current
-    val tripsStore = LocalTripsStore.current
     val currentKey = navigator.current as? ScreenKey
-
-    val activeTripId by remember(tripsStore) {
-        derivedStateOf { tripsStore.activeTrip?.id }
-    }
-    val pendingReviewId by remember(tripsStore) {
-        derivedStateOf { tripsStore.pendingReviewTripId }
-    }
-
-    val tripActionLabel = when {
-        activeTripId != null -> {
-            if (
-                currentKey is CurrentTripScreenKey &&
-                currentKey.trip.id == activeTripId
-            ) {
-                "Current trip"
-            } else {
-                "Resume trip"
-            }
-        }
-        pendingReviewId != null -> "Trip complete · 100%"
-        else -> null
-    }
 
     SharedTopBarContent(
         currentKey = currentKey,
         hasPrevious = navigator.hasPrevious(),
-        tripActionLabel = tripActionLabel,
-        tripActionSelected = currentKey is CurrentTripScreenKey,
         onBack = {
             if (navigator.current == currentKey) {
                 navigation.back()
@@ -109,15 +80,9 @@ fun SharedTopBar() {
                 navigation.openSection(destination)
             }
         },
-        onTripAction = {
+        onCurrentTripInformation = {
             if (navigator.current == currentKey) {
-                if (tripsStore.activeTrip != null) {
-                    navigation.resumeActiveTrip()
-                } else {
-                    tripsStore.pendingReviewTripId?.let {
-                        navigation.openCompletedTrip(it)
-                    }
-                }
+                navigation.requestTripInformation()
             }
         }
     )
@@ -130,11 +95,9 @@ fun SharedTopBar() {
 internal fun SharedTopBarContent(
     currentKey: ScreenKey?,
     hasPrevious: Boolean,
-    tripActionLabel: String?,
-    tripActionSelected: Boolean,
     onBack: () -> Unit,
     onOpenSection: (ScreenKey) -> Unit,
-    onTripAction: () -> Unit
+    onCurrentTripInformation: () -> Unit = {}
 ) {
     val historySelected =
         currentKey == HistoryScreenKey ||
@@ -192,15 +155,6 @@ internal fun SharedTopBarContent(
                 isSelected = currentKey == AboutScreenKey,
                 onClick = { onOpenSection(AboutScreenKey) }
             )
-
-            if (tripActionLabel != null) {
-                HeaderTextItem(
-                    label = tripActionLabel,
-                    isSelected = tripActionSelected,
-                    onClick = onTripAction,
-                    width = 120
-                )
-            }
         }
 
         if (currentKey != MainScreenKey || hasPrevious) {
@@ -210,8 +164,13 @@ internal fun SharedTopBarContent(
                 highlighted =
                     currentKey == ProfileScreenKey ||
                             currentKey == AboutScreenKey,
-                showBack = hasPrevious,
-                onBack = onBack
+                showBack = hasPrevious && currentKey !is CurrentTripScreenKey,
+                onBack = onBack,
+                onTitleClick = if (currentKey is CurrentTripScreenKey) {
+                    onCurrentTripInformation
+                } else {
+                    null
+                }
             )
         }
     }

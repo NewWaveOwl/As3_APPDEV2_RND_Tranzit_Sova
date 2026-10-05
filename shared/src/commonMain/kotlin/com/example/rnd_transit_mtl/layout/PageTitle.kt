@@ -1,6 +1,8 @@
 package com.example.rnd_transit_mtl.layout
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -28,7 +30,8 @@ internal fun PageTitle(
     layoutScale: Float,
     highlighted: Boolean,
     showBack: Boolean = false,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onTitleClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -62,6 +65,17 @@ internal fun PageTitle(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp)
+                .then(
+                    if (onTitleClick != null) {
+                        Modifier.clickable(
+                            role = Role.Button,
+                            onClickLabel = "Show trip information",
+                            onClick = onTitleClick
+                        ).padding(vertical = 8.dp)
+                    } else {
+                        Modifier
+                    }
+                )
         )
     }
 }

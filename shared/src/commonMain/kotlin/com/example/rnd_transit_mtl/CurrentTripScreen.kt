@@ -64,6 +64,7 @@ fun CurrentTripScreen(
     modifier: Modifier = Modifier
 ) {
     val tripsStore = LocalTripsStore.current
+    val navigation = LocalTripNavigation.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val uriHandler = LocalUriHandler.current
 
@@ -378,6 +379,12 @@ fun CurrentTripScreen(
                     }
                 }
             },
+            showTripInformation = isDestinationActive &&
+                navigation.informationTripId == trip.id,
+            onDismissInformation = {
+                navigation.dismissTripInformation(trip.id)
+            },
+            mapInteractive = true,
             modifier = modifier
         )
     }

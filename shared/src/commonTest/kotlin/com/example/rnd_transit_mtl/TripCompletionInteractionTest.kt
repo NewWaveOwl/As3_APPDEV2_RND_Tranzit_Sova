@@ -97,6 +97,33 @@ class TripCompletionInteractionTest {
         assertTrue(restored.completedTrips.isEmpty())
     }
 
+    @Test
+    fun informationPopupRequiresCurrentTripAndClosesWhenReturningToGO() {
+        val trip = generatedTrip()
+        val store = TripsStore(nowEpochMillis = { 20_000L })
+        val stack = NavBackStack<NavKey>(MainScreenKey)
+        val navigator = Navigator(stack)
+        val navigation = TripNavigation(navigator, store)
+
+        store.start(trip)
+        assertFalse(navigation.requestTripInformation())
+        assertNull(navigation.informationTripId)
+        assertTrue(navigation.openCurrentTrip(trip))
+        assertNull(navigation.informationTripId)
+        assertTrue(navigation.requestTripInformation())
+        assertEquals(trip.id, navigation.informationTripId)
+        assertEquals(trip, store.activeTrip)
+
+        // A stale popup for another ID cannot dismiss the current popup.
+        navigation.dismissTripInformation("different-trip")
+        assertEquals(trip.id, navigation.informationTripId)
+        assertTrue(navigation.returnToPlanner())
+        assertNull(navigation.informationTripId)
+        assertEquals(MainScreenKey, navigator.current)
+        assertEquals(trip.id, store.activeTrip?.id)
+        assertTrue(store.completedTrips.isEmpty())
+    }
+
     private fun generatedTrip(): Trip =
         assertIs<TripGenerationResult.Success>(
             MockTripGenerator(

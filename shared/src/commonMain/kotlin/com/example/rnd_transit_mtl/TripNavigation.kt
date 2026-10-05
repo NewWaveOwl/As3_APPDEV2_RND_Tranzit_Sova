@@ -1,6 +1,9 @@
 package com.example.rnd_transit_mtl
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.example.rnd_transit_mtl.model.Trip
 import com.example.rnd_transit_mtl.model.TripReviewMode
 import com.example.rnd_transit_mtl.state.TripActionResult
@@ -23,6 +26,23 @@ class TripNavigation(
     private val navigator: Navigator,
     private val tripsStore: TripsStore
 ) {
+    /** Transient popup request; trip records still come only from TripsStore. */
+    var informationTripId by mutableStateOf<String?>(null)
+        private set
+
+    fun requestTripInformation(): Boolean {
+        val current = navigator.current as? CurrentTripScreenKey ?: return false
+        if (tripsStore.findTrip(current.trip.id) == null) return false
+        informationTripId = current.trip.id
+        return true
+    }
+
+    fun dismissTripInformation(tripId: String? = null) {
+        if (tripId == null || informationTripId == tripId) {
+            informationTripId = null
+        }
+    }
+
     private class ReviewBackRegistration(
         val key: TripReviewScreenKey,
         val onBack: () -> Unit
@@ -49,6 +69,7 @@ class TripNavigation(
     }
 
     fun openCurrentTrip(trip: Trip): Boolean {
+        dismissTripInformation()
         val active = tripsStore.activeTrip ?: return false
         if (active.id != trip.id) return false
         if (!discardCurrentReview()) return false
@@ -72,6 +93,7 @@ class TripNavigation(
 
     /** Restores the completed 100% presentation without running a simulation. */
     fun openCompletedTrip(tripId: String): Boolean {
+        dismissTripInformation()
         val completed = tripsStore.findCompleted(tripId) ?: return false
         if (!discardCurrentReview()) return false
 
@@ -95,6 +117,7 @@ class TripNavigation(
      * Repeated requests recognize the existing destination.
      */
     fun openInitialReview(tripId: String): Boolean {
+        dismissTripInformation()
         if (tripsStore.findCompleted(tripId) == null) return false
 
         val destination = TripReviewScreenKey(
@@ -154,6 +177,7 @@ class TripNavigation(
     }
 
     fun openDetails(tripId: String): Boolean {
+        dismissTripInformation()
         if (tripsStore.findCompleted(tripId) == null) return false
         if (!discardCurrentReview()) return false
 
@@ -219,6 +243,7 @@ class TripNavigation(
 
         if (!discardCurrentReview()) return false
 
+        dismissTripInformation()
         pruneCompletedSimulationEntries()
         navigator.open(destination)
         return navigator.current == destination
@@ -232,6 +257,7 @@ class TripNavigation(
      * A composed review can supply its own equivalent close operation.
      */
     fun back(): Boolean {
+        dismissTripInformation()
         if (!navigator.hasPrevious()) return false
 
         val current = navigator.current

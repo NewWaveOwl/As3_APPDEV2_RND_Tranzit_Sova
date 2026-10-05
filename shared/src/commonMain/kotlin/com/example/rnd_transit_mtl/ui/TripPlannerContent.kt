@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -59,11 +60,12 @@ fun TripPlannerContent(
         modifier = modifier.fillMaxSize().background(TransitMain),
         contentAlignment = Alignment.TopCenter
     ) {
+        val availableHeight = maxHeight
         val layoutScale = (maxWidth.value.coerceAtMost(430f) / 402f)
             .coerceIn(0.7f, 1.1f)
         val controlHeight = 96.dp * layoutScale
         // GO is centered in the available screen. Expanded choices remain scrollable.
-        val topSpace = ((maxHeight - controlHeight) / 2f).coerceAtLeast(24.dp)
+        val topSpace = ((availableHeight - controlHeight) / 2f).coerceAtLeast(24.dp)
 
         Image(
             painter = painterResource(Res.drawable.map_sample),
@@ -121,26 +123,37 @@ fun TripPlannerContent(
                 Spacer(Modifier.height(12.dp))
             }
 
-            TransportPanel(
-                layoutScale = layoutScale,
-                transportTypes = transportTypes,
-                transportRoutes = transportRoutes,
-                selectedTransportIds = selectedTransportIds,
-                selectedRouteIds = selectedRouteIds,
-                expandedTransportId = expandedTransportId,
-                onExpandedTransportChange = onExpandedTransportChange,
-                onToggleTransport = onToggleTransport,
-                onToggleRoute = onToggleRoute,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Teal covers all remaining space, including below the yellow panel.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(
+                        min = (availableHeight - topSpace - controlHeight - 12.dp)
+                            .coerceAtLeast(0.dp)
+                    )
+                    .background(TransitMain)
+            ) {
+                TransportPanel(
+                    layoutScale = layoutScale,
+                    transportTypes = transportTypes,
+                    transportRoutes = transportRoutes,
+                    selectedTransportIds = selectedTransportIds,
+                    selectedRouteIds = selectedRouteIds,
+                    expandedTransportId = expandedTransportId,
+                    onExpandedTransportChange = onExpandedTransportChange,
+                    onToggleTransport = onToggleTransport,
+                    onToggleRoute = onToggleRoute,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            IntensityPanel(
-                layoutScale = layoutScale,
-                intensity = intensity,
-                onIntensityChange = onIntensityChange,
-                validationMessage = "",
-                modifier = Modifier.fillMaxWidth().height(120.dp * layoutScale)
-            )
+                IntensityPanel(
+                    layoutScale = layoutScale,
+                    intensity = intensity,
+                    onIntensityChange = onIntensityChange,
+                    validationMessage = "",
+                    modifier = Modifier.fillMaxWidth().height(120.dp * layoutScale)
+                )
+            }
         }
     }
 }
