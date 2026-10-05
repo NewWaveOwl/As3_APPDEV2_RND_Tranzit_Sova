@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -32,7 +31,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rnd_transit_mtl.AboutScreenKey
@@ -47,7 +45,6 @@ import com.example.rnd_transit_mtl.SettingsScreenKey
 import com.example.rnd_transit_mtl.TripDetailsScreenKey
 import com.example.rnd_transit_mtl.TripReviewScreenKey
 import com.example.rnd_transit_mtl.model.TripReviewMode
-import com.example.rnd_transit_mtl.ui.theme.TransitHighlight
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitSelected
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
@@ -79,11 +76,6 @@ fun SharedTopBar() {
             if (navigator.current == currentKey) {
                 navigation.openSection(destination)
             }
-        },
-        onCurrentTripInformation = {
-            if (navigator.current == currentKey) {
-                navigation.requestTripInformation()
-            }
         }
     )
 }
@@ -96,8 +88,7 @@ internal fun SharedTopBarContent(
     currentKey: ScreenKey?,
     hasPrevious: Boolean,
     onBack: () -> Unit,
-    onOpenSection: (ScreenKey) -> Unit,
-    onCurrentTripInformation: () -> Unit = {}
+    onOpenSection: (ScreenKey) -> Unit
 ) {
     val historySelected =
         currentKey == HistoryScreenKey ||
@@ -120,57 +111,58 @@ internal fun SharedTopBarContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HeaderIconItem(
-                label = "Home",
-                painter = painterResource(Res.drawable.ic_home),
-                isSelected = currentKey == MainScreenKey,
-                showGo = currentKey != MainScreenKey,
-                onClick = { onOpenSection(MainScreenKey) }
-            )
-            HeaderIconItem(
-                label = "Profile",
-                painter = painterResource(Res.drawable.ic_account_circle),
-                isSelected = currentKey == ProfileScreenKey,
-                onClick = { onOpenSection(ProfileScreenKey) }
-            )
-            HeaderIconItem(
-                label = "History",
-                painter = painterResource(Res.drawable.ic_receipt_long),
-                isSelected = historySelected,
-                onClick = { onOpenSection(HistoryScreenKey) }
-            )
+            // Settings stays at the right edge; only the left group scrolls
+            // when a window is too narrow for all three destinations.
+            Row(
+                modifier = Modifier.weight(1f)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HeaderIconItem(
+                    label = "Home",
+                    painter = painterResource(Res.drawable.ic_home),
+                    isSelected = currentKey == MainScreenKey,
+                    showGo = currentKey != MainScreenKey,
+                    onClick = { onOpenSection(MainScreenKey) }
+                )
+                HeaderIconItem(
+                    label = "Profile",
+                    painter = painterResource(Res.drawable.ic_account_circle),
+                    isSelected = currentKey == ProfileScreenKey || currentKey == AboutScreenKey,
+                    onClick = { onOpenSection(ProfileScreenKey) }
+                )
+                HeaderIconItem(
+                    label = "History",
+                    painter = painterResource(Res.drawable.ic_receipt_long),
+                    isSelected = historySelected,
+                    onClick = { onOpenSection(HistoryScreenKey) }
+                )
+            }
             HeaderIconItem(
                 label = "Settings",
                 painter = painterResource(Res.drawable.ic_settings),
                 isSelected = currentKey == SettingsScreenKey,
                 onClick = { onOpenSection(SettingsScreenKey) }
             )
-            HeaderTextItem(
-                label = "About",
-                isSelected = currentKey == AboutScreenKey,
-                onClick = { onOpenSection(AboutScreenKey) }
-            )
         }
 
-        if (currentKey != MainScreenKey || hasPrevious) {
+        // The current-trip title overlays the map so GO and trip viewports match.
+        if (currentKey !is CurrentTripScreenKey &&
+            (currentKey != MainScreenKey || hasPrevious)
+        ) {
             PageTitle(
                 title = currentKey?.screenTitle ?: "RND Transit",
                 layoutScale = 1f,
                 highlighted =
                     currentKey == ProfileScreenKey ||
                             currentKey == AboutScreenKey,
-                showBack = hasPrevious && currentKey !is CurrentTripScreenKey,
-                onBack = onBack,
-                onTitleClick = if (currentKey is CurrentTripScreenKey) {
-                    onCurrentTripInformation
-                } else {
-                    null
-                }
+                showBack = hasPrevious,
+                onBack = onBack
             )
         }
     }
@@ -230,41 +222,6 @@ private fun HeaderIconItem(
             color = foreground,
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1
-        )
-    }
-}
-
-@Composable
-private fun HeaderTextItem(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    width: Int = 72
-) {
-    Box(
-        modifier = Modifier
-            .width(width.dp)
-            .height(68.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                if (isSelected) TransitSelected else TransitMain
-            )
-            .clickable(
-                role = Role.Button,
-                onClick = onClick
-            )
-            .semantics {
-                selected = isSelected
-                contentDescription = label
-            }
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            color = if (isSelected) TransitMain else TransitHighlight,
-            style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Center
         )
     }
 }

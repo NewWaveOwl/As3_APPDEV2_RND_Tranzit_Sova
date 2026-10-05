@@ -385,6 +385,10 @@ fun CurrentTripScreen(
                 navigation.dismissTripInformation(trip.id)
             },
             mapInteractive = true,
+            animateEntrance = true,
+            onShowInformation = {
+                if (latestDestinationActive) navigation.requestTripInformation()
+            },
             modifier = modifier
         )
     }

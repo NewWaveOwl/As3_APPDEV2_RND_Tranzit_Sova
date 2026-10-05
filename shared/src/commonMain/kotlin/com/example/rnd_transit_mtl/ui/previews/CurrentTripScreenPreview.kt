@@ -16,13 +16,13 @@ private val currentTripPreviewRecord = Trip(
     imageUrl = "",
     start = TripPoint(
         label = "Start",
-        x = 0.20f,
-        y = 0.30f
+        x = 0.45f,
+        y = 0.25f
     ),
     destination = TripPoint(
         label = "Destination",
-        x = 0.80f,
-        y = 0.70f
+        x = 0.55f,
+        y = 0.48f
     ),
     plannedMinutes = 30,
     selectedTransports = listOf(

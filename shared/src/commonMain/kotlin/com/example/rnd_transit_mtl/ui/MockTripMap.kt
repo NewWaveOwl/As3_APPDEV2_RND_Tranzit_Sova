@@ -4,7 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -22,29 +23,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.rnd_transit_mtl.model.TripPoint
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
 import com.example.rnd_transit_mtl.ui.theme.TransitOrange
-import com.example.rnd_transit_mtl.ui.theme.TransitSelected
 import com.example.rnd_transit_mtl.ui.theme.TransitWhite
 import org.jetbrains.compose.resources.painterResource
 import rnd_transit_mtl.shared.generated.resources.Res
+import rnd_transit_mtl.shared.generated.resources.end_point_marker
 import rnd_transit_mtl.shared.generated.resources.map_sample
+import rnd_transit_mtl.shared.generated.resources.map_user_pointer_marker
+import rnd_transit_mtl.shared.generated.resources.start_point_marker
 
 /**
- * The complete bundled PNG fills a normalized drawing rectangle.
- * Both the image and every route anchor use that same rectangle.
- * Pinch/drag changes only the saved camera; endpoints and progress stay stored.
- *
- * This deliberately stretches the mock PNG to the available rectangle instead
- * of cropping away random endpoints. It does not represent geographic routing.
+ * The PNG, route, endpoints and directed pointer share one uniform transform.
+ * Current trip starts with exactly the planner's centered Crop; static details
+ * use Fit. Pinch/drag changes only the camera, never stored endpoints or time.
  */
 @Composable
 fun MockTripMap(
@@ -52,58 +56,89 @@ fun MockTripMap(
     destination: TripPoint,
     progress: Float,
     modifier: Modifier = Modifier,
-    interactive: Boolean = false
+    interactive: Boolean = false,
+    matchPlannerBackground: Boolean = false,
+    controlsTopPadding: Dp = 10.dp
 ) {
     val mapPainter = painterResource(Res.drawable.map_sample)
+    val startPainter = painterResource(Res.drawable.start_point_marker)
+    val endPainter = painterResource(Res.drawable.end_point_marker)
+    // XML is an exact shared-resource conversion of the supplied SVG.
+    val pointerPainter = painterResource(Res.drawable.map_user_pointer_marker)
+    val sourceSize = validMapSourceSize(mapPainter.intrinsicSize)
     val boundedProgress = boundedTripProgress(progress)
     val percentage = tripProgressPercentage(boundedProgress)
+    val markerInset = with(LocalDensity.current) { 40.dp.toPx() }
+    var viewport by remember { mutableStateOf(Size.Zero) }
     var zoom by rememberSaveable(start, destination) { mutableStateOf(1f) }
     var panX by rememberSaveable(start, destination) { mutableStateOf(0f) }
     var panY by rememberSaveable(start, destination) { mutableStateOf(0f) }
 
-    fun setZoom(value: Float) {
-        zoom = value.coerceIn(1f, 4f)
-        val limit = (zoom - 1f) / 2f
-        panX = panX.coerceIn(-limit, limit)
-        panY = panY.coerceIn(-limit, limit)
+    val baseRect = if (viewport.width > 0f && viewport.height > 0f) {
+        mapImageRect(viewport, sourceSize, matchPlannerBackground, markerInset)
+    } else Rect.Zero
+    // Zooming out to Fit lets older trips outside the initial crop remain reachable.
+    val minimumZoom = if (matchPlannerBackground && baseRect.width > 0f) {
+        minOf(viewport.width / baseRect.width, viewport.height / baseRect.height)
+    } else 1f
+
+    fun clampPan(pan: Offset, cameraZoom: Float): Offset {
+        val limitX = ((baseRect.width * cameraZoom - viewport.width) / 2f)
+            .coerceAtLeast(0f)
+        val limitY = ((baseRect.height * cameraZoom - viewport.height) / 2f)
+            .coerceAtLeast(0f)
+        return Offset(pan.x.coerceIn(-limitX, limitX), pan.y.coerceIn(-limitY, limitY))
     }
 
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize().clipToBounds()
-            .background(TransitMain)
+    fun setCamera(value: Float, pan: Offset) {
+        if (viewport.width <= 0f || viewport.height <= 0f) return
+        val nextZoom = value.coerceIn(minimumZoom, 4f)
+        val boundedPan = clampPan(pan, nextZoom)
+        zoom = nextZoom
+        panX = boundedPan.x / viewport.width
+        panY = boundedPan.y / viewport.height
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().clipToBounds().background(TransitMain)
+            .onSizeChanged { viewport = Size(it.width.toFloat(), it.height.toFloat()) }
             .semantics {
-                contentDescription = "Mock transit map. Orange start triangle, " +
-                    "green destination triangle, and a moving circle. " +
+                contentDescription = "Mock transit map. Yellow start triangle, " +
+                    "green destination triangle, and a directed yellow pointer. " +
                     if (interactive) "Pinch to zoom and drag to move the picture." else ""
                 stateDescription = "$percentage percent complete"
             }
     ) {
         Canvas(
             modifier = Modifier.fillMaxSize()
-                .pointerInput(interactive, start, destination) {
+                .pointerInput(interactive, start, destination, viewport, matchPlannerBackground) {
                     if (!interactive) return@pointerInput
                     detectTransformGestures { centroid, pan, zoomChange, _ ->
-                        if (size.width > 0 && size.height > 0) {
-                            val oldZoom = zoom
-                            val newZoom = (oldZoom * zoomChange).coerceIn(1f, 4f)
-                            val ratio = newZoom / oldZoom
-                            val center = Offset(size.width / 2f, size.height / 2f)
-                            val oldPan = Offset(panX * size.width, panY * size.height)
-                            val newPan = (centroid - center) -
+                        if (viewport.width > 0f && viewport.height > 0f) {
+                            val oldZoom = zoom.coerceIn(minimumZoom, 4f)
+                            val nextZoom = (oldZoom * zoomChange).coerceIn(minimumZoom, 4f)
+                            val ratio = nextZoom / oldZoom
+                            val center = Offset(viewport.width / 2f, viewport.height / 2f)
+                            val oldPan = clampPan(
+                                Offset(panX * viewport.width, panY * viewport.height), oldZoom
+                            )
+                            val nextPan = (centroid - center) -
                                 (centroid - center - oldPan) * ratio + pan
-                            val limit = (newZoom - 1f) / 2f
-                            zoom = newZoom
-                            panX = (newPan.x / size.width).coerceIn(-limit, limit)
-                            panY = (newPan.y / size.height).coerceIn(-limit, limit)
+                            setCamera(nextZoom, nextPan)
                         }
                     }
                 }
         ) {
+            if (baseRect.width <= 0f || baseRect.height <= 0f) return@Canvas
+            val cameraZoom = zoom.coerceIn(minimumZoom, 4f)
+            val cameraPan = clampPan(Offset(panX * size.width, panY * size.height), cameraZoom)
+            val imageWidth = baseRect.width * cameraZoom
+            val imageHeight = baseRect.height * cameraZoom
             val mapRect = Rect(
-                left = size.width * (1f - zoom) / 2f + panX * size.width,
-                top = size.height * (1f - zoom) / 2f + panY * size.height,
-                right = size.width * (1f + zoom) / 2f + panX * size.width,
-                bottom = size.height * (1f + zoom) / 2f + panY * size.height
+                left = (size.width - imageWidth) / 2f + cameraPan.x,
+                top = (size.height - imageHeight) / 2f + cameraPan.y,
+                right = (size.width + imageWidth) / 2f + cameraPan.x,
+                bottom = (size.height + imageHeight) / 2f + cameraPan.y
             )
             translate(mapRect.left, mapRect.top) {
                 with(mapPainter) { draw(size = mapRect.size) }
@@ -112,11 +147,12 @@ fun MockTripMap(
             val startPosition = start.toMapPosition(mapRect)
             val endPosition = destination.toMapPosition(mapRect)
             val currentPosition = Offset(
-                x = startPosition.x + (endPosition.x - startPosition.x) * boundedProgress,
-                y = startPosition.y + (endPosition.y - startPosition.y) * boundedProgress
+                startPosition.x + (endPosition.x - startPosition.x) * boundedProgress,
+                startPosition.y + (endPosition.y - startPosition.y) * boundedProgress
             )
-            val markerRadius = minOf(24.dp.toPx(), size.width * 0.08f, size.height * 0.12f)
-            val routeWidth = minOf(10.dp.toPx(), markerRadius * 0.5f)
+            val pointerSize = minOf(48.dp.toPx(), size.width * 0.14f, size.height * 0.14f)
+            val endpointSize = pointerSize * 1.5f
+            val routeWidth = minOf(10.dp.toPx(), pointerSize * 0.25f)
             drawLine(
                 TransitMain, startPosition, endPosition,
                 strokeWidth = routeWidth, cap = StrokeCap.Round
@@ -127,47 +163,41 @@ fun MockTripMap(
                     strokeWidth = routeWidth * 0.65f, cap = StrokeCap.Round
                 )
             }
-
-            drawCurrentTripCircle(currentPosition, markerRadius)
-            drawTripEndpoint(startPosition, markerRadius * 0.82f, TransitOrange)
-            drawTripEndpoint(endPosition, markerRadius * 0.82f, TransitSelected)
+            drawDirectedTripPointer(
+                pointerPainter, currentPosition, pointerSize,
+                tripPointerRotation(startPosition, endPosition)
+            )
+            drawAnchoredTripEndpoint(startPainter, startPosition, endpointSize)
+            drawAnchoredTripEndpoint(endPainter, endPosition, endpointSize)
         }
 
         if (interactive) {
             Row(
-                modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)
+                modifier = Modifier.align(Alignment.TopEnd)
+                    .padding(start = 10.dp, end = 10.dp, top = controlsTopPadding)
                     .background(TransitMain, RoundedCornerShape(16.dp)),
                 horizontalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 TextButton(
-                    onClick = { setZoom(zoom / 1.25f) },
-                    enabled = zoom > 1f,
+                    onClick = {
+                        setCamera(zoom / 1.25f, Offset(panX * viewport.width, panY * viewport.height))
+                    },
+                    enabled = zoom > minimumZoom,
                     modifier = Modifier.size(48.dp)
                         .semantics { contentDescription = "Zoom out" }
-                ) {
-                    Text("−", color = TransitWhite)
-                }
+                ) { Text("−", color = TransitWhite) }
                 TextButton(
-                    onClick = { setZoom(zoom * 1.25f) },
+                    onClick = {
+                        setCamera(zoom * 1.25f, Offset(panX * viewport.width, panY * viewport.height))
+                    },
                     enabled = zoom < 4f,
                     modifier = Modifier.size(48.dp)
                         .semantics { contentDescription = "Zoom in" }
-                ) {
-                    Text("+", color = TransitWhite)
-                }
-                TextButton(
-                    onClick = {
-                        zoom = 1f
-                        panX = 0f
-                        panY = 0f
-                    }
-                ) {
+                ) { Text("+", color = TransitWhite) }
+                TextButton(onClick = { setCamera(1f, Offset.Zero) }) {
                     Text("Reset", color = TransitWhite)
                 }
             }
         }
     }
 }
-
-private fun TripPoint.toMapPosition(mapRect: Rect): Offset =
-    Offset(mapRect.left + x * mapRect.width, mapRect.top + y * mapRect.height)

@@ -1,8 +1,15 @@
 package com.example.rnd_transit_mtl.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +25,23 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.example.rnd_transit_mtl.data.TripGenerationBounds
 import com.example.rnd_transit_mtl.model.TransportRoute
 import com.example.rnd_transit_mtl.model.TransportType
 import com.example.rnd_transit_mtl.ui.theme.TransitMain
@@ -54,10 +71,25 @@ fun TripPlannerContent(
     activeTripSummary: String?,
     pendingReviewSummary: String?,
     onPrimaryAction: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    controlsVisible: Boolean = true,
+    onMapViewportReady: (TripGenerationBounds) -> Unit = {}
 ) {
+    val mapPainter = painterResource(Res.drawable.map_sample)
+    val sourceSize = validMapSourceSize(mapPainter.intrinsicSize)
+    var viewport by remember { mutableStateOf(Size.Zero) }
+    // Reserve the current-trip title and its zoom controls above new endpoints.
+    val titleHeight = with(LocalDensity.current) { 128.dp.toPx() }
+    val latestViewportReady by rememberUpdatedState(onMapViewportReady)
+    LaunchedEffect(viewport, sourceSize, titleHeight) {
+        if (viewport.width > 0f && viewport.height > 0f) {
+            latestViewportReady(plannerTripBounds(viewport, sourceSize, titleHeight))
+        }
+    }
+
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize().background(TransitMain),
+        modifier = modifier.fillMaxSize().background(TransitMain)
+            .onSizeChanged { viewport = Size(it.width.toFloat(), it.height.toFloat()) },
         contentAlignment = Alignment.TopCenter
     ) {
         val availableHeight = maxHeight
@@ -68,7 +100,7 @@ fun TripPlannerContent(
         val topSpace = ((availableHeight - controlHeight) / 2f).coerceAtLeast(24.dp)
 
         Image(
-            painter = painterResource(Res.drawable.map_sample),
+            painter = mapPainter,
             contentDescription = "Bundled mock transit map",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -83,19 +115,31 @@ fun TripPlannerContent(
         ) {
             Spacer(Modifier.height(topSpace))
 
-            GOBox(
-                minutes = minutes,
-                onMinutesChange = onMinutesChange,
-                onGo = onPrimaryAction,
-                layoutScale = layoutScale,
-                actionLabel = actionLabel,
-                actionEnabled = actionEnabled,
-                minutesEnabled = actionEnabled,
-                modifier = Modifier.fillMaxWidth(0.92f)
-            )
+            AnimatedVisibility(
+                visible = controlsVisible,
+                enter = EnterTransition.None,
+                exit = slideOutHorizontally(tween(400), targetOffsetX = { it }) +
+                    fadeOut(tween(400))
+            ) {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    GOBox(
+                        minutes = minutes,
+                        onMinutesChange = onMinutesChange,
+                        onGo = onPrimaryAction,
+                        layoutScale = layoutScale,
+                        actionLabel = actionLabel,
+                        actionEnabled = actionEnabled,
+                        minutesEnabled = actionEnabled,
+                        modifier = Modifier.fillMaxWidth(0.92f)
+                    )
+                }
+            }
 
-            val summary = activeTripSummary ?: pendingReviewSummary
-            if (summary != null || validationMessage.isNotEmpty()) {
+            // Starting updates the store before navigation. Do not flash a new
+            // "Unfinished" card into the outgoing planner during its exit.
+            val summary = (activeTripSummary ?: pendingReviewSummary)
+                .takeIf { controlsVisible }
+            if (summary != null || (controlsVisible && validationMessage.isNotEmpty())) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -123,36 +167,43 @@ fun TripPlannerContent(
                 Spacer(Modifier.height(12.dp))
             }
 
-            // Teal covers all remaining space, including below the yellow panel.
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(
-                        min = (availableHeight - topSpace - controlHeight - 12.dp)
-                            .coerceAtLeast(0.dp)
-                    )
-                    .background(TransitMain)
+            // The map stays still; transport and intensity slide down on GO.
+            AnimatedVisibility(
+                visible = controlsVisible,
+                enter = EnterTransition.None,
+                exit = slideOutVertically(tween(400), targetOffsetY = { it }) +
+                    fadeOut(tween(400))
             ) {
-                TransportPanel(
-                    layoutScale = layoutScale,
-                    transportTypes = transportTypes,
-                    transportRoutes = transportRoutes,
-                    selectedTransportIds = selectedTransportIds,
-                    selectedRouteIds = selectedRouteIds,
-                    expandedTransportId = expandedTransportId,
-                    onExpandedTransportChange = onExpandedTransportChange,
-                    onToggleTransport = onToggleTransport,
-                    onToggleRoute = onToggleRoute,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(
+                            min = (availableHeight - topSpace - controlHeight - 12.dp)
+                                .coerceAtLeast(0.dp)
+                        )
+                        .background(TransitMain)
+                ) {
+                    TransportPanel(
+                        layoutScale = layoutScale,
+                        transportTypes = transportTypes,
+                        transportRoutes = transportRoutes,
+                        selectedTransportIds = selectedTransportIds,
+                        selectedRouteIds = selectedRouteIds,
+                        expandedTransportId = expandedTransportId,
+                        onExpandedTransportChange = onExpandedTransportChange,
+                        onToggleTransport = onToggleTransport,
+                        onToggleRoute = onToggleRoute,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                IntensityPanel(
-                    layoutScale = layoutScale,
-                    intensity = intensity,
-                    onIntensityChange = onIntensityChange,
-                    validationMessage = "",
-                    modifier = Modifier.fillMaxWidth().height(120.dp * layoutScale)
-                )
+                    IntensityPanel(
+                        layoutScale = layoutScale,
+                        intensity = intensity,
+                        onIntensityChange = onIntensityChange,
+                        validationMessage = "",
+                        modifier = Modifier.fillMaxWidth().height(120.dp * layoutScale)
+                    )
+                }
             }
         }
     }

@@ -47,10 +47,11 @@ sealed class TripGenerationResult {
 /**
  * Creates one mock trip from validated planner values.
  *
- * Coordinates describe an inset normalized map rectangle. They do
+ * Coordinates describe the whole PNG in normalized units. New trips can use
+ * the planner's visible crop as generation bounds. Coordinates do
  * not represent GPS coordinates or positions on actual streets.
  *
- * Demo distance is normalized straight-line separation multiplied
+ * Demo distance is separation inside the generation area multiplied
  * by a synthetic scale and rounded to two decimal places. It is
  * intentionally independent of planned minutes and transport modes.
  *
@@ -83,7 +84,8 @@ class MockTripGenerator(
         input: TripGenerationInput,
         transportTypes: List<TransportType>,
         transportRoutes: List<TransportRoute>,
-        existingTripIds: Set<String>
+        existingTripIds: Set<String>,
+        bounds: TripGenerationBounds = TripGenerationBounds()
     ): TripGenerationResult {
         val normalizedInput = input.copy(
             title = input.title.trim(),
@@ -136,8 +138,8 @@ class MockTripGenerator(
             title = normalizedInput.title,
             description = normalizedInput.description,
             imageUrl = normalizedInput.imageUrl,
-            start = start,
-            destination = destination,
+            start = bounds.toSourcePoint(start),
+            destination = bounds.toSourcePoint(destination),
             plannedMinutes = normalizedInput.plannedMinutes,
             selectedTransports = snapshots.first,
             selectedRoutes = snapshots.second,
@@ -278,6 +280,7 @@ class MockTripGenerator(
     companion object {
         const val SAFE_MIN: Float = 0.15f
         const val SAFE_MAX: Float = 0.85f
+        /** Separation inside the visible generation area, before mapping into the PNG. */
         const val MIN_NORMALIZED_SEPARATION: Double = 0.25
         const val MAX_DESTINATION_ATTEMPTS: Int = 32
         const val MAX_ID_ATTEMPTS: Int = 16

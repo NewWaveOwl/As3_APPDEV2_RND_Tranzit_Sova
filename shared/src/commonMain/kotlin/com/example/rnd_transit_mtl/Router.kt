@@ -1,5 +1,8 @@
 package com.example.rnd_transit_mtl
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -164,7 +167,7 @@ fun Router(
             navigation.back()
         },
         entryProvider = entryProvider {
-            entry<MainScreenKey> {
+            entry<MainScreenKey>(clazzContentKey = { PLANNER_MAP_CONTENT_KEY }) {
                 MainScreen(
                     transportTypes = transportTypes,
                     transportRoutes = transportRoutes,
@@ -196,7 +199,9 @@ fun Router(
                 )
             }
 
-            entry<CurrentTripScreenKey> { key ->
+            entry<CurrentTripScreenKey>(
+                clazzContentKey = { key -> TRIP_MAP_CONTENT_KEY_PREFIX + key.trip.id }
+            ) { key ->
                 CurrentTripScreen(
                     trip = key.trip,
                     isDestinationActive = navigator.current == key,
@@ -310,16 +315,56 @@ fun Router(
             }
         },
         transitionSpec = {
-            slideInHorizontally(initialOffsetX = { it }) togetherWith
+            if (isPlannerMapTransition(
+                    initialState.entries.lastOrNull()?.contentKey,
+                    targetState.entries.lastOrNull()?.contentKey
+                )
+            ) {
+                // Incoming map stays stationary under outgoing planner controls.
+                (EnterTransition.None togetherWith fadeOut(tween(400))).apply {
+                    targetContentZIndex = -1f
+                }
+            } else {
+                slideInHorizontally(initialOffsetX = { it }) togetherWith
                     slideOutHorizontally(targetOffsetX = { -it })
+            }
         },
         popTransitionSpec = {
-            slideInHorizontally(initialOffsetX = { -it }) togetherWith
+            if (isPlannerMapTransition(
+                    initialState.entries.lastOrNull()?.contentKey,
+                    targetState.entries.lastOrNull()?.contentKey
+                )
+            ) {
+                (EnterTransition.None togetherWith fadeOut(tween(400))).apply {
+                    targetContentZIndex = -1f
+                }
+            } else {
+                slideInHorizontally(initialOffsetX = { -it }) togetherWith
                     slideOutHorizontally(targetOffsetX = { it })
+            }
         },
         predictivePopTransitionSpec = {
-            slideInHorizontally(initialOffsetX = { -it }) togetherWith
+            if (isPlannerMapTransition(
+                    initialState.entries.lastOrNull()?.contentKey,
+                    targetState.entries.lastOrNull()?.contentKey
+                )
+            ) {
+                (EnterTransition.None togetherWith fadeOut(tween(400))).apply {
+                    targetContentZIndex = -1f
+                }
+            } else {
+                slideInHorizontally(initialOffsetX = { -it }) togetherWith
                     slideOutHorizontally(targetOffsetX = { it })
+            }
         }
     )
 }
+
+private const val PLANNER_MAP_CONTENT_KEY = "planner-map"
+private const val TRIP_MAP_CONTENT_KEY_PREFIX = "current-trip-map:"
+
+private fun isPlannerMapTransition(initialKey: Any?, targetKey: Any?): Boolean =
+    (initialKey == PLANNER_MAP_CONTENT_KEY &&
+        targetKey is String && targetKey.startsWith(TRIP_MAP_CONTENT_KEY_PREFIX)) ||
+        (targetKey == PLANNER_MAP_CONTENT_KEY &&
+            initialKey is String && initialKey.startsWith(TRIP_MAP_CONTENT_KEY_PREFIX))

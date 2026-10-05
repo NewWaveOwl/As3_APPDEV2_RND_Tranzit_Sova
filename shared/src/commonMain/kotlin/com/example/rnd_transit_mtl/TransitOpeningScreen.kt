@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.rnd_transit_mtl.data.MockTripGenerator
+import com.example.rnd_transit_mtl.data.TripGenerationBounds
 import com.example.rnd_transit_mtl.data.TripGenerationInput
 import com.example.rnd_transit_mtl.data.TripGenerationResult
 import com.example.rnd_transit_mtl.model.TransportRoute
@@ -30,6 +31,8 @@ internal fun TransitOpeningScreen(
 ) {
     val tripsStore = LocalTripsStore.current
     val generator = remember { MockTripGenerator() }
+    // Viewport is measured again after rotation; stored trip endpoints are unchanged.
+    var generationBounds by remember { mutableStateOf<TripGenerationBounds?>(null) }
 
     var minutes by rememberSaveable { mutableStateOf(30) }
 
@@ -121,6 +124,11 @@ internal fun TransitOpeningScreen(
                 return
             }
 
+            val bounds = generationBounds
+            if (bounds == null) {
+                validationMessage = "The map is preparing. Please try GO again."
+                return
+            }
             validationMessage = ""
 
             val input = TripGenerationInput(
@@ -143,7 +151,8 @@ internal fun TransitOpeningScreen(
                     input = input,
                     transportTypes = transportTypes,
                     transportRoutes = transportRoutes,
-                    existingTripIds = existingIds
+                    existingTripIds = existingIds,
+                    bounds = bounds
                 )
             ) {
                 is TripGenerationResult.InvalidInput -> {
@@ -301,7 +310,8 @@ internal fun TransitOpeningScreen(
         actionLabel = actionLabel,
         actionEnabled = isDestinationActive &&
                 !processingAction &&
-                actionHasCallback,
+                actionHasCallback &&
+                (activeState != null || pendingReviewId != null || generationBounds != null),
         activeTripSummary = activeState?.let {
             val percentage = (
                     it.elapsedMillis.toFloat() / 10_000f * 100f
@@ -313,6 +323,8 @@ internal fun TransitOpeningScreen(
             "Completed: ${it.title} · tap 100% to open your trip"
         },
         onPrimaryAction = { performPrimaryAction() },
+        controlsVisible = isDestinationActive,
+        onMapViewportReady = { generationBounds = it },
         modifier = modifier
     )
 }

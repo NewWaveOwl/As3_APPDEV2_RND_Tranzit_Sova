@@ -1,44 +1,46 @@
 package com.example.rnd_transit_mtl.ui
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import com.example.rnd_transit_mtl.ui.theme.TransitMain
-import com.example.rnd_transit_mtl.ui.theme.TransitOrange
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.painter.Painter
+import kotlin.math.PI
+import kotlin.math.atan2
 
-/** Triangles and circle share the route's exact screen-space anchors. */
-internal fun DrawScope.drawTripEndpoint(
-    center: Offset,
-    radius: Float,
-    color: Color
+/** The supplied endpoint SVGs have their outer triangle tip at this anchor. */
+internal fun DrawScope.drawAnchoredTripEndpoint(
+    painter: Painter,
+    position: Offset,
+    markerSize: Float
 ) {
-    drawPath(tripTriangle(center, radius, pointsDown = true), TransitMain)
-    drawPath(tripTriangle(center, radius * 0.62f, pointsDown = true), color)
-}
-
-internal fun DrawScope.drawCurrentTripCircle(
-    center: Offset,
-    radius: Float
-) {
-    drawCircle(TransitOrange, radius, center)
-    drawCircle(TransitMain, radius * 0.86f, center)
-    drawPath(
-        tripTriangle(center, radius * 0.58f, pointsDown = false),
-        TransitOrange
-    )
-}
-
-private fun tripTriangle(
-    center: Offset,
-    radius: Float,
-    pointsDown: Boolean
-): Path {
-    val direction = if (pointsDown) 1f else -1f
-    return Path().apply {
-        moveTo(center.x, center.y + radius * direction)
-        lineTo(center.x - radius, center.y - radius * direction)
-        lineTo(center.x + radius, center.y - radius * direction)
-        close()
+    translate(
+        left = position.x - markerSize * (129.202f / 259f),
+        top = position.y - markerSize * (223.784f / 259f)
+    ) {
+        with(painter) { draw(size = Size(markerSize, markerSize)) }
     }
+}
+
+/** The pointer's circle center stays on the route while its sharp tip turns. */
+internal fun DrawScope.drawDirectedTripPointer(
+    painter: Painter,
+    position: Offset,
+    markerSize: Float,
+    rotationDegrees: Float
+) {
+    rotate(rotationDegrees, pivot = position) {
+        translate(position.x - markerSize / 2f, position.y - markerSize / 2f) {
+            with(painter) { draw(size = Size(markerSize, markerSize)) }
+        }
+    }
+}
+
+/** The SVG points up at zero degrees; screen Y increases downward. */
+internal fun tripPointerRotation(start: Offset, destination: Offset): Float {
+    val direction = destination - start
+    if (direction == Offset.Zero) return 0f
+    val degrees = (atan2(direction.y.toDouble(), direction.x.toDouble()) * 180.0 / PI).toFloat()
+    return (degrees + 90f + 360f) % 360f
 }
