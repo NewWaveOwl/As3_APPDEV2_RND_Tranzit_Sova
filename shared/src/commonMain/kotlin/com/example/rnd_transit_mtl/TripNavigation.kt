@@ -6,18 +6,18 @@ import com.example.rnd_transit_mtl.model.TripReviewMode
 import com.example.rnd_transit_mtl.state.TripActionResult
 import com.example.rnd_transit_mtl.state.TripsStore
 
-typealias RegisterReviewBackHandler =
-        (() -> Unit) -> (() -> Unit)
+typealias RegisterReviewBackHandler = (() -> Unit) -> (() -> Unit)
 
 val LocalTripNavigation = compositionLocalOf<TripNavigation> {
     error("TripNavigation must be provided by App.")
 }
 
 /**
- * Coordinates route changes using one Navigator and one TripsStore.
+ * Coordinates destination changes through the application's one Navigator.
  *
- * Records and drafts remain in TripsStore. Origins remain in route keys.
- * The live Back callback is temporary and is never saved.
+ * Trips and drafts remain in TripsStore. Review origins remain in route keys.
+ * The temporary Back registration is never included in saved state.
+ * Operations must run on the UI thread.
  */
 class TripNavigation(
     private val navigator: Navigator,
@@ -31,10 +31,8 @@ class TripNavigation(
     private var reviewBackRegistration: ReviewBackRegistration? = null
 
     /**
-     * Lets header Back invoke the same close operation as platform Back.
-     *
-     * Identity checking prevents an outgoing entry's disposal from removing
-     * a newer registration for the same key.
+     * Connects shared header Back to the review screen's close operation.
+     * An outgoing registration cannot unregister a newer registration.
      */
     fun registerReviewBackHandler(
         key: TripReviewScreenKey,
@@ -64,7 +62,6 @@ class TripNavigation(
         if (existing != null) {
             navigator.popUntil(existing)
         } else {
-            // The generated item is passed as the navigation parameter.
             navigator.navigate(CurrentTripScreenKey(trip))
         }
 
@@ -79,7 +76,7 @@ class TripNavigation(
     }
 
     /**
-     * Establishes the matching initial review, then acknowledges the event.
+     * Establishes the matching initial review before acknowledging its event.
      * Repeated requests recognize the existing destination.
      */
     fun openInitialReview(tripId: String): Boolean {
@@ -98,13 +95,11 @@ class TripNavigation(
         val fromMatchingTrip =
             current is CurrentTripScreenKey &&
                     current.trip.id == tripId
-
         val fromPendingEvent =
             tripsStore.pendingReviewTripId == tripId
 
         if (!fromMatchingTrip && !fromPendingEvent) return false
 
-        // Preserve an unrelated review until its user finishes or leaves it.
         if (
             current is TripReviewScreenKey &&
             current.tripId != tripId
@@ -112,9 +107,7 @@ class TripNavigation(
             return false
         }
 
-        val existing = navigator.findLast {
-            it == destination
-        }
+        val existing = navigator.findLast { it == destination }
 
         when {
             existing != null -> navigator.popUntil(existing)
@@ -150,6 +143,7 @@ class TripNavigation(
         if (!discardCurrentReview()) return false
 
         pruneCompletedSimulationEntries()
+
         val destination = TripDetailsScreenKey(tripId)
         navigator.open(destination)
         return navigator.current == destination
@@ -179,10 +173,8 @@ class TripNavigation(
     }
 
     /**
-     * Called after the screen has saved or discarded its draft.
-     *
-     * Initial review normally replaces itself with History.
-     * Editing returns to the saved origin, recovering to History if deleted.
+     * Returns after the screen has saved or discarded its draft.
+     * A deleted details origin recovers to History.
      */
     fun finishReview(key: TripReviewScreenKey): Boolean {
         val target = reviewReturnDestination(key)
@@ -197,8 +189,8 @@ class TripNavigation(
     }
 
     /**
-     * Header section shortcuts close an unsaved review before switching.
-     * Existing saved feedback and completed records are preserved.
+     * Closes an unsaved review before switching shared sections.
+     * The closed review destination cannot remain underneath the new section.
      */
     fun openSection(destination: ScreenKey): Boolean {
         when (destination) {
@@ -221,15 +213,14 @@ class TripNavigation(
         openSection(MainScreenKey)
 
     /**
-     * Header Back and NavDisplay's platform Back fallback use this operation.
-     *
-     * A composed review registers its own close handler. Before registration,
-     * the fallback performs the same discard-and-return behavior.
+     * Used by shared header Back and NavDisplay's platform Back fallback.
+     * A composed review can supply its own equivalent close operation.
      */
     fun back(): Boolean {
         if (!navigator.hasPrevious()) return false
 
         val current = navigator.current
+
         if (current is TripReviewScreenKey) {
             val registration = reviewBackRegistration
 
@@ -246,16 +237,22 @@ class TripNavigation(
         }
 
         /*
-         * Handles a Back tap at the completion boundary before the review
-         * destination has been established. The completed record is retained.
+         * At the completion boundary, replace the finished destination
+         * before pruning. Pruning first would expose the preceding page,
+         * allowing replaceOrReturn() to replace that unrelated page.
          */
         if (
             current is CurrentTripScreenKey &&
             tripsStore.findCompleted(current.trip.id) != null
         ) {
-            tripsStore.skipReview(current.trip.id)
-            pruneCompletedSimulationEntries()
+            when (tripsStore.skipReview(current.trip.id)) {
+                TripActionResult.Applied,
+                is TripActionResult.MissingTrip -> Unit
+                else -> return false
+            }
+
             replaceOrReturn(HistoryScreenKey)
+            pruneCompletedSimulationEntries()
             return navigator.current == HistoryScreenKey
         }
 
@@ -290,13 +287,17 @@ class TripNavigation(
         }
     }
 
+    /**
+     * Discards unsaved feedback and closes its navigation destination.
+     * Saved feedback and the completed record remain unchanged.
+     */
     private fun discardCurrentReview(): Boolean {
         val key = navigator.current as? TripReviewScreenKey
             ?: return true
 
         return when (tripsStore.skipReview(key.tripId)) {
             TripActionResult.Applied,
-            is TripActionResult.MissingTrip -> true
+            is TripActionResult.MissingTrip -> finishReview(key)
             else -> false
         }
     }
